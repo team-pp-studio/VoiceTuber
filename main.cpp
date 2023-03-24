@@ -3,8 +3,10 @@
 // graphics context creation, etc.) If you are new to Dear ImGui, read documentation from the docs/
 // folder + read the top of imgui.cpp. Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+#include "audio-capture.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
+#include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 #include <sdlpp/sdlpp.hpp>
@@ -25,6 +27,30 @@ int main(int, char **)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
+  std::string curViseme;
+  auto wav2Visemes = Wav2Visemes{[&curViseme](Viseme val) {
+    switch (val)
+    {
+    case Viseme::sil: curViseme = "sil"; break;
+    case Viseme::PP: curViseme = "PP"; break;
+    case Viseme::FF: curViseme = "FF"; break;
+    case Viseme::TH: curViseme = "TH"; break;
+    case Viseme::DD: curViseme = "DD"; break;
+    case Viseme::kk: curViseme = "kk"; break;
+    case Viseme::CH: curViseme = "CH"; break;
+    case Viseme::SS: curViseme = "SS"; break;
+    case Viseme::nn: curViseme = "nn"; break;
+    case Viseme::RR: curViseme = "RR"; break;
+    case Viseme::aa: curViseme = "aa"; break;
+    case Viseme::E: curViseme = "E"; break;
+    case Viseme::I: curViseme = "I"; break;
+    case Viseme::O: curViseme = "O"; break;
+    case Viseme::U: curViseme = "U"; break;
+    }
+  }};
+  LOG("sample rate:", wav2Visemes.sampleRate());
+  LOG("frame size:", wav2Visemes.frameSize());
+  auto audioCapture = AudioCapture{wav2Visemes.sampleRate(), wav2Visemes.frameSize()};
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -156,6 +182,8 @@ int main(int, char **)
         done = true;
     }
 
+    wav2Visemes.ingest(audioCapture.buf());
+
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -179,7 +207,7 @@ int main(int, char **)
         counter++;
       ImGui::SameLine();
       ImGui::Text("counter = %d", counter);
-
+      ImGui::Text("Viseme: %s", curViseme.c_str());
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
       ImGui::End();
     }
