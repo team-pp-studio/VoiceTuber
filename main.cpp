@@ -6,6 +6,7 @@
 #include "audio-capture.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
+#include "sprite.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 #include <log/log.hpp>
@@ -27,30 +28,12 @@ int main(int, char **)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
-  std::string curViseme;
-  auto wav2Visemes = Wav2Visemes{[&curViseme](Viseme val) {
-    switch (val)
-    {
-    case Viseme::sil: curViseme = "sil"; break;
-    case Viseme::PP: curViseme = "PP"; break;
-    case Viseme::FF: curViseme = "FF"; break;
-    case Viseme::TH: curViseme = "TH"; break;
-    case Viseme::DD: curViseme = "DD"; break;
-    case Viseme::kk: curViseme = "kk"; break;
-    case Viseme::CH: curViseme = "CH"; break;
-    case Viseme::SS: curViseme = "SS"; break;
-    case Viseme::nn: curViseme = "nn"; break;
-    case Viseme::RR: curViseme = "RR"; break;
-    case Viseme::aa: curViseme = "aa"; break;
-    case Viseme::E: curViseme = "E"; break;
-    case Viseme::I: curViseme = "I"; break;
-    case Viseme::O: curViseme = "O"; break;
-    case Viseme::U: curViseme = "U"; break;
-    }
-  }};
+  Viseme curViseme;
+  auto wav2Visemes = Wav2Visemes{[&curViseme](Viseme val) { curViseme = val; }};
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   auto audioCapture = AudioCapture{wav2Visemes.sampleRate(), wav2Visemes.frameSize()};
+  audioCapture.reg(wav2Visemes);
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -95,6 +78,8 @@ int main(int, char **)
   SDL_GL_MakeCurrent(window.get(), gl_context);
   SDL_GL_SetSwapInterval(1); // Enable vsync
 
+  Sprite sprite("visemes.png");
+
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -125,22 +110,21 @@ int main(int, char **)
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load Fonts
-  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and
-  // use ImGui::PushFont()/PopFont() to select them.
+  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts
+  // and use ImGui::PushFont()/PopFont() to select them.
   // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font
   // among multiple.
   // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your
   // application (e.g. use an assertion, or display an error and quit).
   // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when
   // calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-  // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font
-  // rendering.
+  // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality
+  // font rendering.
   // - Read 'docs/FONTS.md' for more instructions and details.
-  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write
-  // a double backslash \\ !
-  // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/"
-  // folder. See Makefile.emscripten for details.
-  // io.Fonts->AddFontDefault();
+  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to
+  // write a double backslash \\ !
+  // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the
+  // "fonts/" folder. See Makefile.emscripten for details. io.Fonts->AddFontDefault();
   // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
@@ -154,9 +138,9 @@ int main(int, char **)
   // Main loop
   bool done = false;
 #ifdef __EMSCRIPTEN__
-  // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of
-  // the imgui.ini file. You may manually call LoadIniSettingsFromMemory() to load settings from your own
-  // storage.
+  // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen()
+  // of the imgui.ini file. You may manually call LoadIniSettingsFromMemory() to load settings from
+  // your own storage.
   io.IniFilename = NULL;
   EMSCRIPTEN_MAINLOOP_BEGIN
 #else
@@ -164,13 +148,13 @@ int main(int, char **)
 #endif
   {
     // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to
-    // use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or
-    // clear/overwrite your copy of the mouse data.
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants
+    // to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application,
+    // or clear/overwrite your copy of the mouse data.
     // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main
-    // application, or clear/overwrite your copy of the keyboard data. Generally you may always pass all
-    // inputs to dear imgui, and hide them from your application based on those two flags.
+    // application, or clear/overwrite your copy of the keyboard data. Generally you may always pass
+    // all inputs to dear imgui, and hide them from your application based on those two flags.
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -182,7 +166,7 @@ int main(int, char **)
         done = true;
     }
 
-    wav2Visemes.ingest(audioCapture.buf());
+    audioCapture.tick();
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -207,7 +191,25 @@ int main(int, char **)
         counter++;
       ImGui::SameLine();
       ImGui::Text("counter = %d", counter);
-      ImGui::Text("Viseme: %s", curViseme.c_str());
+      switch (curViseme)
+      {
+      case Viseme::sil: ImGui::Text("Viseme: sil"); break;
+      case Viseme::PP: ImGui::Text("Viseme: PP"); break;
+      case Viseme::FF: ImGui::Text("Viseme: FF"); break;
+      case Viseme::TH: ImGui::Text("Viseme: TH"); break;
+      case Viseme::DD: ImGui::Text("Viseme: DD"); break;
+      case Viseme::kk: ImGui::Text("Viseme: kk"); break;
+      case Viseme::CH: ImGui::Text("Viseme: CH"); break;
+      case Viseme::SS: ImGui::Text("Viseme: SS"); break;
+      case Viseme::nn: ImGui::Text("Viseme: nn"); break;
+      case Viseme::RR: ImGui::Text("Viseme: RR"); break;
+      case Viseme::aa: ImGui::Text("Viseme: aa"); break;
+      case Viseme::E: ImGui::Text("Viseme: E"); break;
+      case Viseme::I: ImGui::Text("Viseme: I"); break;
+      case Viseme::O: ImGui::Text("Viseme: O"); break;
+      case Viseme::U: ImGui::Text("Viseme: U"); break;
+      }
+
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
       ImGui::End();
     }
@@ -219,6 +221,10 @@ int main(int, char **)
     // ImGui rendering
     ImGui::Render();
 
+    // Enable blending
+    glEnable(GL_BLEND);
+    // Set blending function
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     const auto w = (int)io.DisplaySize.x;
     const auto h = (int)io.DisplaySize.y;
     glViewport(0, 0, w, h);
@@ -234,19 +240,15 @@ int main(int, char **)
                  clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor4f(0, 0, 0, 1);
-    glBegin(GL_LINES);
-    glVertex2f(0, 0);
-    glVertex2f(w, h);
-    glVertex2f(0, h);
-    glVertex2f(w, 0);
-    glEnd();
+
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    sprite.render(curViseme);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Update and Render additional Platform Windows
-    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier
-    // to paste this code elsewhere.
+    // (Platform functions may change the current OpenGL context, so we save/restore it to make it
+    // easier to paste this code elsewhere.
     //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {

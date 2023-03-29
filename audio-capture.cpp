@@ -23,11 +23,29 @@ AudioCapture::AudioCapture(int sampleRate, int frameSize)
   audio.pause(0);
 }
 
-auto AudioCapture::buf() -> Wav
+auto AudioCapture::tick() -> void
 {
   audio.lock();
-  Wav ret = std::move(buf_);
+  auto v = std::move(buf_);
   buf_.clear();
   audio.unlock();
-  return ret;
+
+  if (sinks.empty())
+    return;
+  auto last = sinks.back();
+  for (auto it = std::begin(sinks); it != std::end(sinks); ++it)
+    if (&it->get() != &last.get())
+      it->get().ingest(v);
+    else
+      it->get().ingest(std::move(v));
+}
+
+auto AudioCapture::reg(AudioSink &v) -> void
+{
+  sinks.push_back(v);
+}
+
+auto AudioCapture::unreg(AudioSink &v) -> void
+{
+  std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; });
 }

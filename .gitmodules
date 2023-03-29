@@ -1,0 +1,6 @@
+[submodule "stb"]
+	path = stb
+	url = https://github.com/nothings/stb.git
+[submodule "pocketsphinx"]
+	path = pocketsphinx
+	url = https://github.com/cmusphinx/pocketsphinx.git
