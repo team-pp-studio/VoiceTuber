@@ -4,6 +4,7 @@
 // folder + read the top of imgui.cpp. Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #include "audio-capture.hpp"
+#include "bouncer.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
 #include "sprite.hpp"
@@ -78,7 +79,21 @@ int main(int, char **)
   SDL_GL_MakeCurrent(window.get(), gl_context);
   SDL_GL_SetSwapInterval(1); // Enable vsync
 
-  Sprite sprite("visemes.png");
+  Bouncer root;
+  audioCapture.reg(root);
+
+  Sprite sprite1("visemes.png");
+  sprite1.cols = 3;
+  sprite1.rows = 5;
+  sprite1.loc = {.0f, 100.f};
+  sprite1.pivot = {512.f, 600.f - 293.f};
+  Sprite sprite2("visemes.png");
+  sprite2.cols = 3;
+  sprite2.rows = 5;
+  sprite2.loc = {512.f, 100.f};
+  sprite2.pivot = {512.f, 600.f - 293.f};
+  root.nodes.push_back(sprite1);
+  root.nodes.push_back(sprite2);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -240,9 +255,12 @@ int main(int, char **)
                  clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-
     glColor4f(1.f, 1.f, 1.f, 1.f);
-    sprite.render(curViseme);
+    sprite1.viseme = curViseme;
+    sprite2.rot -= 1.f;
+    sprite2.viseme = curViseme;
+    sprite2.scale = {sinf(.1f * sprite2.rot), sinf(.1f * sprite2.rot)};
+    root.renderAll();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
