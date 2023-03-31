@@ -43,6 +43,7 @@ auto Sprite::render() -> void
   const auto fRows = static_cast<float>(rows);
   auto i = static_cast<int>(viseme) % cols / fCols;
   auto j = (fRows - 1.f - static_cast<int>(viseme) / cols) / fRows;
+  glColor4f(1.f, 1.f, 1.f, 1.f);
   glTexCoord2f(.0f + i, .0f + j);
   glVertex2f(.0f, .0f);
   glTexCoord2f(1.f / fCols + i, .0f + j);

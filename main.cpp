@@ -3,12 +3,9 @@
 // graphics context creation, etc.) If you are new to Dear ImGui, read documentation from the docs/
 // folder + read the top of imgui.cpp. Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "audio-capture.hpp"
-#include "bouncer.hpp"
+#include "app.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
-#include "sprite.hpp"
-#include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 #include <sdlpp/sdlpp.hpp>
@@ -29,12 +26,6 @@ int main(int, char **)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
-  Viseme curViseme;
-  auto wav2Visemes = Wav2Visemes{[&curViseme](Viseme val) { curViseme = val; }};
-  LOG("sample rate:", wav2Visemes.sampleRate());
-  LOG("frame size:", wav2Visemes.frameSize());
-  auto audioCapture = AudioCapture{wav2Visemes.sampleRate(), wav2Visemes.frameSize()};
-  audioCapture.reg(wav2Visemes);
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -78,16 +69,6 @@ int main(int, char **)
   SDL_GLContext gl_context = SDL_GL_CreateContext(window.get());
   SDL_GL_MakeCurrent(window.get(), gl_context);
   SDL_GL_SetSwapInterval(1); // Enable vsync
-
-  Bouncer root;
-  audioCapture.reg(root);
-
-  Sprite sprite1("visemes.png");
-  sprite1.cols = 3;
-  sprite1.rows = 5;
-  sprite1.loc = {.0f, 100.f};
-  sprite1.pivot = {512.f, 600.f - 293.f};
-  root.nodes.push_back(sprite1);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -141,8 +122,7 @@ int main(int, char **)
   // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
   // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 
-  // Our state
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  App app;
 
   // Main loop
   bool done = false;
@@ -175,8 +155,6 @@ int main(int, char **)
         done = true;
     }
 
-    audioCapture.tick();
-
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -184,50 +162,7 @@ int main(int, char **)
 
     // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named
     // window.
-    {
-      static float f = 0.0f;
-      static int counter = 0;
-
-      ImGui::Begin("Z-order");
-
-      ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-      ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
-
-      if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when
-                                   // edited/activated)
-        counter++;
-      ImGui::SameLine();
-      ImGui::Text("counter = %d", counter);
-      switch (curViseme)
-      {
-      case Viseme::sil: ImGui::Text("Viseme: sil"); break;
-      case Viseme::PP: ImGui::Text("Viseme: PP"); break;
-      case Viseme::FF: ImGui::Text("Viseme: FF"); break;
-      case Viseme::TH: ImGui::Text("Viseme: TH"); break;
-      case Viseme::DD: ImGui::Text("Viseme: DD"); break;
-      case Viseme::kk: ImGui::Text("Viseme: kk"); break;
-      case Viseme::CH: ImGui::Text("Viseme: CH"); break;
-      case Viseme::SS: ImGui::Text("Viseme: SS"); break;
-      case Viseme::nn: ImGui::Text("Viseme: nn"); break;
-      case Viseme::RR: ImGui::Text("Viseme: RR"); break;
-      case Viseme::aa: ImGui::Text("Viseme: aa"); break;
-      case Viseme::E: ImGui::Text("Viseme: E"); break;
-      case Viseme::I: ImGui::Text("Viseme: I"); break;
-      case Viseme::O: ImGui::Text("Viseme: O"); break;
-      case Viseme::U: ImGui::Text("Viseme: U"); break;
-      }
-
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-      ImGui::End();
-    }
-    {
-      ImGui::Begin("Details");
-      root.renderUi();
-      sprite1.renderUi();
-      ImGui::End();
-    }
+    app.renderUi();
 
     // ImGui rendering
     ImGui::Render();
@@ -244,16 +179,7 @@ int main(int, char **)
     glOrtho(0, w, 0, h, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    glClearColor(clear_color.x * clear_color.w,
-                 clear_color.y * clear_color.w,
-                 clear_color.z * clear_color.w,
-                 clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-    sprite1.viseme = curViseme;
-    root.renderAll();
+    app.render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
