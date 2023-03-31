@@ -87,13 +87,7 @@ int main(int, char **)
   sprite1.rows = 5;
   sprite1.loc = {.0f, 100.f};
   sprite1.pivot = {512.f, 600.f - 293.f};
-  Sprite sprite2("visemes.png");
-  sprite2.cols = 3;
-  sprite2.rows = 5;
-  sprite2.loc = {512.f, 100.f};
-  sprite2.pivot = {512.f, 600.f - 293.f};
   root.nodes.push_back(sprite1);
-  root.nodes.push_back(sprite2);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -230,6 +224,8 @@ int main(int, char **)
     }
     {
       ImGui::Begin("Details");
+      root.renderUi();
+      sprite1.renderUi();
       ImGui::End();
     }
 
@@ -257,9 +253,6 @@ int main(int, char **)
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
     sprite1.viseme = curViseme;
-    sprite2.rot -= 1.f;
-    sprite2.viseme = curViseme;
-    sprite2.scale = {sinf(.1f * sprite2.rot), sinf(.1f * sprite2.rot)};
     root.renderAll();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

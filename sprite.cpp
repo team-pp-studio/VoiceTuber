@@ -1,6 +1,8 @@
 #include "sprite.hpp"
 #include "stb/stb_image.h"
 #include <cassert>
+#include <cstdint>
+#include <imgui/imgui.h>
 
 Sprite::Sprite(const std::string &fileName)
   : texture([&]() {
@@ -57,4 +59,17 @@ auto Sprite::render() -> void
 Sprite::~Sprite()
 {
   glDeleteTextures(1, &texture);
+}
+
+auto Sprite::renderUi() -> void
+{
+  Node::renderUi();
+  ImGui::PushID("Sprite");
+  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
+  ImGui::DragInt(
+    "Cols", &cols, 1, 1, std::numeric_limits<int>::max(), "%d", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::DragInt(
+    "Rows", &rows, 1, 1, std::numeric_limits<int>::max(), "%d", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::PopItemWidth();
+  ImGui::PopID();
 }

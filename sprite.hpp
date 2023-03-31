@@ -16,6 +16,7 @@ public:
   int cols = 1;
   int rows = 1;
   Viseme viseme;
+  auto renderUi() -> void final;
 
 private:
   int w_;

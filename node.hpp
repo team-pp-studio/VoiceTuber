@@ -12,7 +12,11 @@ public:
   float rot = 0.f;
   std::vector<std::reference_wrapper<Node>> nodes;
   auto renderAll() -> void;
+  virtual auto renderUi() -> void;
 
 protected:
   virtual auto render() -> void {}
+
+private:
+  bool uniformScaling = true;
 };
