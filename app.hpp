@@ -4,6 +4,7 @@
 #include "sprite.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
+#include <glm/gtc/type_ptr.hpp>
 
 class App
 {

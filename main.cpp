@@ -74,7 +74,6 @@ int main(int, char **)
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
-  (void)io;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport / Platform Windows
@@ -155,21 +154,18 @@ int main(int, char **)
         done = true;
     }
 
+    app.tick();
+
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named
-    // window.
     app.renderUi();
 
-    // ImGui rendering
     ImGui::Render();
 
-    // Enable blending
     glEnable(GL_BLEND);
-    // Set blending function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     const auto w = (int)io.DisplaySize.x;
     const auto h = (int)io.DisplaySize.y;

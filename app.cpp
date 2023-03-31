@@ -1,6 +1,13 @@
 #include "app.hpp"
 #include <log/log.hpp>
 
+static auto getProjectionMatrix() -> glm::mat4
+{
+  GLfloat projectionMatrixData[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrixData);
+  return glm::make_mat4(projectionMatrixData);
+}
+
 App::App()
   : wav2Visemes([this](Viseme val) { curViseme = val; }),
     audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
@@ -19,8 +26,7 @@ App::App()
 
 auto App::render() -> void
 {
-  glClearColor(
-    clearColor.x * clearColor.w, clearColor.y * clearColor.w, clearColor.z * clearColor.w, clearColor.w);
+  glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
 
   root.renderAll();
@@ -31,7 +37,7 @@ auto App::renderUi() -> void
   {
     ImGui::Begin("Z-order");
 
-    ImGui::ColorEdit3("clear color", (float *)&clearColor); // Edit 3 floats representing a color
+    ImGui::ColorEdit4("clear color", (float *)&clearColor); // Edit 3 floats representing a color
 
     switch (curViseme)
     {
@@ -69,4 +75,10 @@ auto App::tick() -> void
 {
   audioCapture.tick();
   sprite.viseme = curViseme;
+
+  const auto projectionMatrix = getProjectionMatrix();
+  int mouseX, mouseY;
+  SDL_GetMouseState(&mouseX, &mouseY);
+  auto localPos = sprite.screenToLocal(projectionMatrix, Vec2{static_cast<float>(mouseX), static_cast<float>(mouseY)});
+  LOG(localPos.x, localPos.y);
 }
