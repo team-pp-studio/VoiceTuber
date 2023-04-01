@@ -22,8 +22,6 @@ auto AnimSprite::renderUi() -> void
   Sprite::renderUi();
   ImGui::PushID("AnimSprite");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::DragInt(
-    "NumFrames", &numFrames, 1, 1, std::numeric_limits<int>::max(), "%d", ImGuiSliderFlags_AlwaysClamp);
   ImGui::DragFloat(
     "FPS", &fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
   ImGui::PopItemWidth();

@@ -13,11 +13,11 @@ public:
   App();
   auto render() -> void;
   auto renderUi() -> void;
+  auto processIo() -> void;
   auto tick() -> void;
 
 private:
   ImVec4 clearColor = ImVec4(123.f / 256.f, 164.f / 256.f, 119.f / 256.f, 1.00f);
-  Viseme curViseme = Viseme::sil;
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
   Bouncer root;

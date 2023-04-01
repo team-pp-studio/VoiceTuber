@@ -17,6 +17,7 @@ public:
   int cols = 1;
   int rows = 1;
   int frame = 0;
+  int numFrames = 1;
 
 protected:
   auto render(Node *hovered, Node *selected) -> void override;

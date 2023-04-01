@@ -68,10 +68,15 @@ auto Sprite::renderUi() -> void
   Node::renderUi();
   ImGui::PushID("Sprite");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::DragInt(
-    "Cols", &cols, 1, 1, std::numeric_limits<int>::max(), "%d", ImGuiSliderFlags_AlwaysClamp);
-  ImGui::DragInt(
-    "Rows", &rows, 1, 1, std::numeric_limits<int>::max(), "%d", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::InputInt("Cols", &cols);
+  if (cols < 1)
+    cols = 1;
+  ImGui::InputInt("Rows", &rows);
+  if (rows < 1)
+    rows = 1;
+  ImGui::InputInt("NumFrames", &numFrames);
+  if (numFrames < 1)
+    numFrames = 1;
   ImGui::PopItemWidth();
   ImGui::PopID();
 }

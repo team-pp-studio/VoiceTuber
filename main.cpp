@@ -193,6 +193,7 @@ int main(int, char **)
     }
 
     window.glSwap();
+    app.processIo();
   }
 #ifdef __EMSCRIPTEN__
   EMSCRIPTEN_MAINLOOP_END;

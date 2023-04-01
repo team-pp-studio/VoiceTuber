@@ -9,7 +9,7 @@ static auto getProjMat() -> glm::mat4
 }
 
 App::App()
-  : wav2Visemes([this](Viseme val) { curViseme = val; }),
+  : wav2Visemes([this](Viseme val) { mouth.setViseme(val); }),
     audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     face("face-blink-anim.png"),
     mouth("visemes.png")
@@ -43,6 +43,7 @@ App::App()
   mouth.viseme2Sprite[Viseme::I] = 2;
   mouth.viseme2Sprite[Viseme::O] = 5;
   mouth.viseme2Sprite[Viseme::U] = 3;
+  mouth.numFrames = 16;
   root.addChild(face);
   face.addChild(mouth);
 }
@@ -62,25 +63,6 @@ auto App::renderUi() -> void
 
     ImGui::ColorEdit4("clear color", (float *)&clearColor); // Edit 3 floats representing a color
 
-    switch (curViseme)
-    {
-    case Viseme::sil: ImGui::Text("Viseme: sil"); break;
-    case Viseme::PP: ImGui::Text("Viseme: PP"); break;
-    case Viseme::FF: ImGui::Text("Viseme: FF"); break;
-    case Viseme::TH: ImGui::Text("Viseme: TH"); break;
-    case Viseme::DD: ImGui::Text("Viseme: DD"); break;
-    case Viseme::kk: ImGui::Text("Viseme: kk"); break;
-    case Viseme::CH: ImGui::Text("Viseme: CH"); break;
-    case Viseme::SS: ImGui::Text("Viseme: SS"); break;
-    case Viseme::nn: ImGui::Text("Viseme: nn"); break;
-    case Viseme::RR: ImGui::Text("Viseme: RR"); break;
-    case Viseme::aa: ImGui::Text("Viseme: aa"); break;
-    case Viseme::E: ImGui::Text("Viseme: E"); break;
-    case Viseme::I: ImGui::Text("Viseme: I"); break;
-    case Viseme::O: ImGui::Text("Viseme: O"); break;
-    case Viseme::U: ImGui::Text("Viseme: U"); break;
-    }
-
     ImGuiIO &io = ImGui::GetIO();
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
@@ -91,7 +73,10 @@ auto App::renderUi() -> void
   if (selected)
     selected->renderUi();
   ImGui::End();
+}
 
+auto App::processIo() -> void
+{
   // Check if ImGui did not process any user input
   ImGuiIO &io = ImGui::GetIO();
   if (!io.WantCaptureMouse)
@@ -173,7 +158,6 @@ auto App::cancel() -> void
 auto App::tick() -> void
 {
   audioCapture.tick();
-  mouth.viseme = curViseme;
 
   const auto projMat = getProjMat();
   int mouseX, mouseY;

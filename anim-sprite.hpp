@@ -7,7 +7,6 @@ class AnimSprite : public Sprite
 public:
   AnimSprite(const std::string &fileName);
   float fps = 30.f;
-  int numFrames = 1;
 
 protected:
   auto render(Node *hovered, Node *selected) -> void override;
