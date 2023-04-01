@@ -11,9 +11,10 @@ auto Bouncer::ingest(Wav v) -> void
   offset = strength * v.back() / 0x8000;
 }
 
-auto Bouncer::render() -> void
+auto Bouncer::render(Node *hovered, Node *selected) -> void
 {
   glTranslatef(.0f, offset, .0f);
+  Node::render(hovered, selected);
 }
 
 auto Bouncer::renderUi() -> void

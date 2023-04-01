@@ -65,7 +65,7 @@ int main(int, char **)
     (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
   auto window =
-    sdl::Window{"PNGProject", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags};
+    sdl::Window{"VoiceTuber", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags};
   SDL_GLContext gl_context = SDL_GL_CreateContext(window.get());
   SDL_GL_MakeCurrent(window.get(), gl_context);
   SDL_GL_SetSwapInterval(1); // Enable vsync

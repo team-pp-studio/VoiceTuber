@@ -11,7 +11,7 @@ static auto getModelViewMatrix() -> glm::mat4
   return glm::make_mat4(modelMatrixData);
 }
 
-auto Node::renderAll() -> void
+auto Node::renderAll(Node *hovered, Node *selected) -> void
 {
   glPushMatrix();
   // Apply transformations
@@ -22,9 +22,9 @@ auto Node::renderAll() -> void
   glTranslatef(-pivot.x, -pivot.y, 0.0f); // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
-  render();
+  render(hovered, selected);
   for (auto n : nodes)
-    n.get().renderAll();
+    n.get().renderAll(hovered, selected);
   glPopMatrix();
 }
 
@@ -115,24 +115,26 @@ auto Node::renderUi() -> void
   ImGui::PopID();
 }
 
-static glm::vec3 mouseToModelViewCoords(Vec2 mouse, Vec2 windowSize, const glm::mat4& mvpMatrix) {
-    // Step 1: Normalize mouse coordinates to clip space coordinates
-    glm::vec3 clipSpaceCoords(
-        (2.0f * mouse.x) / windowSize.x - 1.0f, // X in range [-1, 1]
-        1.0f - (2.0f * mouse.y) / windowSize.y, // Y in range [-1, 1], and invert the Y-axis
-        1.0f // Z = 1, assuming the near plane is at Z = -1 in clip space
-    );
+static glm::vec3 mouseToModelViewCoords(Vec2 mouse, Vec2 windowSize, const glm::mat4 &mvpMatrix)
+{
+  // Step 1: Normalize mouse coordinates to clip space coordinates
+  glm::vec3 clipSpaceCoords(
+    (2.0f * mouse.x) / windowSize.x - 1.0f, // X in range [-1, 1]
+    1.0f - (2.0f * mouse.y) / windowSize.y, // Y in range [-1, 1], and invert the Y-axis
+    1.0f                                    // Z = 1, assuming the near plane is at Z = -1 in clip space
+  );
 
-    // Step 2: Unproject clip space coordinates to model view coordinates
-    glm::mat4 invMVPMatrix = glm::inverse(mvpMatrix);
-    glm::vec4 modelViewCoords = invMVPMatrix * glm::vec4(clipSpaceCoords, 1.0f);
+  // Step 2: Unproject clip space coordinates to model view coordinates
+  glm::mat4 invMVPMatrix = glm::inverse(mvpMatrix);
+  glm::vec4 modelViewCoords = invMVPMatrix * glm::vec4(clipSpaceCoords, 1.0f);
 
-    // Homogeneous division
-    if (modelViewCoords.w != 0.0f) {
-        modelViewCoords /= modelViewCoords.w;
-    }
+  // Homogeneous division
+  if (modelViewCoords.w != 0.0f)
+  {
+    modelViewCoords /= modelViewCoords.w;
+  }
 
-    return glm::vec3(modelViewCoords);
+  return glm::vec3(modelViewCoords);
 }
 
 auto Node::screenToLocal(const glm::mat4 &projMat, Vec2 screen) const -> Vec2
@@ -144,4 +146,36 @@ auto Node::screenToLocal(const glm::mat4 &projMat, Vec2 screen) const -> Vec2
   glm::mat4 mvpMatrix = projMat * modelViewMat;
   glm::vec3 modelViewCoords = mouseToModelViewCoords(screen, Vec2{w, h}, mvpMatrix);
   return Vec2{modelViewCoords.x, modelViewCoords.y};
+}
+
+auto Node::nodeUnder(const glm::mat4 &projMap, Vec2 v) -> Node *
+{
+
+  for (auto n : nodes)
+  {
+    auto u = n.get().nodeUnder(projMap, v);
+    if (u)
+      return u;
+  }
+  auto localPos = screenToLocal(projMap, v);
+  if (localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h())
+    return nullptr;
+  return this;
+}
+
+auto Node::render(Node *hovered, Node *selected) -> void
+{
+  if (selected != this && hovered != this)
+    return;
+  if (selected == this)
+    glColor4f(1.f, .7f, .0f, 1.f);
+  else if (hovered == this)
+    glColor4f(1.f, 1.f, 1.0f, .2f);
+  glBegin(GL_LINE_STRIP);
+  glVertex2f(.0f, .0f);
+  glVertex2f(w(), .0f);
+  glVertex2f(w(), h());
+  glVertex2f(.0f, h());
+  glVertex2f(.0f, .0f);
+  glEnd();
 }

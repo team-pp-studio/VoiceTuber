@@ -1,10 +1,11 @@
 #pragma once
+#include "anim-sprite.hpp"
 #include "audio-capture.hpp"
 #include "bouncer.hpp"
-#include "sprite.hpp"
+#include "mouth.hpp"
 #include "wav-2-visemes.hpp"
-#include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui/imgui.h>
 
 class App
 {
@@ -20,5 +21,8 @@ private:
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
   Bouncer root;
-  Sprite sprite;
+  AnimSprite face;
+  Mouth mouth;
+  Node *hovered = nullptr;
+  Node *selected = nullptr;
 };

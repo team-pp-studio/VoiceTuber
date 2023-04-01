@@ -13,5 +13,5 @@ public:
 private:
   float offset = 0.f;
   auto ingest(Wav) -> void final;
-  auto render() -> void final;
+  auto render(Node *hovered, Node *selected) -> void final;
 };

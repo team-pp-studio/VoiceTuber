@@ -1,27 +1,49 @@
 #include "app.hpp"
 #include <log/log.hpp>
 
-static auto getProjectionMatrix() -> glm::mat4
+static auto getProjMat() -> glm::mat4
 {
-  GLfloat projectionMatrixData[16];
-  glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrixData);
-  return glm::make_mat4(projectionMatrixData);
+  GLfloat projMatData[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, projMatData);
+  return glm::make_mat4(projMatData);
 }
 
 App::App()
   : wav2Visemes([this](Viseme val) { curViseme = val; }),
     audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
-    sprite("visemes.png")
+    face("face-blink-anim.png"),
+    mouth("visemes.png")
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   audioCapture.reg(wav2Visemes);
   audioCapture.reg(root);
-  sprite.cols = 3;
-  sprite.rows = 5;
-  sprite.loc = {.0f, 100.f};
-  sprite.pivot = {512.f, 600.f - 293.f};
-  root.nodes.push_back(sprite);
+  face.cols = 5;
+  face.rows = 5;
+  face.numFrames = 25;
+  face.fps = 5.f;
+  face.loc = {500.f, -50.f};
+  mouth.cols = 4;
+  mouth.rows = 4;
+  mouth.loc = {382.f, 194.f};
+  mouth.pivot = {128.f, 128.f};
+  mouth.viseme2Sprite[Viseme::sil] = 6;
+  mouth.viseme2Sprite[Viseme::PP] = 12;
+  mouth.viseme2Sprite[Viseme::FF] = 9;
+  mouth.viseme2Sprite[Viseme::TH] = 15;
+  mouth.viseme2Sprite[Viseme::DD] = 8;
+  mouth.viseme2Sprite[Viseme::kk] = 10;
+  mouth.viseme2Sprite[Viseme::CH] = 7;
+  mouth.viseme2Sprite[Viseme::SS] = 14;
+  mouth.viseme2Sprite[Viseme::nn] = 11;
+  mouth.viseme2Sprite[Viseme::RR] = 13;
+  mouth.viseme2Sprite[Viseme::aa] = 1;
+  mouth.viseme2Sprite[Viseme::E] = 4;
+  mouth.viseme2Sprite[Viseme::I] = 2;
+  mouth.viseme2Sprite[Viseme::O] = 5;
+  mouth.viseme2Sprite[Viseme::U] = 3;
+  root.nodes.push_back(face);
+  face.nodes.push_back(mouth);
 }
 
 auto App::render() -> void
@@ -29,7 +51,7 @@ auto App::render() -> void
   glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  root.renderAll();
+  root.renderAll(hovered, selected);
 }
 
 auto App::renderUi() -> void
@@ -63,22 +85,33 @@ auto App::renderUi() -> void
     ImGui::End();
   }
 
+  ImGui::Begin("Details");
+  root.renderUi();
+  if (selected)
+    selected->renderUi();
+  ImGui::End();
+
+  // Check if ImGui did not process any user input
+  ImGuiIO &io = ImGui::GetIO();
+  if (!io.WantCaptureMouse && !io.WantCaptureKeyboard)
   {
-    ImGui::Begin("Details");
-    root.renderUi();
-    sprite.renderUi();
-    ImGui::End();
+    if (ImGui::IsMouseClicked(0))
+    {
+      int mouseX, mouseY;
+      SDL_GetMouseState(&mouseX, &mouseY);
+      const auto projMat = getProjMat();
+      selected = root.nodeUnder(projMat, Vec2{1.f * mouseX, 1.f * mouseY});
+    }
   }
 }
 
 auto App::tick() -> void
 {
   audioCapture.tick();
-  sprite.viseme = curViseme;
+  mouth.viseme = curViseme;
 
-  const auto projectionMatrix = getProjectionMatrix();
+  const auto projMat = getProjMat();
   int mouseX, mouseY;
   SDL_GetMouseState(&mouseX, &mouseY);
-  auto localPos = sprite.screenToLocal(projectionMatrix, Vec2{static_cast<float>(mouseX), static_cast<float>(mouseY)});
-  LOG(localPos.x, localPos.y);
+  hovered = root.nodeUnder(projMat, Vec2{1.f * mouseX, 1.f * mouseY});
 }
