@@ -23,6 +23,7 @@ App::App()
   face.numFrames = 25;
   face.fps = 5.f;
   face.loc = {500.f, -50.f};
+  face.pivot = {512.f, 512.f};
   mouth.cols = 4;
   mouth.rows = 4;
   mouth.loc = {382.f, 194.f};
@@ -42,8 +43,8 @@ App::App()
   mouth.viseme2Sprite[Viseme::I] = 2;
   mouth.viseme2Sprite[Viseme::O] = 5;
   mouth.viseme2Sprite[Viseme::U] = 3;
-  root.nodes.push_back(face);
-  face.nodes.push_back(mouth);
+  root.addChild(face);
+  face.addChild(mouth);
 }
 
 auto App::render() -> void
@@ -93,16 +94,80 @@ auto App::renderUi() -> void
 
   // Check if ImGui did not process any user input
   ImGuiIO &io = ImGui::GetIO();
-  if (!io.WantCaptureMouse && !io.WantCaptureKeyboard)
+  if (!io.WantCaptureMouse)
   {
-    if (ImGui::IsMouseClicked(0))
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
-      int mouseX, mouseY;
-      SDL_GetMouseState(&mouseX, &mouseY);
-      const auto projMat = getProjMat();
-      selected = root.nodeUnder(projMat, Vec2{1.f * mouseX, 1.f * mouseY});
+      if (editMode == EditMode::select)
+      {
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        const auto projMat = getProjMat();
+        selected = root.nodeUnder(projMat, glm::vec2{1.f * mouseX, 1.f * mouseY});
+      }
+      else
+        editMode = EditMode::select;
+    }
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+      cancel();
+  }
+  if (!io.WantCaptureKeyboard)
+  {
+    if (selected)
+    {
+      // Check if 'G' key was pressed for move operation
+      if (ImGui::IsKeyPressed(ImGuiKey_G))
+      {
+        LOG("'G' key pressed, handle move operation here");
+        editMode = EditMode::move;
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        startMousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
+        initLoc = selected->loc;
+      }
+
+      // Check if 'S' key was pressed for scale operation
+      if (ImGui::IsKeyPressed(ImGuiKey_S))
+      {
+        LOG("'S' key pressed, handle scale operation here");
+        editMode = EditMode::scale;
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        startMousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
+        initScale = selected->scale;
+      }
+
+      // Check if 'R' key was pressed for rotate operation
+      if (ImGui::IsKeyPressed(ImGuiKey_R))
+      {
+        LOG("'R' key pressed, handle rotate operation here");
+        editMode = EditMode::rotate;
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        startMousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
+        initRot = selected->rot;
+      }
+      if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+        cancel();
     }
   }
+}
+
+auto App::cancel() -> void
+{
+  if (!selected)
+  {
+    editMode = EditMode::select;
+    return;
+  }
+  switch (editMode)
+  {
+  case EditMode::select: selected = nullptr; break;
+  case EditMode::move: selected->loc = initLoc; break;
+  case EditMode::scale: selected->scale = initScale; break;
+  case EditMode::rotate: selected->rot = initRot; break;
+  }
+  editMode = EditMode::select;
 }
 
 auto App::tick() -> void
@@ -113,5 +178,13 @@ auto App::tick() -> void
   const auto projMat = getProjMat();
   int mouseX, mouseY;
   SDL_GetMouseState(&mouseX, &mouseY);
-  hovered = root.nodeUnder(projMat, Vec2{1.f * mouseX, 1.f * mouseY});
+  hovered = nullptr;
+  const auto endMousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
+  switch (editMode)
+  {
+  case EditMode::select: hovered = root.nodeUnder(projMat, endMousePos); break;
+  case EditMode::move: selected->updateLoc(projMat, initLoc, startMousePos, endMousePos); break;
+  case EditMode::scale: selected->updateScale(projMat, initScale, startMousePos, endMousePos); break;
+  case EditMode::rotate: selected->updateRot(projMat, initRot, startMousePos, endMousePos); break;
+  }
 }

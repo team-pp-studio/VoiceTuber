@@ -16,7 +16,7 @@ public:
   auto tick() -> void;
 
 private:
-  ImVec4 clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImVec4 clearColor = ImVec4(123.f / 256.f, 164.f / 256.f, 119.f / 256.f, 1.00f);
   Viseme curViseme = Viseme::sil;
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
@@ -25,4 +25,12 @@ private:
   Mouth mouth;
   Node *hovered = nullptr;
   Node *selected = nullptr;
+  enum class EditMode { select, move, scale, rotate };
+  EditMode editMode = EditMode::select;
+  glm::vec2 startMousePos;
+  glm::vec2 initLoc;
+  glm::vec2 initScale;
+  float initRot;
+
+  auto cancel() -> void;
 };

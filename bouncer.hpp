@@ -6,7 +6,7 @@
 class Bouncer final : public Node, public AudioSink
 {
 public:
-  float strength = 200.f;
+  float strength = 100.f;
 
   auto renderUi() -> void final;
 

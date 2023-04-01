@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
 #include <limits>
+#include <log/log.hpp>
 
 static auto getModelViewMatrix() -> glm::mat4
 {
@@ -45,6 +46,18 @@ auto Node::renderUi() -> void
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
+  {
+    ImGui::PushStyleColor(
+      ImGuiCol_Text,
+      ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
+    auto width = w();
+    auto height = h();
+    ImGui::InputFloat("##Width", &width, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::SameLine();
+    ImGui::InputFloat("Size", &height, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::PopStyleColor(); // Restore the original text color
+  }
+
   ImGui::PopItemWidth();
   ImGui::PopID();
 
@@ -115,7 +128,9 @@ auto Node::renderUi() -> void
   ImGui::PopID();
 }
 
-static glm::vec3 mouseToModelViewCoords(Vec2 mouse, Vec2 windowSize, const glm::mat4 &mvpMatrix)
+static glm::vec3 mouseToModelViewCoords(glm::vec2 mouse,
+                                        glm::vec2 windowSize,
+                                        const glm::mat4 &mvpMatrix)
 {
   // Step 1: Normalize mouse coordinates to clip space coordinates
   glm::vec3 clipSpaceCoords(
@@ -137,27 +152,27 @@ static glm::vec3 mouseToModelViewCoords(Vec2 mouse, Vec2 windowSize, const glm::
   return glm::vec3(modelViewCoords);
 }
 
-auto Node::screenToLocal(const glm::mat4 &projMat, Vec2 screen) const -> Vec2
+auto Node::screenToLocal(const glm::mat4 &projMat, glm::vec2 screen) const -> glm::vec2
 {
   ImGuiIO &io = ImGui::GetIO();
   const auto w = io.DisplaySize.x;
   const auto h = io.DisplaySize.y;
 
   glm::mat4 mvpMatrix = projMat * modelViewMat;
-  glm::vec3 modelViewCoords = mouseToModelViewCoords(screen, Vec2{w, h}, mvpMatrix);
-  return Vec2{modelViewCoords.x, modelViewCoords.y};
+  glm::vec3 modelViewCoords = mouseToModelViewCoords(screen, glm::vec2{w, h}, mvpMatrix);
+  return glm::vec2{modelViewCoords.x, modelViewCoords.y};
 }
 
-auto Node::nodeUnder(const glm::mat4 &projMap, Vec2 v) -> Node *
+auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
 
   for (auto n : nodes)
   {
-    auto u = n.get().nodeUnder(projMap, v);
+    auto u = n.get().nodeUnder(projMat, v);
     if (u)
       return u;
   }
-  auto localPos = screenToLocal(projMap, v);
+  auto localPos = screenToLocal(projMat, v);
   if (localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h())
     return nullptr;
   return this;
@@ -178,4 +193,51 @@ auto Node::render(Node *hovered, Node *selected) -> void
   glVertex2f(.0f, h());
   glVertex2f(.0f, .0f);
   glEnd();
+}
+
+auto Node::updateLoc(const glm::mat4 &projMat,
+                     glm::vec2 initLoc,
+                     glm::vec2 startScreenLoc,
+                     glm::vec2 endScreenLoc) -> void
+{
+  const auto startLoc = parent_ ? parent_->screenToLocal(projMat, startScreenLoc) : startScreenLoc;
+  const auto endLoc = parent_ ? parent_->screenToLocal(projMat, endScreenLoc) : endScreenLoc;
+  loc = initLoc + endLoc - startLoc;
+}
+
+auto Node::addChild(Node &v) -> void
+{
+  nodes.push_back(v);
+  v.parent_ = this;
+}
+
+auto Node::updateScale(const glm::mat4 &projMat,
+                       glm::vec2 initScale,
+                       glm::vec2 startScreenLoc,
+                       glm::vec2 endScreenLoc) -> void
+{
+  const auto startLoc = screenToLocal(projMat, startScreenLoc);
+  const auto endLoc = screenToLocal(projMat, endScreenLoc);
+
+  // Calculate the scaling factor based on the distance between start and end locations
+  const auto scaleFactor = glm::length(endLoc - pivot) / glm::length(startLoc - pivot);
+  scale = initScale * scaleFactor;
+}
+
+auto Node::updateRot(const glm::mat4 &projMat,
+                     float initRot,
+                     glm::vec2 startScreenLoc,
+                     glm::vec2 endScreenLoc) -> void
+{
+  const auto startLoc = screenToLocal(projMat, startScreenLoc);
+  const auto endLoc = screenToLocal(projMat, endScreenLoc);
+
+  // Calculate the angles between the pivot and start/end locations
+  const auto startAngle =
+    std::atan2(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi;
+  const auto endAngle = std::atan2(endLoc.y - pivot.y, endLoc.x - pivot.x) * 180.f / std::numbers::pi;
+
+  // Calculate the rotation difference and update the rotation
+  const auto rotDiff = endAngle - startAngle;
+  rot = initRot + rotDiff;
 }
