@@ -14,4 +14,6 @@ protected:
 
 private:
   decltype(std::chrono::high_resolution_clock::now()) startTime;
+
+  auto name() const -> std::string final;
 };

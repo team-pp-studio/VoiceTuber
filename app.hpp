@@ -4,6 +4,7 @@
 #include "bouncer.hpp"
 #include "mouth.hpp"
 #include "wav-2-visemes.hpp"
+#include <functional>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui/imgui.h>
 
@@ -20,9 +21,11 @@ private:
   ImVec4 clearColor = ImVec4(123.f / 256.f, 164.f / 256.f, 119.f / 256.f, 1.00f);
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
-  Bouncer root;
+  Bouncer bouncer;
   AnimSprite face;
-  Mouth mouth;
+  Mouth mouth1;
+  Mouth mouth2;
+  std::reference_wrapper<Node> root;
   Node *hovered = nullptr;
   Node *selected = nullptr;
   enum class EditMode { select, move, scale, rotate };
@@ -33,4 +36,5 @@ private:
   float initRot;
 
   auto cancel() -> void;
+  auto renderTree(Node &) -> void;
 };

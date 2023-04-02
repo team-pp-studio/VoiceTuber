@@ -23,6 +23,8 @@ protected:
   auto render(Node *hovered, Node *selected) -> void override;
   auto renderUi() -> void override;
 
+  std::string fileName;
+
 private:
   int w_;
   int h_;

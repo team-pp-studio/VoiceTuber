@@ -1,5 +1,6 @@
 #include "node.hpp"
 #include <SDL_opengl.h>
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
 #include <limits>
@@ -24,13 +25,15 @@ auto Node::renderAll(Node *hovered, Node *selected) -> void
   modelViewMat = getModelViewMatrix();
 
   render(hovered, selected);
-  for (auto n : nodes)
+  for (auto n : nodes_)
     n.get().renderAll(hovered, selected);
   glPopMatrix();
 }
 
 auto Node::renderUi() -> void
 {
+  auto n = name();
+  ImGui::Text("# %s", n.c_str());
   ImGui::PushID("Location");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
   ImGui::DragFloat("##XLocation",
@@ -165,10 +168,9 @@ auto Node::screenToLocal(const glm::mat4 &projMat, glm::vec2 screen) const -> gl
 
 auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
-
-  for (auto n : nodes)
+  for (auto it = nodes_.rbegin(); it != nodes_.rend(); ++it)
   {
-    auto u = n.get().nodeUnder(projMat, v);
+    auto u = it->get().nodeUnder(projMat, v);
     if (u)
       return u;
   }
@@ -207,7 +209,7 @@ auto Node::updateLoc(const glm::mat4 &projMat,
 
 auto Node::addChild(Node &v) -> void
 {
-  nodes.push_back(v);
+  nodes_.push_back(v);
   v.parent_ = this;
 }
 
@@ -240,4 +242,83 @@ auto Node::updateRot(const glm::mat4 &projMat,
   // Calculate the rotation difference and update the rotation
   const auto rotDiff = endAngle - startAngle;
   rot = initRot + rotDiff;
+}
+
+auto Node::nodes() const -> const std::vector<std::reference_wrapper<Node>> &
+{
+  return nodes_;
+}
+
+auto Node::moveUp() -> void
+{
+  if (!parent())
+    return;
+  if (&parent()->nodes_.front().get() == this)
+    return;
+  auto it = std::find_if(std::begin(parent()->nodes_),
+                         std::end(parent()->nodes_),
+                         [this](const auto &v) { return this == &v.get(); });
+  assert(it != std::end(parent()->nodes_));
+  auto prev = it - 1;
+  std::swap(*it, *prev);
+}
+
+auto Node::moveDown() -> void
+{
+  if (!parent())
+    return;
+  if (!parent())
+    return;
+  if (&parent()->nodes_.back().get() == this)
+    return;
+  auto it = std::find_if(std::begin(parent()->nodes_),
+                         std::end(parent()->nodes_),
+                         [this](const auto &v) { return this == &v.get(); });
+  assert(it != std::end(parent()->nodes_));
+  auto prev = it + 1;
+  std::swap(*it, *prev);
+}
+
+auto Node::unparent() -> void
+{
+  if (!parent())
+    return;
+  if (!parent()->parent())
+    return;
+  auto newParent = parent()->parent();
+  auto it = std::find_if(std::begin(parent()->nodes_),
+                         std::end(parent()->nodes_),
+                         [this](const auto &v) { return this == &v.get(); });
+
+  assert(it != std::end(parent()->nodes_));
+  loc += parent()->loc;
+
+  newParent->nodes_.push_back(*it);
+  parent_->nodes_.erase(it);
+
+  parent_ = newParent;
+}
+
+auto Node::parentWithBellow() -> void
+{
+  if (!parent())
+    return;
+  auto it = std::find_if(std::begin(parent()->nodes_),
+                         std::end(parent()->nodes_),
+                         [this](const auto &v) { return this == &v.get(); });
+
+  assert(it != std::end(parent()->nodes_));
+
+  if (&parent()->nodes_.back().get() == this)
+    return;
+
+  auto &nextSibling = *(it + 1);
+  glm::mat4 nextSiblingTransform = nextSibling.get().modelViewMat;
+  modelViewMat = glm::inverse(nextSiblingTransform) * modelViewMat;
+  loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
+
+  nextSibling.get().nodes_.push_back(*it);
+  parent_->nodes_.erase(it);
+
+  parent_ = &nextSibling.get();
 }

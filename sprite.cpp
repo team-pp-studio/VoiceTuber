@@ -5,7 +5,7 @@
 #include <imgui/imgui.h>
 
 Sprite::Sprite(const std::string &fileName)
-  : texture([&]() {
+  : fileName(fileName), texture([&]() {
       int ch;
       stbi_set_flip_vertically_on_load(1);
       auto imageData = stbi_load(fileName.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);

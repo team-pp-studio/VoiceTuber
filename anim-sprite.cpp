@@ -27,3 +27,8 @@ auto AnimSprite::renderUi() -> void
   ImGui::PopItemWidth();
   ImGui::PopID();
 }
+
+auto AnimSprite::name() const -> std::string
+{
+  return fileName + " - anim";
+}

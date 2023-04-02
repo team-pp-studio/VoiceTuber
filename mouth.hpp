@@ -11,6 +11,7 @@ public:
   auto setViseme(Viseme) -> void;
 
 private:
+  auto name() const -> std::string final;
   auto render(Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
 

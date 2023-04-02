@@ -104,3 +104,8 @@ auto Mouth::setViseme(Viseme v) -> void
     return;
   viseme = v;
 }
+
+auto Mouth::name() const -> std::string
+{
+  return fileName + " - mouth";
+}
