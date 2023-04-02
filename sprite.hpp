@@ -9,7 +9,7 @@
 class Sprite : public Node
 {
 public:
-  Sprite(const std::string &fileName);
+  Sprite(const std::string &path);
   ~Sprite() override;
   auto w() const -> float final { return 1.f * w_ / cols; };
   auto h() const -> float final { return 1.f * h_ / rows; };

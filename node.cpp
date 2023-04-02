@@ -25,8 +25,8 @@ auto Node::renderAll(Node *hovered, Node *selected) -> void
   modelViewMat = getModelViewMatrix();
 
   render(hovered, selected);
-  for (auto n : nodes_)
-    n.get().renderAll(hovered, selected);
+  for (auto &n : nodes_)
+    n->renderAll(hovered, selected);
   glPopMatrix();
 }
 
@@ -170,7 +170,7 @@ auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
   for (auto it = nodes_.rbegin(); it != nodes_.rend(); ++it)
   {
-    auto u = it->get().nodeUnder(projMat, v);
+    auto u = (*it)->nodeUnder(projMat, v);
     if (u)
       return u;
   }
@@ -207,10 +207,10 @@ auto Node::updateLoc(const glm::mat4 &projMat,
   loc = initLoc + endLoc - startLoc;
 }
 
-auto Node::addChild(Node &v) -> void
+auto Node::addChild(std::unique_ptr<Node> v) -> void
 {
-  nodes_.push_back(v);
-  v.parent_ = this;
+  v->parent_ = this;
+  nodes_.emplace_back(std::move(v));
 }
 
 auto Node::updateScale(const glm::mat4 &projMat,
@@ -244,7 +244,7 @@ auto Node::updateRot(const glm::mat4 &projMat,
   rot = initRot + rotDiff;
 }
 
-auto Node::nodes() const -> const std::vector<std::reference_wrapper<Node>> &
+auto Node::nodes() const -> const Nodes &
 {
   return nodes_;
 }
@@ -253,11 +253,11 @@ auto Node::moveUp() -> void
 {
   if (!parent())
     return;
-  if (&parent()->nodes_.front().get() == this)
+  if (parent()->nodes_.front().get() == this)
     return;
   auto it = std::find_if(std::begin(parent()->nodes_),
                          std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == &v.get(); });
+                         [this](const auto &v) { return this == v.get(); });
   assert(it != std::end(parent()->nodes_));
   auto prev = it - 1;
   std::swap(*it, *prev);
@@ -269,11 +269,11 @@ auto Node::moveDown() -> void
     return;
   if (!parent())
     return;
-  if (&parent()->nodes_.back().get() == this)
+  if (parent()->nodes_.back().get() == this)
     return;
   auto it = std::find_if(std::begin(parent()->nodes_),
                          std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == &v.get(); });
+                         [this](const auto &v) { return this == v.get(); });
   assert(it != std::end(parent()->nodes_));
   auto prev = it + 1;
   std::swap(*it, *prev);
@@ -288,14 +288,12 @@ auto Node::unparent() -> void
   auto newParent = parent()->parent();
   auto it = std::find_if(std::begin(parent()->nodes_),
                          std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == &v.get(); });
+                         [this](const auto &v) { return this == v.get(); });
 
   assert(it != std::end(parent()->nodes_));
   loc += parent()->loc;
-
-  newParent->nodes_.push_back(*it);
+  newParent->nodes_.emplace_back(std::move(*it));
   parent_->nodes_.erase(it);
-
   parent_ = newParent;
 }
 
@@ -305,20 +303,30 @@ auto Node::parentWithBellow() -> void
     return;
   auto it = std::find_if(std::begin(parent()->nodes_),
                          std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == &v.get(); });
+                         [this](const auto &v) { return this == v.get(); });
 
   assert(it != std::end(parent()->nodes_));
 
-  if (&parent()->nodes_.back().get() == this)
+  if (parent()->nodes_.back().get() == this)
     return;
 
-  auto &nextSibling = *(it + 1);
-  glm::mat4 nextSiblingTransform = nextSibling.get().modelViewMat;
+  auto nextSibling = (it + 1)->get();
+  glm::mat4 nextSiblingTransform = nextSibling->modelViewMat;
   modelViewMat = glm::inverse(nextSiblingTransform) * modelViewMat;
   loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
 
-  nextSibling.get().nodes_.push_back(*it);
+  nextSibling->nodes_.emplace_back(std::move(*it));
   parent_->nodes_.erase(it);
+  parent_ = nextSibling;
+}
 
-  parent_ = &nextSibling.get();
+auto Node::del(Node &node) -> void
+{
+  if (!node.parent_)
+    return;
+  auto &parentNodes = node.parent_->nodes_;
+  auto it = std::find_if(
+    parentNodes.begin(), parentNodes.end(), [&node](const auto &v) { return &node == v.get(); });
+  assert(it != parentNodes.end());
+  parentNodes.erase(it);
 }

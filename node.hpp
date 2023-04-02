@@ -1,22 +1,24 @@
 #pragma once
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/vec2.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
 class Node
 {
 public:
+  using Nodes = std::vector<std::unique_ptr<Node>>;
   virtual ~Node() = default;
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
   glm::vec2 pivot = {.0f, .0f};
   float rot = 0.f;
-  auto addChild(Node &) -> void;
+  auto addChild(std::unique_ptr<Node>) -> void;
   auto moveDown() -> void;
   auto moveUp() -> void;
   auto nodeUnder(const glm::mat4 &projMat, glm::vec2) -> Node *;
-  auto nodes() const -> const std::vector<std::reference_wrapper<Node>> &;
+  auto nodes() const -> const Nodes &;
   auto parent() -> Node * { return parent_; };
   auto parentWithBellow() -> void;
   auto renderAll(Node *hovered, Node *selected) -> void;
@@ -38,12 +40,14 @@ public:
   virtual auto renderUi() -> void;
   virtual auto w() const -> float { return 1.f; }
 
+  static auto del(Node &) -> void;
+
 protected:
   virtual auto render(Node *hovered, Node *selected) -> void;
 
 private:
   auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
-  std::vector<std::reference_wrapper<Node>> nodes_;
+  Nodes nodes_;
   bool uniformScaling = true;
   glm::mat4 modelViewMat;
   Node *parent_ = nullptr;

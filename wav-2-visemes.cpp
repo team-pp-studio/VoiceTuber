@@ -5,9 +5,8 @@
 #include <stdexcept>
 #include <unordered_map>
 
-Wav2Visemes::Wav2Visemes(Cb cb)
-  : cb(std::move(cb)),
-    config([]() {
+Wav2Visemes::Wav2Visemes()
+  : config([]() {
       auto ret = ps_config_init(nullptr);
       ps_default_search_args(ret);
       ps_config_set_str(ret, "lm", nullptr);
@@ -89,7 +88,10 @@ auto Wav2Visemes::ingest(Wav wav) -> void
 
       auto it = phonToViseme.find(phoneme);
       if (it != std::end(phonToViseme))
-        cb(it->second);
+      {
+        for (auto v : sinks)
+          v.get().ingest(it->second);
+      }
       else
         LOG("Did not find phone mapping for:", phoneme);
     }
@@ -109,4 +111,14 @@ auto Wav2Visemes::sampleRate() const -> int
 auto Wav2Visemes::frameSize() const -> int
 {
   return ps_endpointer_frame_size(ep);
+}
+
+auto Wav2Visemes::reg(VisemesSink &v) -> void
+{
+  sinks.push_back(v);
+}
+
+auto Wav2Visemes::unreg(VisemesSink &v) -> void
+{
+  std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; });
 }

@@ -1,7 +1,9 @@
 #include "mouth.hpp"
+#include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
-Mouth::Mouth(const std::string &fileName) : Sprite(fileName)
+Mouth::Mouth(Wav2Visemes &wav2Visemes, const std::string &fileName)
+  : Sprite(fileName), wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -18,6 +20,12 @@ Mouth::Mouth(const std::string &fileName) : Sprite(fileName)
   viseme2Sprite[Viseme::I] = 12;
   viseme2Sprite[Viseme::O] = 13;
   viseme2Sprite[Viseme::U] = 14;
+  wav2Visemes.reg(*this);
+}
+
+Mouth::~Mouth()
+{
+  wav2Visemes.get().unreg(*this);
 }
 
 auto Mouth::render(Node *hovered, Node *selected) -> void
@@ -98,7 +106,7 @@ auto Mouth::renderUi() -> void
   ImGui::PopID();
 }
 
-auto Mouth::setViseme(Viseme v) -> void
+auto Mouth::ingest(Viseme v) -> void
 {
   if (std::chrono::high_resolution_clock::now() < freezeTime)
     return;
