@@ -3,6 +3,10 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
+FileOpen::FileOpen(const char *dialogName) : dialogName(dialogName), cwd(std::filesystem::current_path())
+{
+}
+
 auto FileOpen::draw() -> bool
 {
   if (!ImGui::BeginPopupModal(dialogName, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -13,7 +17,6 @@ auto FileOpen::draw() -> bool
   if (files.empty())
   {
     // list files and directories in the current directory
-    const auto cwd = std::filesystem::current_path();
     for (auto &entry : std::filesystem::directory_iterator(cwd))
       files.push_back(entry.path());
     std::sort(files.begin(), files.end());
@@ -28,10 +31,7 @@ auto FileOpen::draw() -> bool
         postponedAction = [this]() {
           files.clear();
           selectedFile = "";
-          // Get the current working directory.
-          const auto cwd = std::filesystem::current_path();
-          // Go up one directory.
-          std::filesystem::current_path(cwd.parent_path());
+          cwd = cwd.parent_path();
         };
 
     for (auto &file : files)
@@ -51,7 +51,7 @@ auto FileOpen::draw() -> bool
           {
             // change directory
             postponedAction = [this, file]() {
-              std::filesystem::current_path(file);
+              cwd = file;
               files.clear();
               selectedFile = "";
             };

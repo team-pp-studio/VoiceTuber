@@ -63,9 +63,19 @@ auto App::renderUi() -> void
       postponedAction();
 
     if (addMouthDialog.draw())
-      root->addChild(std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile()));
+    {
+      if (!std::filesystem::exists(addMouthDialog.getSelectedFile().filename()))
+        std::filesystem::copy(addMouthDialog.getSelectedFile(),
+                              addMouthDialog.getSelectedFile().filename());
+      root->addChild(std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile().filename()));
+    }
     if (addAnimDialog.draw())
-      root->addChild(std::make_unique<AnimSprite>(addAnimDialog.getSelectedFile()));
+    {
+      if (!std::filesystem::exists(addAnimDialog.getSelectedFile().filename()))
+        std::filesystem::copy(addAnimDialog.getSelectedFile(),
+                              addAnimDialog.getSelectedFile().filename());
+      root->addChild(std::make_unique<AnimSprite>(addAnimDialog.getSelectedFile().filename()));
+    }
 
     ImGui::BeginDisabled(!selected);
     if (ImGui::Button("<"))
