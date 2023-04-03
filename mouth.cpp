@@ -113,7 +113,16 @@ auto Mouth::ingest(Viseme v) -> void
   viseme = v;
 }
 
-auto Mouth::name() const -> std::string
+auto Mouth::save(OStrm &strm) const -> void
 {
-  return fileName + " - mouth";
+  ::ser(strm, className);
+  ::ser(strm, name);
+  ::ser(strm, *this);
+  Sprite::save(strm);
+}
+
+auto Mouth::load(IStrm &strm) -> void
+{
+  ::deser(strm, *this);
+  Sprite::load(strm);
 }

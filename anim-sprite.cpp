@@ -28,7 +28,16 @@ auto AnimSprite::renderUi() -> void
   ImGui::PopID();
 }
 
-auto AnimSprite::name() const -> std::string
+auto AnimSprite::save(OStrm &strm) const -> void
 {
-  return fileName + " - anim";
+  ::ser(strm, className);
+  ::ser(strm, name);
+  ::ser(strm, *this);
+  Sprite::save(strm);
+}
+
+auto AnimSprite::load(IStrm &strm) -> void
+{
+  ::deser(strm, *this);
+  Sprite::load(strm);
 }

@@ -1,10 +1,33 @@
 #include "node.hpp"
+#include "save-factory.hpp"
 #include <SDL_opengl.h>
 #include <algorithm>
 #include <glm/glm.hpp>
-#include <imgui/imgui.h>
 #include <limits>
 #include <log/log.hpp>
+
+namespace Internal
+{
+  auto serVal(OStrm &strm, const glm::vec2 &value) noexcept -> void
+  {
+    strm.write(reinterpret_cast<const char *>(&value), sizeof(value));
+  }
+
+  auto deserVal(IStrm &strm, glm::vec2 &value) noexcept -> void
+  {
+    strm.read(reinterpret_cast<char *>(&value), sizeof(value));
+  }
+
+  auto serVal(OStrm &strm, const ImVec4 &value) noexcept -> void
+  {
+    strm.write(reinterpret_cast<const char *>(&value), sizeof(value));
+  }
+
+  auto deserVal(IStrm &strm, ImVec4 &value) noexcept -> void
+  {
+    strm.read(reinterpret_cast<char *>(&value), sizeof(value));
+  }
+} // namespace Internal
 
 static auto getModelViewMatrix() -> glm::mat4
 {
@@ -13,27 +36,27 @@ static auto getModelViewMatrix() -> glm::mat4
   return glm::make_mat4(modelMatrixData);
 }
 
+Node::Node(std::string name) : name(std::move(name)) {}
+
 auto Node::renderAll(Node *hovered, Node *selected) -> void
 {
   glPushMatrix();
   // Apply transformations
   glTranslatef(loc.x, loc.y, 0.0f);       // Move the sprite
-  glTranslatef(pivot.x, pivot.y, 0.0f);   // Move the pivot point
   glRotatef(rot, 0.0f, 0.0f, 1.0f);       // Rotate the sprite
   glScalef(scale.x, scale.y, 1.0f);       // Scale the sprite
   glTranslatef(-pivot.x, -pivot.y, 0.0f); // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
   render(hovered, selected);
-  for (auto &n : nodes_)
+  for (auto &n : nodes)
     n->renderAll(hovered, selected);
   glPopMatrix();
 }
 
 auto Node::renderUi() -> void
 {
-  auto n = name();
-  ImGui::Text("# %s", n.c_str());
+  ImGui::Text("# %s", name.c_str());
   ImGui::PushID("Location");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
   ImGui::DragFloat("##XLocation",
@@ -121,6 +144,48 @@ auto Node::renderUi() -> void
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
+  if (ImGui::Button("NW"))
+  {
+    pivot = glm::vec2{0, h()};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("N "))
+  {
+    pivot = glm::vec2{w() / 2, h()};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("NE"))
+  {
+    pivot = glm::vec2{w(), h()};
+  }
+  if (ImGui::Button("W "))
+  {
+    pivot = glm::vec2{w(), h() / 2};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("C "))
+  {
+    pivot = glm::vec2{w() / 2, h() / 2};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("E "))
+  {
+    pivot = glm::vec2{w(), h() / 2};
+  }
+  if (ImGui::Button("SW"))
+  {
+    pivot = glm::vec2{0, 0};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("S "))
+  {
+    pivot = glm::vec2{w() / 2, 0};
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("SE"))
+  {
+    pivot = glm::vec2{w(), 0};
+  }
   ImGui::PopItemWidth();
   ImGui::PopID();
 
@@ -168,7 +233,7 @@ auto Node::screenToLocal(const glm::mat4 &projMat, glm::vec2 screen) const -> gl
 
 auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
-  for (auto it = nodes_.rbegin(); it != nodes_.rend(); ++it)
+  for (auto it = nodes.rbegin(); it != nodes.rend(); ++it)
   {
     auto u = (*it)->nodeUnder(projMat, v);
     if (u)
@@ -195,70 +260,39 @@ auto Node::render(Node *hovered, Node *selected) -> void
   glVertex2f(.0f, h());
   glVertex2f(.0f, .0f);
   glEnd();
-}
-
-auto Node::updateLoc(const glm::mat4 &projMat,
-                     glm::vec2 initLoc,
-                     glm::vec2 startScreenLoc,
-                     glm::vec2 endScreenLoc) -> void
-{
-  const auto startLoc = parent_ ? parent_->screenToLocal(projMat, startScreenLoc) : startScreenLoc;
-  const auto endLoc = parent_ ? parent_->screenToLocal(projMat, endScreenLoc) : endScreenLoc;
-  loc = initLoc + endLoc - startLoc;
+  const auto d = std::max(w(), h()) * .05f;
+  if (selected == this)
+  {
+    glBegin(GL_LINES);
+    glVertex2f(pivot.x - d, pivot.y - d);
+    glVertex2f(pivot.x + d, pivot.y + d);
+    glVertex2f(pivot.x - d, pivot.y + d);
+    glVertex2f(pivot.x + d, pivot.y - d);
+    glEnd();
+  }
 }
 
 auto Node::addChild(std::unique_ptr<Node> v) -> void
 {
   v->parent_ = this;
-  nodes_.emplace_back(std::move(v));
+  nodes.emplace_back(std::move(v));
 }
 
-auto Node::updateScale(const glm::mat4 &projMat,
-                       glm::vec2 initScale,
-                       glm::vec2 startScreenLoc,
-                       glm::vec2 endScreenLoc) -> void
+auto Node::getNodes() const -> const Nodes &
 {
-  const auto startLoc = screenToLocal(projMat, startScreenLoc);
-  const auto endLoc = screenToLocal(projMat, endScreenLoc);
-
-  // Calculate the scaling factor based on the distance between start and end locations
-  const auto scaleFactor = glm::length(endLoc - pivot) / glm::length(startLoc - pivot);
-  scale = initScale * scaleFactor;
-}
-
-auto Node::updateRot(const glm::mat4 &projMat,
-                     float initRot,
-                     glm::vec2 startScreenLoc,
-                     glm::vec2 endScreenLoc) -> void
-{
-  const auto startLoc = screenToLocal(projMat, startScreenLoc);
-  const auto endLoc = screenToLocal(projMat, endScreenLoc);
-
-  // Calculate the angles between the pivot and start/end locations
-  const auto startAngle =
-    std::atan2(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi;
-  const auto endAngle = std::atan2(endLoc.y - pivot.y, endLoc.x - pivot.x) * 180.f / std::numbers::pi;
-
-  // Calculate the rotation difference and update the rotation
-  const auto rotDiff = endAngle - startAngle;
-  rot = initRot + rotDiff;
-}
-
-auto Node::nodes() const -> const Nodes &
-{
-  return nodes_;
+  return nodes;
 }
 
 auto Node::moveUp() -> void
 {
   if (!parent())
     return;
-  if (parent()->nodes_.front().get() == this)
+  if (parent()->nodes.front().get() == this)
     return;
-  auto it = std::find_if(std::begin(parent()->nodes_),
-                         std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == v.get(); });
-  assert(it != std::end(parent()->nodes_));
+  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
+    return this == v.get();
+  });
+  assert(it != std::end(parent()->nodes));
   auto prev = it - 1;
   std::swap(*it, *prev);
 }
@@ -269,12 +303,12 @@ auto Node::moveDown() -> void
     return;
   if (!parent())
     return;
-  if (parent()->nodes_.back().get() == this)
+  if (parent()->nodes.back().get() == this)
     return;
-  auto it = std::find_if(std::begin(parent()->nodes_),
-                         std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == v.get(); });
-  assert(it != std::end(parent()->nodes_));
+  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
+    return this == v.get();
+  });
+  assert(it != std::end(parent()->nodes));
   auto prev = it + 1;
   std::swap(*it, *prev);
 }
@@ -286,14 +320,14 @@ auto Node::unparent() -> void
   if (!parent()->parent())
     return;
   auto newParent = parent()->parent();
-  auto it = std::find_if(std::begin(parent()->nodes_),
-                         std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == v.get(); });
+  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
+    return this == v.get();
+  });
 
-  assert(it != std::end(parent()->nodes_));
+  assert(it != std::end(parent()->nodes));
   loc += parent()->loc;
-  newParent->nodes_.emplace_back(std::move(*it));
-  parent_->nodes_.erase(it);
+  newParent->nodes.emplace_back(std::move(*it));
+  parent_->nodes.erase(it);
   parent_ = newParent;
 }
 
@@ -301,13 +335,13 @@ auto Node::parentWithBellow() -> void
 {
   if (!parent())
     return;
-  auto it = std::find_if(std::begin(parent()->nodes_),
-                         std::end(parent()->nodes_),
-                         [this](const auto &v) { return this == v.get(); });
+  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
+    return this == v.get();
+  });
 
-  assert(it != std::end(parent()->nodes_));
+  assert(it != std::end(parent()->nodes));
 
-  if (parent()->nodes_.back().get() == this)
+  if (parent()->nodes.back().get() == this)
     return;
 
   auto nextSibling = (it + 1)->get();
@@ -315,8 +349,8 @@ auto Node::parentWithBellow() -> void
   modelViewMat = glm::inverse(nextSiblingTransform) * modelViewMat;
   loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
 
-  nextSibling->nodes_.emplace_back(std::move(*it));
-  parent_->nodes_.erase(it);
+  nextSibling->nodes.emplace_back(std::move(*it));
+  parent_->nodes.erase(it);
   parent_ = nextSibling;
 }
 
@@ -324,9 +358,110 @@ auto Node::del(Node &node) -> void
 {
   if (!node.parent_)
     return;
-  auto &parentNodes = node.parent_->nodes_;
+  auto &parentNodes = node.parent_->nodes;
   auto it = std::find_if(
     parentNodes.begin(), parentNodes.end(), [&node](const auto &v) { return &node == v.get(); });
   assert(it != parentNodes.end());
   parentNodes.erase(it);
+}
+
+auto Node::translateCancel() -> void
+{
+  loc = initLoc;
+}
+
+auto Node::translateStart(glm::vec2 mouse) -> void
+{
+  startMousePos = mouse;
+  initLoc = loc;
+}
+
+auto Node::translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
+{
+  const auto startLoc = parent_ ? parent_->screenToLocal(projMat, startMousePos) : startMousePos;
+  const auto endLoc = parent_ ? parent_->screenToLocal(projMat, mouse) : mouse;
+  loc = initLoc + endLoc - startLoc;
+}
+
+auto Node::rotCancel() -> void
+{
+  rot = initRot;
+}
+
+auto Node::rotStart(glm::vec2 mouse) -> void
+{
+  startMousePos = mouse;
+  initRot = rot;
+}
+
+auto Node::rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
+{
+  const auto startLoc = screenToLocal(projMat, startMousePos);
+  const auto endLoc = screenToLocal(projMat, mouse);
+
+  // Calculate the angles between the pivot and start/end locations
+  const auto startAngle =
+    std::atan2(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi;
+  const auto endAngle = std::atan2(endLoc.y - pivot.y, endLoc.x - pivot.x) * 180.f / std::numbers::pi;
+
+  // Calculate the rotation difference and update the rotation
+  const auto rotDiff = endAngle - startAngle;
+  rot = initRot + rotDiff;
+}
+
+auto Node::scaleCancel() -> void
+{
+  scale = initScale;
+}
+
+auto Node::scaleStart(glm::vec2 mouse) -> void
+{
+  startMousePos = mouse;
+  initScale = scale;
+}
+
+auto Node::scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
+{
+  const auto startLoc = screenToLocal(projMat, startMousePos);
+  const auto endLoc = screenToLocal(projMat, mouse);
+
+  // Calculate the scaling factor based on the distance between start and end locations
+  const auto scaleFactor = glm::length(endLoc - pivot) / glm::length(startLoc - pivot);
+  scale = initScale * scaleFactor;
+}
+
+auto Node::saveAll(OStrm &strm) const -> void
+{
+  save(strm);
+  auto sz = static_cast<int32_t>(nodes.size());
+  ::ser(strm, sz);
+  for (const auto &n : nodes)
+    n->saveAll(strm);
+}
+
+auto Node::loadAll(const class SaveFactory &saveFactory, IStrm &strm) -> void
+{
+  load(strm);
+  int32_t sz;
+  ::deser(strm, sz);
+  for (auto i = 0; i < sz; ++i)
+  {
+    std::string className;
+    std::string name;
+    ::deser(strm, className);
+    ::deser(strm, name);
+    auto node = saveFactory.ctor(className, name);
+    node->loadAll(saveFactory, strm);
+    addChild(std::move(node));
+  }
+}
+
+auto Node::save(OStrm &strm) const -> void
+{
+  ::ser(strm, *this);
+}
+
+auto Node::load(IStrm &strm) -> void
+{
+  ::deser(strm, *this);
 }

@@ -7,18 +7,18 @@
 #include <log/log.hpp>
 
 Sprite::Sprite(const std::string &path)
-  : fileName([&path]() {
+  : Node([&path]() {
       std::filesystem::path fsPath(path);
       return fsPath.filename().string();
     }()),
     texture([&]() {
       int ch;
       stbi_set_flip_vertically_on_load(1);
-      auto imageData = stbi_load(fileName.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);
+      auto imageData = stbi_load(name.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);
       if (imageData == nullptr)
       {
         std::ostringstream ss;
-        ss << "Error loading image: " << fileName;
+        ss << "Error loading image: " << name;
         throw std::runtime_error(ss.str());
       }
       LOG("Number of channels:", ch);
@@ -42,7 +42,6 @@ Sprite::Sprite(const std::string &path)
       return texture;
     }())
 {
-  pivot = glm::vec2{w_ / 2, h_ / 2};
 }
 
 auto Sprite::render(Node *hovered, Node *selected) -> void
@@ -52,8 +51,8 @@ auto Sprite::render(Node *hovered, Node *selected) -> void
   glBegin(GL_QUADS);
   const auto fCols = static_cast<float>(cols);
   const auto fRows = static_cast<float>(rows);
-  auto i = frame % cols / fCols;
-  auto j = (fRows - 1.f - frame / cols) / fRows;
+  const auto i = frame % cols / fCols;
+  const auto j = (fRows - 1.f - frame / cols) / fRows;
   glColor4f(1.f, 1.f, 1.f, 1.f);
   glTexCoord2f(.0f + i, .0f + j);
   glVertex2f(.0f, .0f);
@@ -90,4 +89,15 @@ auto Sprite::renderUi() -> void
     numFrames = 1;
   ImGui::PopItemWidth();
   ImGui::PopID();
+}
+
+auto Sprite::save(OStrm &strm) const -> void
+{
+  ::ser(strm, *this);
+  Node::save(strm);
+}
+auto Sprite::load(IStrm &strm) -> void
+{
+  ::deser(strm, *this);
+  Node::load(strm);
 }

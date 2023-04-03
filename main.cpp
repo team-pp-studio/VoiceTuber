@@ -199,6 +199,8 @@ int main(int, char **)
   EMSCRIPTEN_MAINLOOP_END;
 #endif
 
+  app.savePrj();
+
   // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
