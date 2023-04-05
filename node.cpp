@@ -38,19 +38,19 @@ static auto getModelViewMatrix() -> glm::mat4
 
 Node::Node(std::string name) : name(std::move(name)) {}
 
-auto Node::renderAll(Node *hovered, Node *selected) -> void
+auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
 {
   glPushMatrix();
   // Apply transformations
-  glTranslatef(loc.x, loc.y, 0.0f);       // Move the sprite
-  glRotatef(rot, 0.0f, 0.0f, 1.0f);       // Rotate the sprite
-  glScalef(scale.x, scale.y, 1.0f);       // Scale the sprite
-  glTranslatef(-pivot.x, -pivot.y, 0.0f); // Move the pivot point back
+  glTranslatef(loc.x, loc.y, 0.0f);           // Move the sprite
+  glRotatef(rot + animRot, 0.0f, 0.0f, 1.0f); // Rotate the sprite
+  glScalef(scale.x, scale.y, 1.0f);           // Scale the sprite
+  glTranslatef(-pivot.x, -pivot.y, 0.0f);     // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
-  render(hovered, selected);
+  render(dt, hovered, selected);
   for (auto &n : nodes)
-    n->renderAll(hovered, selected);
+    n->renderAll(dt, hovered, selected);
   glPopMatrix();
 }
 
@@ -245,7 +245,7 @@ auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
   return this;
 }
 
-auto Node::render(Node *hovered, Node *selected) -> void
+auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
 {
   if (selected != this && hovered != this)
     return;

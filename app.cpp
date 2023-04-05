@@ -15,7 +15,8 @@ static auto getProjMat() -> glm::mat4
 App::App()
   : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     addMouthDialog("Add Mouth Dialog"),
-    addAnimDialog("Add Anim Dialog")
+    addSpriteDialog("Add Sprite Dialog"),
+    lastUpdate(std::chrono::high_resolution_clock::now())
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
@@ -37,7 +38,10 @@ auto App::render() -> void
     return;
   }
 
-  root->renderAll(hovered, selected);
+  auto now = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float> diff = now - lastUpdate;
+  lastUpdate = now;
+  root->renderAll(diff.count(), hovered, selected);
 }
 
 auto App::renderUi() -> void
@@ -57,8 +61,8 @@ auto App::renderUi() -> void
     if (ImGui::Button("Add Mouth..."))
       postponedAction = [&]() { ImGui::OpenPopup(addMouthDialog.dialogName); };
     ImGui::SameLine();
-    if (ImGui::Button("Add Anim..."))
-      postponedAction = [&]() { ImGui::OpenPopup(addAnimDialog.dialogName); };
+    if (ImGui::Button("Add Sprite..."))
+      postponedAction = [&]() { ImGui::OpenPopup(addSpriteDialog.dialogName); };
     if (postponedAction)
       postponedAction();
 
@@ -69,12 +73,12 @@ auto App::renderUi() -> void
                               addMouthDialog.getSelectedFile().filename());
       root->addChild(std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile().filename()));
     }
-    if (addAnimDialog.draw())
+    if (addSpriteDialog.draw())
     {
-      if (!std::filesystem::exists(addAnimDialog.getSelectedFile().filename()))
-        std::filesystem::copy(addAnimDialog.getSelectedFile(),
-                              addAnimDialog.getSelectedFile().filename());
-      root->addChild(std::make_unique<AnimSprite>(addAnimDialog.getSelectedFile().filename()));
+      if (!std::filesystem::exists(addSpriteDialog.getSelectedFile().filename()))
+        std::filesystem::copy(addSpriteDialog.getSelectedFile(),
+                              addSpriteDialog.getSelectedFile().filename());
+      root->addChild(std::make_unique<AnimSprite>(addSpriteDialog.getSelectedFile().filename()));
     }
 
     ImGui::BeginDisabled(!selected);

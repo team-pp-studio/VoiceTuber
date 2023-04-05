@@ -29,8 +29,9 @@ private:
   enum class EditMode { select, translate, scale, rotate };
   EditMode editMode = EditMode::select;
   FileOpen addMouthDialog;
-  FileOpen addAnimDialog;
+  FileOpen addSpriteDialog;
   PrjDialog prjDialog;
+  decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
 
   auto cancel() -> void;
   auto loadPrj() -> void;

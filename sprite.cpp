@@ -44,7 +44,7 @@ Sprite::Sprite(const std::string &path)
 {
 }
 
-auto Sprite::render(Node *hovered, Node *selected) -> void
+auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
 {
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -65,7 +65,7 @@ auto Sprite::render(Node *hovered, Node *selected) -> void
   glEnd();
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
-  Node::render(hovered, selected);
+  Node::render(dt, hovered, selected);
 }
 
 Sprite::~Sprite()

@@ -17,7 +17,7 @@ public:
 
 private:
   auto ingest(Viseme) -> void final;
-  auto render(Node *hovered, Node *selected) -> void final;
+  auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
   auto load(IStrm &) -> void final;

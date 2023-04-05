@@ -29,7 +29,7 @@ public:
   };
 
 protected:
-  auto render(Node *hovered, Node *selected) -> void override;
+  auto render(float dt, Node *hovered, Node *selected) -> void override;
   auto renderUi() -> void override;
   auto save(OStrm &) const -> void override;
   auto load(IStrm &) -> void override;

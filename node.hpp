@@ -48,7 +48,7 @@ public:
     return parent_;
   };
   auto parentWithBellow() -> void;
-  auto renderAll(Node *hovered, Node *selected) -> void;
+  auto renderAll(float dt, Node *hovered, Node *selected) -> void;
   auto rotCancel() -> void;
   auto rotStart(glm::vec2 mouse) -> void;
   auto rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
@@ -73,7 +73,7 @@ public:
   }
 
 protected:
-  virtual auto render(Node *hovered, Node *selected) -> void;
+  virtual auto render(float dt, Node *hovered, Node *selected) -> void;
   virtual auto save(OStrm &) const -> void;
   virtual auto load(IStrm &) -> void;
 
@@ -84,11 +84,20 @@ private:
 
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
+
+protected:
   glm::vec2 pivot = {.0f, .0f};
+  float animRot = 0.f;
+
+private:
   float rot = 0.f;
   bool uniformScaling = true;
   Nodes nodes;
+
+protected:
   glm::mat4 modelViewMat;
+
+private:
   Node *parent_ = nullptr;
   glm::vec2 startMousePos;
   glm::vec2 initLoc;

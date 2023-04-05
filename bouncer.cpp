@@ -21,12 +21,12 @@ auto Bouncer::ingest(Wav v) -> void
   offset = strength * v.back() / 0x8000;
 }
 
-auto Bouncer::render(Node *hovered, Node *selected) -> void
+auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
 {
   glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
   glTranslatef(.0f, offset, .0f);
-  Node::render(hovered, selected);
+  Node::render(dt, hovered, selected);
 }
 
 auto Bouncer::renderUi() -> void

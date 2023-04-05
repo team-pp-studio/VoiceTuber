@@ -28,10 +28,10 @@ Mouth::~Mouth()
   wav2Visemes.get().unreg(*this);
 }
 
-auto Mouth::render(Node *hovered, Node *selected) -> void
+auto Mouth::render(float dt, Node *hovered, Node *selected) -> void
 {
   frame = viseme2Sprite[viseme] % numFrames;
-  Sprite::render(hovered, selected);
+  Sprite::render(dt, hovered, selected);
 }
 
 auto Mouth::renderUi() -> void

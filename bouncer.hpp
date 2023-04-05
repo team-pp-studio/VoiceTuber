@@ -23,7 +23,7 @@ private:
   float offset = 0.f;
   std::reference_wrapper<AudioCapture> audioCapture;
   auto ingest(Wav) -> void final;
-  auto render(Node *hovered, Node *selected) -> void final;
+  auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
   auto load(IStrm &) -> void final;
