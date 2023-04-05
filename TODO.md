@@ -1,0 +1,1 @@
+- [ ] (bug) App crashes after deleting a mouth and clicking on another mouth.

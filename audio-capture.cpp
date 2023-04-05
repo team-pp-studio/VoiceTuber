@@ -47,5 +47,7 @@ auto AudioCapture::reg(AudioSink &v) -> void
 
 auto AudioCapture::unreg(AudioSink &v) -> void
 {
-  std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; });
+  sinks.erase(
+    std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; }),
+    std::end(sinks));
 }

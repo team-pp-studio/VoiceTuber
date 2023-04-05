@@ -120,5 +120,7 @@ auto Wav2Visemes::reg(VisemesSink &v) -> void
 
 auto Wav2Visemes::unreg(VisemesSink &v) -> void
 {
-  std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; });
+  sinks.erase(
+    std::remove_if(std::begin(sinks), std::end(sinks), [&](const auto &x) { return &x.get() == &v; }),
+    std::end(sinks));
 }
