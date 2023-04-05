@@ -241,7 +241,8 @@ auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
       return u;
   }
   auto localPos = screenToLocal(projMat, v);
-  if (localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h())
+  if (localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h() ||
+      isTransparent(localPos))
     return nullptr;
   return this;
 }
@@ -465,4 +466,29 @@ auto Node::save(OStrm &strm) const -> void
 auto Node::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
+}
+
+auto Node::isTransparent(glm::vec2) const -> bool
+{
+  return false;
+}
+
+auto Node::h() const -> float
+{
+  return 1.f;
+}
+
+auto Node::w() const -> float
+{
+  return 1.f;
+}
+
+auto Node::parent() -> Node *
+{
+  return parent_;
+}
+
+auto Node::getName() const -> std::string
+{
+  return name;
 }

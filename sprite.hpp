@@ -19,14 +19,10 @@ public:
 
   Sprite(const std::string &path);
   ~Sprite() override;
-  auto w() const -> float final
-  {
-    return 1.f * w_ / cols;
-  };
-  auto h() const -> float final
-  {
-    return 1.f * h_ / rows;
-  };
+  Sprite(const Sprite &) = delete;
+  auto w() const -> float final;
+  auto h() const -> float final;
+  auto isTransparent(glm::vec2) const -> bool final;
 
 protected:
   auto render(float dt, Node *hovered, Node *selected) -> void override;
@@ -40,7 +36,9 @@ protected:
   int numFrames = 1;
 
 private:
+  int ch;
   int w_;
   int h_;
+  unsigned char *imageData;
   GLuint texture;
 };

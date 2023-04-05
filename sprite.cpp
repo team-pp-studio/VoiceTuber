@@ -12,9 +12,8 @@ Sprite::Sprite(const std::string &path)
       return fsPath.filename().string();
     }()),
     texture([&]() {
-      int ch;
       stbi_set_flip_vertically_on_load(1);
-      auto imageData = stbi_load(name.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);
+      imageData = stbi_load(name.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);
       if (imageData == nullptr)
       {
         std::ostringstream ss;
@@ -38,7 +37,6 @@ Sprite::Sprite(const std::string &path)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
       else
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-      stbi_image_free(imageData);
       return texture;
     }())
 {
@@ -71,6 +69,7 @@ auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
 Sprite::~Sprite()
 {
   glDeleteTextures(1, &texture);
+  stbi_image_free(imageData);
 }
 
 auto Sprite::renderUi() -> void
@@ -100,4 +99,25 @@ auto Sprite::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   Node::load(strm);
+}
+
+auto Sprite::w() const -> float
+{
+  return 1.f * w_ / cols;
+}
+
+auto Sprite::h() const -> float
+{
+  return 1.f * h_ / rows;
+}
+
+auto Sprite::isTransparent(glm::vec2 v) const -> bool
+{
+  if (ch == 3)
+    return false;
+  const auto x = static_cast<int>(v.x);
+  const auto y = static_cast<int>(v.y);
+  if (v.x < 0 || v.x >= w_ || v.y < 0 || v.y >= h_)
+    return true;
+  return imageData[(x + y * w_) * ch + 3] < 127;
 }

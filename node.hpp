@@ -35,23 +35,19 @@ public:
   virtual ~Node() = default;
 
   auto addChild(std::unique_ptr<Node>) -> void;
+  auto getName() const -> std::string;
+  auto getNodes() const -> const Nodes &;
+  auto loadAll(const class SaveFactory &, IStrm &) -> void;
   auto moveDown() -> void;
   auto moveUp() -> void;
-  auto getName() const -> std::string
-  {
-    return name;
-  }
   auto nodeUnder(const glm::mat4 &projMat, glm::vec2) -> Node *;
-  auto getNodes() const -> const Nodes &;
-  auto parent() -> Node *
-  {
-    return parent_;
-  };
+  auto parent() -> Node *;
   auto parentWithBellow() -> void;
   auto renderAll(float dt, Node *hovered, Node *selected) -> void;
   auto rotCancel() -> void;
   auto rotStart(glm::vec2 mouse) -> void;
   auto rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
+  auto saveAll(OStrm &) const -> void;
   auto scaleCancel() -> void;
   auto scaleStart(glm::vec2 mouse) -> void;
   auto scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
@@ -59,18 +55,11 @@ public:
   auto translateStart(glm::vec2 mouse) -> void;
   auto translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
   auto unparent() -> void;
-  auto saveAll(OStrm &) const -> void;
-  auto loadAll(const class SaveFactory &, IStrm &) -> void;
   static auto del(Node &) -> void;
-  virtual auto h() const -> float
-  {
-    return 1.f;
-  }
+  virtual auto h() const -> float;
+  virtual auto isTransparent(glm::vec2) const -> bool;
   virtual auto renderUi() -> void;
-  virtual auto w() const -> float
-  {
-    return 1.f;
-  }
+  virtual auto w() const -> float;
 
 protected:
   virtual auto render(float dt, Node *hovered, Node *selected) -> void;
