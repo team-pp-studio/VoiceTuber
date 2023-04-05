@@ -26,7 +26,7 @@ need for additional hardware such as webcams or tracking devices.
 ### 2.2. Text-to-Speech Integration
 
 -   Integration with Azure TTS for text-to-speech functionality
--   Step-by-step guide for users to obtain and set up an API key
+    -   Step-by-step guide for users to obtain and set up an API key
 -   TTS to voice Twitch chat messages
 -   Alternative for VTubers to type instead of talking, using TTS for vocalization
 
@@ -53,6 +53,9 @@ need for additional hardware such as webcams or tracking devices.
 
 -   Audio amplitude analysis to use different sets of mouth shapes based on the loudness or quietness of the VTuber's speech
 -   Pitch analysis for detecting excitement or screaming
+
+### 2.8. Post-processing pass which would morph the whole image based on the mouse position
+
 
 3\. Open-Source and Lightweight Approach
 ----------------------------------------

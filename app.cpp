@@ -276,6 +276,8 @@ auto App::loadPrj() -> void
 
 auto App::savePrj() -> void
 {
+  if (!root)
+    return;
   OStrm strm;
   root->saveAll(strm);
   std::ofstream st("prj.tpp", std::ofstream::binary);
