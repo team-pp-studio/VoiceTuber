@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <limits>
 #include <log/log.hpp>
+#include <numbers>
 
 namespace Internal
 {

@@ -21,34 +21,34 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BBAEB705-1669-40F3-8567-04CF6A991F4C}</ProjectGuid>
     <RootNamespace>example_sdl2_opengl3</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -90,12 +90,13 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%SDL2_DIR%\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x86;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -104,12 +105,13 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%SDL2_DIR%\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -120,15 +122,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>%SDL2_DIR%\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x86;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
@@ -140,42 +143,126 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>%SDL2_DIR%\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\imgui.cpp" />
-    <ClCompile Include="..\..\imgui_demo.cpp" />
-    <ClCompile Include="..\..\imgui_draw.cpp" />
-    <ClCompile Include="..\..\imgui_tables.cpp" />
-    <ClCompile Include="..\..\imgui_widgets.cpp" />
-    <ClCompile Include="..\..\backends\imgui_impl_sdl2.cpp" />
-    <ClCompile Include="..\..\backends\imgui_impl_opengl3.cpp" />
+    <ClInclude Include="3rd-party\glm\glm\common.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\exponential.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\ext.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\fwd.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\geometric.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\glm.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\integer.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\matrix.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\packing.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\trigonometric.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="3rd-party\imgui\imconfig.h" />
+    <ClInclude Include="3rd-party\imgui\imgui.h" />
+    <ClInclude Include="3rd-party\imgui\imgui_internal.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_rectpack.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_textedit.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_truetype.h" />
+    <ClInclude Include="3rd-party\log\log.hpp" />
+    <ClInclude Include="3rd-party\sdlpp\sdlpp.hpp" />
+    <ClInclude Include="3rd-party\ser\istrm.hpp" />
+    <ClInclude Include="3rd-party\ser\is_serializable.hpp" />
+    <ClInclude Include="3rd-party\ser\macro.hpp" />
+    <ClInclude Include="3rd-party\ser\ostrm.hpp" />
+    <ClInclude Include="3rd-party\ser\overloaded.hpp" />
+    <ClInclude Include="3rd-party\ser\proto.hpp" />
+    <ClInclude Include="3rd-party\ser\schema.hpp" />
+    <ClInclude Include="3rd-party\ser\ser.hpp" />
+    <ClInclude Include="anim-sprite.hpp" />
+    <ClInclude Include="app.hpp" />
+    <ClInclude Include="audio-capture.hpp" />
+    <ClInclude Include="audio-sink.hpp" />
+    <ClInclude Include="bouncer.hpp" />
+    <ClInclude Include="file-open.hpp" />
+    <ClInclude Include="imgui-impl-opengl3-loader.h" />
+    <ClInclude Include="imgui-impl-opengl3.h" />
+    <ClInclude Include="imgui-impl-sdl.h" />
+    <ClInclude Include="imgui-impl-sdlrenderer.h" />
+    <ClInclude Include="mouth.hpp" />
+    <ClInclude Include="node.hpp" />
+    <ClInclude Include="prj-dialog.hpp" />
+    <ClInclude Include="save-factory.hpp" />
+    <ClInclude Include="sprite.hpp" />
+    <ClInclude Include="stb\stb_connected_components.h" />
+    <ClInclude Include="stb\stb_c_lexer.h" />
+    <ClInclude Include="stb\stb_divide.h" />
+    <ClInclude Include="stb\stb_ds.h" />
+    <ClInclude Include="stb\stb_dxt.h" />
+    <ClInclude Include="stb\stb_easy_font.h" />
+    <ClInclude Include="stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="stb\stb_hexwave.h" />
+    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="stb\stb_image_resize.h" />
+    <ClInclude Include="stb\stb_image_write.h" />
+    <ClInclude Include="stb\stb_include.h" />
+    <ClInclude Include="stb\stb_leakcheck.h" />
+    <ClInclude Include="stb\stb_perlin.h" />
+    <ClInclude Include="stb\stb_rect_pack.h" />
+    <ClInclude Include="stb\stb_sprintf.h" />
+    <ClInclude Include="stb\stb_textedit.h" />
+    <ClInclude Include="stb\stb_tilemap_editor.h" />
+    <ClInclude Include="stb\stb_truetype.h" />
+    <ClInclude Include="stb\stb_voxel_render.h" />
+    <ClInclude Include="viseme.hpp" />
+    <ClInclude Include="visemes-sink.hpp" />
+    <ClInclude Include="wav-2-visemes.hpp" />
+    <ClInclude Include="wav.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="3rd-party\imgui\imgui.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_demo.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_tables.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="3rd-party\ser\proto.cpp" />
+    <ClCompile Include="3rd-party\ser\ser.cpp" />
+    <ClCompile Include="anim-sprite.cpp" />
+    <ClCompile Include="app.cpp" />
+    <ClCompile Include="audio-capture.cpp" />
+    <ClCompile Include="bouncer.cpp" />
+    <ClCompile Include="file-open.cpp" />
+    <ClCompile Include="imgui-impl-opengl3.cpp" />
+    <ClCompile Include="imgui-impl-sdl.cpp" />
+    <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\imconfig.h" />
-    <ClInclude Include="..\..\imgui.h" />
-    <ClInclude Include="..\..\imgui_internal.h" />
-    <ClInclude Include="..\..\backends\imgui_impl_sdl2.h" />
-    <ClInclude Include="..\..\backends\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\..\backends\imgui_impl_opengl3_loader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\misc\debuggers\imgui.natstepfilter" />
-    <None Include="..\..\misc\debuggers\imgui.natvis" />
-    <None Include="..\README.txt" />
+    <ClCompile Include="mouth.cpp" />
+    <ClCompile Include="node.cpp" />
+    <ClCompile Include="prj-dialog.cpp" />
+    <ClCompile Include="save-factory.cpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="stb-image.cpp" />
+    <ClCompile Include="stb\stb_vorbis.c" />
+    <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,67 +1,109 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{20b90ce4-7fcb-4731-b9a0-075f875de82d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="sources">
-      <UniqueIdentifier>{f18ab499-84e1-499f-8eff-9754361e0e52}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
+    <ClInclude Include="anim-sprite.hpp" />
+    <ClInclude Include="app.hpp" />
+    <ClInclude Include="audio-capture.hpp" />
+    <ClInclude Include="audio-sink.hpp" />
+    <ClInclude Include="bouncer.hpp" />
+    <ClInclude Include="file-open.hpp" />
+    <ClInclude Include="mouth.hpp" />
+    <ClInclude Include="node.hpp" />
+    <ClInclude Include="prj-dialog.hpp" />
+    <ClInclude Include="save-factory.hpp" />
+    <ClInclude Include="sprite.hpp" />
+    <ClInclude Include="viseme.hpp" />
+    <ClInclude Include="visemes-sink.hpp" />
+    <ClInclude Include="wav.hpp" />
+    <ClInclude Include="wav-2-visemes.hpp" />
+    <ClInclude Include="imgui-impl-opengl3.h" />
+    <ClInclude Include="imgui-impl-opengl3-loader.h" />
+    <ClInclude Include="imgui-impl-sdl.h" />
+    <ClInclude Include="imgui-impl-sdlrenderer.h" />
+    <ClInclude Include="stb\stb_c_lexer.h" />
+    <ClInclude Include="stb\stb_connected_components.h" />
+    <ClInclude Include="stb\stb_divide.h" />
+    <ClInclude Include="stb\stb_ds.h" />
+    <ClInclude Include="stb\stb_dxt.h" />
+    <ClInclude Include="stb\stb_easy_font.h" />
+    <ClInclude Include="stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="stb\stb_hexwave.h" />
+    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="stb\stb_image_resize.h" />
+    <ClInclude Include="stb\stb_image_write.h" />
+    <ClInclude Include="stb\stb_include.h" />
+    <ClInclude Include="stb\stb_leakcheck.h" />
+    <ClInclude Include="stb\stb_perlin.h" />
+    <ClInclude Include="stb\stb_rect_pack.h" />
+    <ClInclude Include="stb\stb_sprintf.h" />
+    <ClInclude Include="stb\stb_textedit.h" />
+    <ClInclude Include="stb\stb_tilemap_editor.h" />
+    <ClInclude Include="stb\stb_truetype.h" />
+    <ClInclude Include="stb\stb_voxel_render.h" />
+    <ClInclude Include="3rd-party\glm\glm\common.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\exponential.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\ext.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\fwd.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\geometric.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\glm.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\integer.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat2x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat3x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\mat4x4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\matrix.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\packing.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\trigonometric.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec2.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec3.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vec4.hpp" />
+    <ClInclude Include="3rd-party\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="3rd-party\imgui\imconfig.h" />
+    <ClInclude Include="3rd-party\imgui\imgui.h" />
+    <ClInclude Include="3rd-party\imgui\imgui_internal.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_rectpack.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_textedit.h" />
+    <ClInclude Include="3rd-party\imgui\imstb_truetype.h" />
+    <ClInclude Include="3rd-party\log\log.hpp" />
+    <ClInclude Include="3rd-party\sdlpp\sdlpp.hpp" />
+    <ClInclude Include="3rd-party\ser\is_serializable.hpp" />
+    <ClInclude Include="3rd-party\ser\istrm.hpp" />
+    <ClInclude Include="3rd-party\ser\macro.hpp" />
+    <ClInclude Include="3rd-party\ser\ostrm.hpp" />
+    <ClInclude Include="3rd-party\ser\overloaded.hpp" />
+    <ClInclude Include="3rd-party\ser\proto.hpp" />
+    <ClInclude Include="3rd-party\ser\schema.hpp" />
+    <ClInclude Include="3rd-party\ser\ser.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_demo.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\backends\imgui_impl_sdl2.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\backends\imgui_impl_opengl3.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\backends\imgui_impl_sdl2.h">
-      <Filter>sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\backends\imgui_impl_opengl3.h">
-      <Filter>sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\backends\imgui_impl_opengl3_loader.h">
-      <Filter>sources</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.txt" />
-    <None Include="..\..\misc\debuggers\imgui.natvis">
-      <Filter>imgui</Filter>
-    </None>
-    <None Include="..\..\misc\debuggers\imgui.natstepfilter">
-      <Filter>imgui</Filter>
-    </None>
+    <ClCompile Include="anim-sprite.cpp" />
+    <ClCompile Include="app.cpp" />
+    <ClCompile Include="audio-capture.cpp" />
+    <ClCompile Include="bouncer.cpp" />
+    <ClCompile Include="file-open.cpp" />
+    <ClCompile Include="imgui-impl-opengl3.cpp" />
+    <ClCompile Include="imgui-impl-sdl.cpp" />
+    <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mouth.cpp" />
+    <ClCompile Include="node.cpp" />
+    <ClCompile Include="prj-dialog.cpp" />
+    <ClCompile Include="save-factory.cpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="stb-image.cpp" />
+    <ClCompile Include="wav-2-visemes.cpp" />
+    <ClCompile Include="stb\stb_vorbis.c" />
+    <ClCompile Include="3rd-party\imgui\imgui.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_demo.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_tables.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="3rd-party\ser\proto.cpp" />
+    <ClCompile Include="3rd-party\ser\ser.cpp" />
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ Wav2Visemes::Wav2Visemes()
       ps_config_set_str(
         ret,
         "allphone",
-        "/usr/local/share/pocketsphinx/model/en-us/en-us-phone.lm.bin"); // TODO-Mika make it
+        "pocketsphinx-model/en-us/en-us-phone.lm.bin"); // TODO-Mika make it
                                                                          // configurable
       ps_config_set_bool(ret, "backtrace", TRUE);
       ps_config_set_float(ret, "beam", 1e-20);

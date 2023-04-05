@@ -42,7 +42,7 @@ auto PrjDialog::draw() -> bool
             selectedDir = "";
           };
         else
-          selectedDir = dir.filename();
+          selectedDir = dir.filename().string();
       }
     }
     if (postponedAction)
