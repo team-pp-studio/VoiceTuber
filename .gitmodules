@@ -1,6 +1,21 @@
 [submodule "stb"]
 	path = stb
 	url = https://github.com/nothings/stb.git
-[submodule "pocketsphinx"]
-	path = pocketsphinx
+[submodule "3rd-party/pocketsphinx"]
+	path = 3rd-party/pocketsphinx
 	url = https://github.com/cmusphinx/pocketsphinx.git
+[submodule "3rd-party/glm"]
+	path = 3rd-party/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "3rd-party/imgui"]
+	path = 3rd-party/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "3rd-party/log"]
+	path = 3rd-party/log
+	url = https://github.com/mika314/log.git
+[submodule "3rd-party/sdlpp"]
+	path = 3rd-party/sdlpp
+	url = https://github.com/mika314/sdlpp.git
+[submodule "3rd-party/ser"]
+	path = 3rd-party/ser
+	url = https://github.com/mika314/ser.git
