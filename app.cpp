@@ -71,14 +71,16 @@ auto App::renderUi() -> void
       if (!std::filesystem::exists(addMouthDialog.getSelectedFile().filename()))
         std::filesystem::copy(addMouthDialog.getSelectedFile(),
                               addMouthDialog.getSelectedFile().filename());
-      root->addChild(std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile().filename().string()));
+      root->addChild(
+        std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile().filename().string()));
     }
     if (addSpriteDialog.draw())
     {
       if (!std::filesystem::exists(addSpriteDialog.getSelectedFile().filename()))
         std::filesystem::copy(addSpriteDialog.getSelectedFile(),
                               addSpriteDialog.getSelectedFile().filename());
-      root->addChild(std::make_unique<AnimSprite>(addSpriteDialog.getSelectedFile().filename().string()));
+      root->addChild(
+        std::make_unique<AnimSprite>(addSpriteDialog.getSelectedFile().filename().string()));
     }
 
     ImGui::BeginDisabled(!selected);
