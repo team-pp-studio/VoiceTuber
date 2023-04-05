@@ -95,6 +95,7 @@ auto Sprite::save(OStrm &strm) const -> void
   ::ser(strm, *this);
   Node::save(strm);
 }
+
 auto Sprite::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
@@ -115,9 +116,9 @@ auto Sprite::isTransparent(glm::vec2 v) const -> bool
 {
   if (ch == 3)
     return false;
-  const auto x = static_cast<int>(v.x);
-  const auto y = static_cast<int>(v.y);
-  if (v.x < 0 || v.x >= w_ || v.y < 0 || v.y >= h_)
+  const auto x = static_cast<int>(v.x + (frame % numFrames) % cols * w());
+  const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * w());
+  if (x < 0 || x >= w_ || y < 0 || y >= h_)
     return true;
   return imageData[(x + y * w_) * ch + 3] < 127;
 }
