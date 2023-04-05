@@ -53,7 +53,7 @@ auto App::renderUi() -> void
     return;
   }
   {
-    ImGui::Begin("Z-order");
+    ImGui::Begin("Outliner");
     std::function<void(void)> postponedAction = nullptr;
     if (ImGui::Button("Save"))
       savePrj();
@@ -173,6 +173,25 @@ auto App::processIo() -> void
         Node::del(*selected);
         selected = nullptr;
       }
+      if (ImGui::IsKeyPressed(ImGuiKey_D))
+      {
+        if (selected)
+        {
+          OStrm os;
+          selected->saveAll(os);
+          const auto s = os.str();
+          IStrm is(s.data(), s.data() + s.size());
+          std::string className;
+          std::string name;
+          ::deser(is, className);
+          ::deser(is, name);
+          LOG(className, name);
+          auto n = saveFactory.ctor(className, name);
+          n->loadAll(saveFactory, is);
+          selected = n.get();
+          root->addChild(std::move(n));
+        }
+      }
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))
         cancel();
     }
@@ -249,6 +268,8 @@ auto App::renderTree(Node &v) -> void
   }
 }
 
+static const auto ver = uint32_t{1};
+
 auto App::loadPrj() -> void
 {
   std::ifstream st("prj.tpp", std::ofstream::binary);
@@ -265,6 +286,16 @@ auto App::loadPrj() -> void
   auto buf = buffer.str();
 
   IStrm strm(buf.data(), buf.data() + buf.size());
+
+  uint32_t v;
+  ::deser(strm, v);
+  if (v != ver)
+  {
+    root = std::make_unique<Bouncer>(audioCapture);
+    LOG("Version mismatch expected:", ver, ", received:", v);
+    return;
+  }
+
   std::string className;
   std::string name;
   ::deser(strm, className);
@@ -279,6 +310,7 @@ auto App::savePrj() -> void
   if (!root)
     return;
   OStrm strm;
+  ::ser(strm, ver);
   root->saveAll(strm);
   std::ofstream st("prj.tpp", std::ofstream::binary);
   st.write(strm.str().data(), strm.str().size());
