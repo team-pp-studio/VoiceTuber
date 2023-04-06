@@ -23,9 +23,9 @@ App::App()
   audioCapture.reg(wav2Visemes);
   saveFactory.reg<Bouncer>([this](std::string) { return std::make_unique<Bouncer>(audioCapture); });
   saveFactory.reg<Mouth>(
-    [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, texLib, std::move(name)); });
   saveFactory.reg<AnimSprite>(
-    [](std::string name) { return std::make_unique<AnimSprite>(std::move(name)); });
+    [this](std::string name) { return std::make_unique<AnimSprite>(texLib, std::move(name)); });
 }
 
 auto App::render() -> void
@@ -71,16 +71,20 @@ auto App::renderUi() -> void
       if (!std::filesystem::exists(addMouthDialog.getSelectedFile().filename()))
         std::filesystem::copy(addMouthDialog.getSelectedFile(),
                               addMouthDialog.getSelectedFile().filename());
-      root->addChild(
-        std::make_unique<Mouth>(wav2Visemes, addMouthDialog.getSelectedFile().filename().string()));
+      auto mouth = std::make_unique<Mouth>(
+        wav2Visemes, texLib, addMouthDialog.getSelectedFile().filename().string());
+      selected = mouth.get();
+      root->addChild(std::move(mouth));
     }
     if (addSpriteDialog.draw())
     {
       if (!std::filesystem::exists(addSpriteDialog.getSelectedFile().filename()))
         std::filesystem::copy(addSpriteDialog.getSelectedFile(),
                               addSpriteDialog.getSelectedFile().filename());
-      root->addChild(
-        std::make_unique<AnimSprite>(addSpriteDialog.getSelectedFile().filename().string()));
+      auto sprite =
+        std::make_unique<AnimSprite>(texLib, addSpriteDialog.getSelectedFile().filename().string());
+      selected = sprite.get();
+      root->addChild(std::move(sprite));
     }
 
     ImGui::BeginDisabled(!selected);
@@ -141,7 +145,7 @@ auto App::processIo() -> void
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
       cancel();
   }
-  if (!io.WantCaptureKeyboard)
+  if (!io.WantCaptureKeyboard || !io.WantCaptureMouse)
   {
     if (selected)
     {
@@ -188,8 +192,9 @@ auto App::processIo() -> void
           LOG(className, name);
           auto n = saveFactory.ctor(className, name);
           n->loadAll(saveFactory, is);
+          auto parent = selected->parent();
           selected = n.get();
-          root->addChild(std::move(n));
+          parent->addChild(std::move(n));
         }
       }
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))

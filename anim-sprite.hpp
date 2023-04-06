@@ -16,7 +16,7 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  AnimSprite(const std::string &fileName);
+  AnimSprite(TexLib &, const std::string &fileName);
   static constexpr const char *className = "AnimSprite";
 
 private:

@@ -2,8 +2,8 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-AnimSprite::AnimSprite(const std::string &fileName)
-  : Sprite(fileName), startTime(std::chrono::high_resolution_clock::now())
+AnimSprite::AnimSprite(TexLib &texLib, const std::string &fileName)
+  : Sprite(texLib, fileName), startTime(std::chrono::high_resolution_clock::now())
 {
 }
 
@@ -29,7 +29,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto pivot4 = glm::vec4{pivot.x, pivot.y, 0.f, 1.f};
   const auto projPivot = projMat * modelViewMat * pivot4;
   const auto v = (glm::vec2{projPivot.x, projPivot.y} - lastProjPivot) / dt;
-  const auto a = (v - lastProjPivotV) / dt;
+  const auto gForce = glm::vec2{0.f, .01f};
+  const auto a = (v - lastProjPivotV + gForce) / dt;
   lastProjPivot = glm::vec2{projPivot.x, projPivot.y};
   lastProjPivotV = v;
 
@@ -122,13 +123,8 @@ auto AnimSprite::renderUi() -> void
   }
   ImGui::PopItemWidth();
   ImGui::PopID();
-  ImGui::DragFloat("Force",
-                   &force,
-                   .1f,
-                   0,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
+  ImGui::DragFloat(
+    "Force", &force, .1f, 0, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
   ImGui::DragFloat("Damping",
                    &damping,
                    .1f,

@@ -1,5 +1,6 @@
 #pragma once
 #include "node.hpp"
+#include "tex-lib.hpp"
 #include "wav-2-visemes.hpp"
 #include <SDL_opengl.h>
 #include <sdlpp/sdlpp.hpp>
@@ -17,9 +18,7 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  Sprite(const std::string &path);
-  ~Sprite() override;
-  Sprite(const Sprite &) = delete;
+  Sprite(TexLib &, const std::string &path);
   auto w() const -> float final;
   auto h() const -> float final;
   auto isTransparent(glm::vec2) const -> bool final;
@@ -36,9 +35,5 @@ protected:
   int numFrames = 1;
 
 private:
-  int ch;
-  int w_;
-  int h_;
-  unsigned char *imageData;
-  GLuint texture;
+  std::reference_wrapper<const Texture> texture;
 };

@@ -1,51 +1,23 @@
 #include "sprite.hpp"
-#include "stb/stb_image.h"
 #include <cassert>
 #include <cstdint>
 #include <filesystem>
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(const std::string &path)
+Sprite::Sprite(TexLib &texLib, const std::string &path)
   : Node([&path]() {
       std::filesystem::path fsPath(path);
       return fsPath.filename().string();
     }()),
-    texture([&]() {
-      stbi_set_flip_vertically_on_load(1);
-      imageData = stbi_load(name.c_str(), &w_, &h_, &ch, STBI_rgb_alpha);
-      if (imageData == nullptr)
-      {
-        std::ostringstream ss;
-        ss << "Error loading image: " << name;
-        throw std::runtime_error(ss.str());
-      }
-      LOG("Number of channels:", ch);
-      assert((ch == 4 || ch == 3) && "The number of channels should be 3 or 4.");
-
-      GLuint ret;
-      glGenTextures(1, &ret);
-      glGenTextures(1, &texture);
-      glBindTexture(GL_TEXTURE_2D, texture);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-      if (ch == 4)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-      else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-      return texture;
-    }())
+    texture(texLib.queryTex(path))
 {
 }
 
 auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
 {
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glBindTexture(GL_TEXTURE_2D, texture.get().texture());
   glBegin(GL_QUADS);
   const auto fCols = static_cast<float>(cols);
   const auto fRows = static_cast<float>(rows);
@@ -64,12 +36,6 @@ auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
   Node::render(dt, hovered, selected);
-}
-
-Sprite::~Sprite()
-{
-  glDeleteTextures(1, &texture);
-  stbi_image_free(imageData);
 }
 
 auto Sprite::renderUi() -> void
@@ -104,21 +70,21 @@ auto Sprite::load(IStrm &strm) -> void
 
 auto Sprite::w() const -> float
 {
-  return 1.f * w_ / cols;
+  return 1.f * texture.get().w() / cols;
 }
 
 auto Sprite::h() const -> float
 {
-  return 1.f * h_ / rows;
+  return 1.f * texture.get().h() / rows;
 }
 
 auto Sprite::isTransparent(glm::vec2 v) const -> bool
 {
-  if (ch == 3)
+  if (texture.get().ch() == 3)
     return false;
   const auto x = static_cast<int>(v.x + (frame % numFrames) % cols * w());
   const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * w());
-  if (x < 0 || x >= w_ || y < 0 || y >= h_)
+  if (x < 0 || x >= texture.get().w() || y < 0 || y >= texture.get().h())
     return true;
-  return imageData[(x + y * w_) * ch + 3] < 127;
+  return texture.get().imageData()[(x + y * texture.get().w()) * texture.get().ch() + 3] < 127;
 }
