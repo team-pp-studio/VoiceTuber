@@ -21,12 +21,13 @@ namespace Internal
 class Node
 {
 public:
-#define SER_PROP_LIST \
-  SER_PROP(loc);      \
-  SER_PROP(scale);    \
-  SER_PROP(pivot);    \
-  SER_PROP(rot);      \
-  SER_PROP(uniformScaling);
+#define SER_PROP_LIST       \
+  SER_PROP(loc);            \
+  SER_PROP(scale);          \
+  SER_PROP(pivot);          \
+  SER_PROP(rot);            \
+  SER_PROP(uniformScaling); \
+  SER_PROP(zOrder);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
@@ -70,6 +71,9 @@ protected:
 
 private:
   auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
+  auto collectUnderNodes(const glm::mat4 &projMat,
+                         glm::vec2 v,
+                         std::vector<std::reference_wrapper<Node>> &) -> void;
 
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
@@ -81,6 +85,11 @@ protected:
 private:
   float rot = 0.f;
   bool uniformScaling = true;
+
+protected:
+  int zOrder = 0;
+
+private:
   Nodes nodes;
 
 protected:

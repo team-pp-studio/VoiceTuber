@@ -129,6 +129,7 @@ auto Node::renderUi() -> void
   }
   ImGui::PopItemWidth();
   ImGui::PopID();
+  ImGui::InputInt("ZOrder", &zOrder);
 
   ImGui::PushID("Pivot");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
@@ -234,17 +235,29 @@ auto Node::screenToLocal(const glm::mat4 &projMat, glm::vec2 screen) const -> gl
 
 auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
+  std::vector<std::reference_wrapper<Node>> underNodes;
+  collectUnderNodes(projMat, v, underNodes);
+
+  std::stable_sort(underNodes.begin(), underNodes.end(), [](const auto a, const auto b) {
+    return a.get().zOrder > b.get().zOrder;
+  });
+
+  if (!underNodes.empty())
+    return &underNodes.front().get();
+  return nullptr;
+}
+
+auto Node::collectUnderNodes(const glm::mat4 &projMat,
+                             glm::vec2 v,
+                             std::vector<std::reference_wrapper<Node>> &underNodes) -> void
+{
   for (auto it = nodes.rbegin(); it != nodes.rend(); ++it)
-  {
-    auto u = (*it)->nodeUnder(projMat, v);
-    if (u)
-      return u;
-  }
+    (*it)->collectUnderNodes(projMat, v, underNodes);
+
   auto localPos = screenToLocal(projMat, v);
-  if (localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h() ||
-      isTransparent(localPos))
-    return nullptr;
-  return this;
+  if (!(localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h() ||
+        isTransparent(localPos)))
+    underNodes.push_back(*this);
 }
 
 auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
@@ -256,20 +269,20 @@ auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
   else if (hovered == this)
     glColor4f(1.f, 1.f, 1.0f, .2f);
   glBegin(GL_LINE_STRIP);
-  glVertex2f(.0f, .0f);
-  glVertex2f(w(), .0f);
-  glVertex2f(w(), h());
-  glVertex2f(.0f, h());
-  glVertex2f(.0f, .0f);
+  glVertex3f(.0f, .0f, zOrder / 1024.f);
+  glVertex3f(w(), .0f, zOrder / 1024.f);
+  glVertex3f(w(), h(), zOrder / 1024.f);
+  glVertex3f(.0f, h(), zOrder / 1024.f);
+  glVertex3f(.0f, .0f, zOrder / 1024.f);
   glEnd();
   const auto d = std::max(w(), h()) * .05f;
   if (selected == this)
   {
     glBegin(GL_LINES);
-    glVertex2f(pivot.x - d, pivot.y - d);
-    glVertex2f(pivot.x + d, pivot.y + d);
-    glVertex2f(pivot.x - d, pivot.y + d);
-    glVertex2f(pivot.x + d, pivot.y - d);
+    glVertex3f(pivot.x - d, pivot.y - d, zOrder / 1024.f);
+    glVertex3f(pivot.x + d, pivot.y + d, zOrder / 1024.f);
+    glVertex3f(pivot.x - d, pivot.y + d, zOrder / 1024.f);
+    glVertex3f(pivot.x + d, pivot.y - d, zOrder / 1024.f);
     glEnd();
   }
 }

@@ -25,13 +25,13 @@ auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto j = (fRows - 1.f - frame / cols) / fRows;
   glColor4f(1.f, 1.f, 1.f, 1.f);
   glTexCoord2f(.0f + i, .0f + j);
-  glVertex2f(.0f, .0f);
+  glVertex3f(.0f, .0f, zOrder / 1024.f);
   glTexCoord2f(1.f / fCols + i, .0f + j);
-  glVertex2f(w(), .0f);
+  glVertex3f(w(), .0f, zOrder / 1024.f);
   glTexCoord2f(1.f / fCols + i, 1.f / fRows + j);
-  glVertex2f(w(), h());
+  glVertex3f(w(), h(), zOrder / 1024.f);
   glTexCoord2f(.0f + i, 1.f / fRows + j);
-  glVertex2f(.0f, h());
+  glVertex3f(.0f, h(), zOrder / 1024.f);
   glEnd();
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);

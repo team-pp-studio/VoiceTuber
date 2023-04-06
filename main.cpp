@@ -68,6 +68,7 @@ int main(int, char **)
     sdl::Window{"VoiceTuber", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags};
   SDL_GLContext gl_context = SDL_GL_CreateContext(window.get());
   SDL_GL_MakeCurrent(window.get(), gl_context);
+
   SDL_GL_SetSwapInterval(1); // Enable vsync
 
   // Setup Dear ImGui context
@@ -165,7 +166,11 @@ int main(int, char **)
 
     ImGui::Render();
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f); // Change the reference value (0.1f) to your desired threshold
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     const auto w = (int)io.DisplaySize.x;
     const auto h = (int)io.DisplaySize.y;

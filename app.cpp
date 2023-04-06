@@ -73,8 +73,12 @@ auto App::renderUi() -> void
                               addMouthDialog.getSelectedFile().filename());
       auto mouth = std::make_unique<Mouth>(
         wav2Visemes, texLib, addMouthDialog.getSelectedFile().filename().string());
+      auto oldSelected = selected;
       selected = mouth.get();
-      root->addChild(std::move(mouth));
+      if (!oldSelected)
+        root->addChild(std::move(mouth));
+      else
+        oldSelected->addChild(std::move(mouth));
     }
     if (addSpriteDialog.draw())
     {
@@ -83,8 +87,12 @@ auto App::renderUi() -> void
                               addSpriteDialog.getSelectedFile().filename());
       auto sprite =
         std::make_unique<AnimSprite>(texLib, addSpriteDialog.getSelectedFile().filename().string());
+      auto oldSelected = selected;
       selected = sprite.get();
-      root->addChild(std::move(sprite));
+      if (!oldSelected)
+        root->addChild(std::move(sprite));
+      else
+        oldSelected->addChild(std::move(sprite));
     }
 
     ImGui::BeginDisabled(!selected);
@@ -273,7 +281,7 @@ auto App::renderTree(Node &v) -> void
   }
 }
 
-static const auto ver = uint32_t{1};
+static const auto ver = uint32_t{2};
 
 auto App::loadPrj() -> void
 {

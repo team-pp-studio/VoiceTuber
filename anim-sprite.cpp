@@ -53,8 +53,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
     return;
   glColor4f(1.f, .7f, .0f, 1.f);
   glBegin(GL_LINES);
-  glVertex2f(pivot.x, pivot.y);
-  glVertex2f(end.x, end.y);
+  glVertex3f(pivot.x, pivot.y, zOrder / 1024.f);
+  glVertex3f(end.x, end.y, zOrder / 1024.f);
   glEnd();
 }
 
