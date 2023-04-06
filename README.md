@@ -45,17 +45,14 @@ need for additional hardware such as webcams or tracking devices.
 -   Library of pre-made scene transitions and effects
 -   Customizable transitions for a professional and polished presentation
 
-### 2.6. Mouse Tracking for Eye Movements
-
+### 2.6. Mouse Tracking for Eye and Body Movements
 -   Avatar's eyes follow the user's cursor for a more lifelike and responsive experience
+-   Post-processing pass and body morphing based on mouse position, creating an effect where the body of the model follows the mouse
 
 ### 2.7. Audio Analysis for Animation Triggers
 
 -   Audio amplitude analysis to use different sets of mouth shapes based on the loudness or quietness of the VTuber's speech
 -   Pitch analysis for detecting excitement or screaming
-
-### 2.8. Post-processing pass which would morph the whole image based on the mouse position
-
 
 3\. Open-Source and Lightweight Approach
 ----------------------------------------
