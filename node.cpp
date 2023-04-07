@@ -129,7 +129,12 @@ auto Node::renderUi() -> void
   }
   ImGui::PopItemWidth();
   ImGui::PopID();
+
+  ImGui::PushID("ZOrder");
+  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
   ImGui::InputInt("ZOrder", &zOrder);
+  ImGui::PopItemWidth();
+  ImGui::PopID();
 
   ImGui::PushID("Pivot");
   ImGui::PushItemWidth(ImGui::GetFontSize() * 8);

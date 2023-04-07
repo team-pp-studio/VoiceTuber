@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
+#include "eye.hpp"
 #include "mouth.hpp"
 #include <fstream>
 #include <log/log.hpp>
@@ -15,6 +16,7 @@ static auto getProjMat() -> glm::mat4
 App::App()
   : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     addMouthDialog("Add Mouth Dialog"),
+    addEyeDialog("Add Eye Dialog"),
     addSpriteDialog("Add Sprite Dialog"),
     lastUpdate(std::chrono::high_resolution_clock::now())
 {
@@ -26,6 +28,8 @@ App::App()
     [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, texLib, std::move(name)); });
   saveFactory.reg<AnimSprite>(
     [this](std::string name) { return std::make_unique<AnimSprite>(texLib, std::move(name)); });
+  saveFactory.reg<Eye>(
+    [this](std::string name) { return std::make_unique<Eye>(*this, texLib, std::move(name)); });
 }
 
 auto App::render() -> void
@@ -61,6 +65,9 @@ auto App::renderUi() -> void
     if (ImGui::Button("Add Mouth..."))
       postponedAction = [&]() { ImGui::OpenPopup(addMouthDialog.dialogName); };
     ImGui::SameLine();
+    if (ImGui::Button("Add Eye..."))
+      postponedAction = [&]() { ImGui::OpenPopup(addEyeDialog.dialogName); };
+    ImGui::SameLine();
     if (ImGui::Button("Add Sprite..."))
       postponedAction = [&]() { ImGui::OpenPopup(addSpriteDialog.dialogName); };
     if (postponedAction)
@@ -79,6 +86,19 @@ auto App::renderUi() -> void
         root->addChild(std::move(mouth));
       else
         oldSelected->addChild(std::move(mouth));
+    }
+    if (addEyeDialog.draw())
+    {
+      if (!std::filesystem::exists(addEyeDialog.getSelectedFile().filename()))
+        std::filesystem::copy(addEyeDialog.getSelectedFile(), addEyeDialog.getSelectedFile().filename());
+      auto eye =
+        std::make_unique<Eye>(*this, texLib, addEyeDialog.getSelectedFile().filename().string());
+      auto oldSelected = selected;
+      selected = eye.get();
+      if (!oldSelected)
+        root->addChild(std::move(eye));
+      else
+        oldSelected->addChild(std::move(eye));
     }
     if (addSpriteDialog.draw())
     {
@@ -247,6 +267,8 @@ auto App::tick() -> void
   case EditMode::scale: selected->scaleUpdate(projMat, mousePos); break;
   case EditMode::rotate: selected->rotUpdate(projMat, mousePos); break;
   }
+  for (auto mouseSink : mouseSinks)
+    mouseSink.get().ingest(projMat, mousePos);
 }
 
 auto App::renderTree(Node &v) -> void
@@ -327,4 +349,17 @@ auto App::savePrj() -> void
   root->saveAll(strm);
   std::ofstream st("prj.tpp", std::ofstream::binary);
   st.write(strm.str().data(), strm.str().size());
+}
+
+auto App::reg(MouseSink &v) -> void
+{
+  mouseSinks.push_back(v);
+}
+
+auto App::unreg(MouseSink &v) -> void
+{
+  mouseSinks.erase(std::remove_if(std::begin(mouseSinks),
+                                  std::end(mouseSinks),
+                                  [&](const auto &x) { return &x.get() == &v; }),
+                   std::end(mouseSinks));
 }

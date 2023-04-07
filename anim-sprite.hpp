@@ -2,7 +2,7 @@
 #include "sprite.hpp"
 #include <chrono>
 
-class AnimSprite final : public Sprite
+class AnimSprite : public Sprite
 {
 public:
 #define SER_PROP_LIST \
@@ -31,8 +31,8 @@ private:
   glm::vec2 lastProjPivot = {0.f, 0.f};
   glm::vec2 lastProjPivotV = {0.f, 0.f};
 
-  auto load(IStrm &) -> void final;
-  auto render(float dt, Node *hovered, Node *selected) -> void final;
-  auto renderUi() -> void final;
-  auto save(OStrm &) const -> void final;
+  auto load(IStrm &) -> void override;
+  auto render(float dt, Node *hovered, Node *selected) -> void override;
+  auto renderUi() -> void override;
+  auto save(OStrm &) const -> void override;
 };

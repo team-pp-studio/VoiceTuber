@@ -63,14 +63,14 @@ public:
   virtual auto w() const -> float;
 
 protected:
+  auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
+  virtual auto load(IStrm &) -> void;
   virtual auto render(float dt, Node *hovered, Node *selected) -> void;
   virtual auto save(OStrm &) const -> void;
-  virtual auto load(IStrm &) -> void;
 
   std::string name;
 
 private:
-  auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
   auto collectUnderNodes(const glm::mat4 &projMat,
                          glm::vec2 v,
                          std::vector<std::reference_wrapper<Node>> &) -> void;

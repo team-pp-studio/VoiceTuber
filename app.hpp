@@ -1,6 +1,7 @@
 #pragma once
 #include "audio-capture.hpp"
 #include "file-open.hpp"
+#include "mouse-sink.hpp"
 #include "prj-dialog.hpp"
 #include "save-factory.hpp"
 #include "tex-lib.hpp"
@@ -19,6 +20,8 @@ public:
   auto processIo() -> void;
   auto tick() -> void;
   auto savePrj() -> void;
+  auto reg(MouseSink &) -> void;
+  auto unreg(MouseSink &) -> void;
 
 private:
   SaveFactory saveFactory;
@@ -31,9 +34,11 @@ private:
   enum class EditMode { select, translate, scale, rotate };
   EditMode editMode = EditMode::select;
   FileOpen addMouthDialog;
+  FileOpen addEyeDialog;
   FileOpen addSpriteDialog;
   PrjDialog prjDialog;
   decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
+  std::vector<std::reference_wrapper<MouseSink>> mouseSinks;
 
   auto cancel() -> void;
   auto loadPrj() -> void;
