@@ -60,9 +60,9 @@ and equipment.
 
 ### 2.8. Voice Anonymization
 
-- Speech-to-text (STT) conversion to transcribe the streamer's voice into text
-- Text-to-speech (TTS) system to vocalize the transcribed text with a synthetic voice, concealing the streamer's real voice
-Various synthetic voice options for customization and personalization
+-   Speech-to-text (STT) conversion to transcribe the streamer's voice into text
+-   Text-to-speech (TTS) system to vocalize the transcribed text with a synthetic voice, concealing the streamer's real voice
+-   Various synthetic voice options for customization and personalization
 
 By incorporating the voice anonymization feature, you can cater to a
 wider audience of streamers, including those who are concerned about
@@ -84,9 +84,34 @@ appealing to a diverse range of users.
 
 -   Integrated designer within the application
 -   Blender-style editing for 2D avatar customization
--   Addition of gadgets and a toolbar for more traditional editing options
+-   Addition of gadgets and a toolbar for more traditional editing
+    options
 
-5\. Conclusion
+5\. Monetization Strategy
+-------------------------
+
+### 5.1. Donations
+
+-   Open-source software with a donation button on GitHub for
+    financial support from users who appreciate the application
+
+### 5.2. Marketplace Platform
+
+-   Create a marketplace platform where users can upload, sell, and
+    purchase custom models, accessories, and other assets for the
+    PNGTuber software
+-   Generate revenue through commission fees on sales made through the
+    platform
+-   Facilitate a thriving community of content creators and artists,
+    contributing to the overall success and popularity of the software
+
+By integrating a marketplace platform, you'll not only be providing a
+means of monetization, but also encouraging a community of creators to
+contribute to and benefit from the software. This approach allows you
+to support the development and maintenance of the software while still
+keeping it open-source and accessible to users.
+
+6\. Conclusion
 --------------
 
 This design document provides an overview of the key features and
