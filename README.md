@@ -6,11 +6,15 @@ PNGTuber Software Design Document
 1\. Introduction
 ----------------
 
-This design document outlines the features and functionality of a
-lightweight PNGTuber software application. The software aims to
-provide an engaging and user-friendly experience for content creators,
-enabling them to create dynamic and interactive content without the
-need for additional hardware such as webcams or tracking devices.
+This design document outlines the features and functionality of
+VoiceTuber, a lightweight software application designed for
+PNGTubers. VoiceTuber streamlines the content creation process by
+emphasizing the use of only a microphone (and sometimes even no
+microphone), eliminating the need for additional hardware such as
+webcams or tracking devices. The software aims to provide an engaging
+and user-friendly experience for PNGTubers, making it easy for
+creators to produce dynamic and interactive content with minimal setup
+and equipment.
 
 2\. Features and Functionality
 ------------------------------
@@ -53,6 +57,18 @@ need for additional hardware such as webcams or tracking devices.
 
 -   Audio amplitude analysis to use different sets of mouth shapes based on the loudness or quietness of the VTuber's speech
 -   Pitch analysis for detecting excitement or screaming
+
+### 2.8. Voice Anonymization
+
+- Speech-to-text (STT) conversion to transcribe the streamer's voice into text
+- Text-to-speech (TTS) system to vocalize the transcribed text with a synthetic voice, concealing the streamer's real voice
+Various synthetic voice options for customization and personalization
+
+By incorporating the voice anonymization feature, you can cater to a
+wider audience of streamers, including those who are concerned about
+privacy or prefer not to reveal their actual voice. This added
+functionality can make your PNGTuber software even more versatile and
+appealing to a diverse range of users.
 
 3\. Open-Source and Lightweight Approach
 ----------------------------------------
