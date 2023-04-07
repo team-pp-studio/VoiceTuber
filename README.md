@@ -1,5 +1,5 @@
-PNGTuber Software Design Document
-=================================
+VoiceTuber Software Design Document
+===================================
 
 # You are on the `main` branch, which means the save format is unstable, so make small experimental projects; any update may break your save.
 
