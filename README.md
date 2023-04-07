@@ -122,7 +122,8 @@ competitors and provide a versatile solution for content creators. As
 development progresses, user feedback and market trends should be
 considered to further refine and improve the application.
 
-## Dependencies
+7\. Dependencies
+----------------
 
 * **Dear ImGui** - A lightweight and efficient Immediate Mode Graphical User Interface library for creating simple and functional graphical interfaces.
 * **GLM** - A C++ mathematics library for graphics software based on the OpenGL Shading Language (GLSL) specification, providing matrix operations and other essential functionality.
@@ -132,3 +133,57 @@ considered to further refine and improve the application.
 * **sdlpp** - A compact C++ wrapper around SDL2, streamlining its integration and usage in C++ applications.
 * **ser** - serialization/deserialization library
 * **stb** - A collection of single-file public domain libraries, specifically used in this project for decoding and encoding images in various formats.
+
+8\. Build Instructions
+----------------------
+
+### Windows
+* Clone the source code using GitHub Desktop
+   * You can install Github Desktop from: <https://desktop.github.com/>
+* Build Pocketsphinx
+   * Install CMake from: <https://cmake.org/download/>
+   * In the cloned project, locate the Pocketsphinx copy at `VoiceTuber/3rd-party/pocketsphinx`. Run the following commands in `cmd`:
+```
+cmake -S . -B build
+cmake --build build
+cmake --build build --target install -DCMAKE_INSTALL_PREFIX=bin
+```
+* Build the rest of the project
+    * Open `VoiceTuber.sln` in Visual Studio 2022
+    * Use the menu option `Build/Build Solution`
+### Linux
+* Install dependencies
+```
+sudo apt-get install -y clang pkg-config libsdl2-dev git cmake
+```
+* Clone the app
+```
+git clone --recurse-submodules https://github.com/team-pp-studio/VoiceTuber.git
+```
+* Build Pocketsphinx
+```
+cd VoiceTuber/3rd-party/pocketsphinx
+cmake -S . -B build
+cmake --build build
+cmake --build build --target install
+cd ../../..
+```
+Last `cmake` command you may need to run with `sudo`.
+
+* Clone and compile the build tool `coddle`
+```
+git clone https://github.com/coddle-cpp/coddle.git && cd coddle && ./build.sh
+```
+* Install `coddle`
+```
+sudo ./deploy.sh
+cd ..
+```
+* Build VoiceTuber
+```
+cd VoiceTuber && coddle
+```
+* Run the application
+```
+./VoiceTuber
+```
