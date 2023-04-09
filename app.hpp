@@ -30,7 +30,6 @@ private:
   AudioCapture audioCapture;
   // Twitch twitch;
   TexLib texLib;
-  std::unique_ptr<Node> root;
   Node *hovered = nullptr;
   Node *selected = nullptr;
   enum class EditMode { select, translate, scale, rotate };
@@ -41,6 +40,7 @@ private:
   PrjDialog prjDialog;
   decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
   std::vector<std::reference_wrapper<MouseSink>> mouseSinks;
+  std::unique_ptr<Node> root;
 
   auto cancel() -> void;
   auto loadPrj() -> void;

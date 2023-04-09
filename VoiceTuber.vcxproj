@@ -105,13 +105,13 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -143,7 +143,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;..\..\backends;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -151,8 +151,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
@@ -203,6 +203,7 @@
     <ClInclude Include="audio-capture.hpp" />
     <ClInclude Include="audio-sink.hpp" />
     <ClInclude Include="bouncer.hpp" />
+    <ClInclude Include="eye.hpp" />
     <ClInclude Include="file-open.hpp" />
     <ClInclude Include="imgui-impl-opengl3-loader.h" />
     <ClInclude Include="imgui-impl-opengl3.h" />
@@ -233,6 +234,8 @@
     <ClInclude Include="stb\stb_tilemap_editor.h" />
     <ClInclude Include="stb\stb_truetype.h" />
     <ClInclude Include="stb\stb_voxel_render.h" />
+    <ClInclude Include="tex-lib.hpp" />
+    <ClInclude Include="texture.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
@@ -250,6 +253,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="audio-capture.cpp" />
     <ClCompile Include="bouncer.cpp" />
+    <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
     <ClCompile Include="imgui-impl-opengl3.cpp" />
     <ClCompile Include="imgui-impl-sdl.cpp" />
@@ -262,6 +266,8 @@
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="stb\stb_vorbis.c" />
+    <ClCompile Include="tex-lib.cpp" />
+    <ClCompile Include="texture.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

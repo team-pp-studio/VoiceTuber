@@ -79,6 +79,9 @@
     <ClInclude Include="3rd-party\ser\proto.hpp" />
     <ClInclude Include="3rd-party\ser\schema.hpp" />
     <ClInclude Include="3rd-party\ser\ser.hpp" />
+    <ClInclude Include="eye.hpp" />
+    <ClInclude Include="tex-lib.hpp" />
+    <ClInclude Include="texture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim-sprite.cpp" />
@@ -105,5 +108,8 @@
     <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp" />
     <ClCompile Include="3rd-party\ser\proto.cpp" />
     <ClCompile Include="3rd-party\ser\ser.cpp" />
+    <ClCompile Include="eye.cpp" />
+    <ClCompile Include="tex-lib.cpp" />
+    <ClCompile Include="texture.cpp" />
   </ItemGroup>
 </Project>
