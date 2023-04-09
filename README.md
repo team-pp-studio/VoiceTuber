@@ -21,48 +21,48 @@ and equipment.
 
 ### 2.1. Core Features
 
--   Viseme detection for lip-syncing
--   Sprite-based animation
--   Rudimentary physics for realistic movement
--   Custom hotkeys for triggering expressions and gestures
--   Wake-word detection using Pocketsphinx
+- [x]  Viseme detection for lip-syncing
+- [x]  Sprite-based animation
+- [x]  Rudimentary physics for realistic movement
+- [ ]  Custom hotkeys for triggering expressions and gestures
+- [ ]  Wake-word detection using Pocketsphinx
 
 ### 2.2. Text-to-Speech Integration
 
--   Integration with Azure TTS for text-to-speech functionality
-    -   Step-by-step guide for users to obtain and set up an API key
--   TTS to voice Twitch chat messages
--   Alternative for VTubers to type instead of talking, using TTS for vocalization
+-  [ ] Integration with Azure TTS for text-to-speech functionality
+    - [ ]  Step-by-step guide for users to obtain and set up an API key
+- [ ]  TTS to voice Twitch chat messages
+- [ ]  Alternative for VTubers to type instead of talking, using TTS for vocalization
 
 ### 2.3. Streaming Platform Integration
 
--   Twitch chat integration for seamless viewer interaction
--   Interactive features using Twitch bits or reward points, such as throwing objects at the model
+- [ ]  Twitch chat integration for seamless viewer interaction
+- [ ]  Interactive features using Twitch bits or reward points, such as throwing objects at the model
 
 ### 2.4. Expression and Gesture Presets
 
--   Library of pre-set expressions and gestures (e.g., surprise, anger, joy)
--   Custom hotkeys and wake words for triggering presets
+- [ ]  Library of pre-set expressions and gestures (e.g., surprise, anger, joy)
+- [ ]  Custom hotkeys and wake words for triggering presets
 
 ### 2.5. Scene Transitions and Effects
 
--   Library of pre-made scene transitions and effects
--   Customizable transitions for a professional and polished presentation
+- [ ]  Library of pre-made scene transitions and effects
+- [ ]  Customizable transitions for a professional and polished presentation
 
 ### 2.6. Mouse Tracking for Eye and Body Movements
--   Avatar's eyes follow the user's cursor for a more lifelike and responsive experience
--   Post-processing pass and body morphing based on mouse position, creating an effect where the body of the model follows the mouse
+- [ ]  Avatar's eyes follow the user's cursor for a more lifelike and responsive experience
+- [ ]  Post-processing pass and body morphing based on mouse position, creating an effect where the body of the model follows the mouse
 
 ### 2.7. Audio Analysis for Animation Triggers
 
--   Audio amplitude analysis to use different sets of mouth shapes based on the loudness or quietness of the VTuber's speech
--   Pitch analysis for detecting excitement or screaming
+- [ ]  Audio amplitude analysis to use different sets of mouth shapes based on the loudness or quietness of the VTuber's speech
+- [ ]  Pitch analysis for detecting excitement or screaming
 
 ### 2.8. Voice Anonymization
 
--   Speech-to-text (STT) conversion to transcribe the streamer's voice into text
--   Text-to-speech (TTS) system to vocalize the transcribed text with a synthetic voice, concealing the streamer's real voice
--   Various synthetic voice options for customization and personalization
+- [ ]  Speech-to-text (STT) conversion to transcribe the streamer's voice into text
+- [ ]  Text-to-speech (TTS) system to vocalize the transcribed text with a synthetic voice, concealing the streamer's real voice
+- [ ]  Various synthetic voice options for customization and personalization
 
 By incorporating the voice anonymization feature, you can cater to a
 wider audience of streamers, including those who are concerned about
@@ -73,18 +73,18 @@ appealing to a diverse range of users.
 3\. Open-Source and Lightweight Approach
 ----------------------------------------
 
--   Released under an MIT license
--   Donation button for financial support through GitHub
--   Focus on maintaining a lightweight application without compromising features
+- [x]  Released under an MIT license
+- [ ]  Donation button for financial support through GitHub
+- [ ]  Focus on maintaining a lightweight application without compromising features
 
 4\. User Interface and Customization
 ------------------------------------
 
 ### 4.1. Avatar Customization
 
--   Integrated designer within the application
--   Blender-style editing for 2D avatar customization
--   Addition of gadgets and a toolbar for more traditional editing
+- [x] Integrated designer within the application
+- [x] Blender-style editing for 2D avatar customization
+- [ ] Addition of gadgets and a toolbar for more traditional editing
     options
 
 5\. Monetization Strategy
@@ -92,17 +92,17 @@ appealing to a diverse range of users.
 
 ### 5.1. Donations
 
--   Open-source software with a donation button on GitHub for
+- [ ] Open-source software with a donation button on GitHub for
     financial support from users who appreciate the application
 
 ### 5.2. Marketplace Platform
 
--   Create a marketplace platform where users can upload, sell, and
+- [ ] Create a marketplace platform where users can upload, sell, and
     purchase custom models, accessories, and other assets for the
     PNGTuber software
--   Generate revenue through commission fees on sales made through the
+- [ ] Generate revenue through commission fees on sales made through the
     platform
--   Facilitate a thriving community of content creators and artists,
+- [ ] Facilitate a thriving community of content creators and artists,
     contributing to the overall success and popularity of the software
 
 By integrating a marketplace platform, you'll not only be providing a
@@ -133,8 +133,24 @@ considered to further refine and improve the application.
 * **sdlpp** - A compact C++ wrapper around SDL2, streamlining its integration and usage in C++ applications.
 * **ser** - serialization/deserialization library
 * **stb** - A collection of single-file public domain libraries, specifically used in this project for decoding and encoding images in various formats.
+* **SDL2_net** - ...
 
-8\. Build Instructions
+8\. TODO
+
+- [x] (bug) App crashes after deleting a mouth and clicking on another
+      mouth.
+- [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
+      to have overshooting
+- [ ] (feature) undo
+- [ ] remember directory in open/save dialog boxes
+- [ ] search for files in the dialog box
+- [ ] add "add" buttons in the add menu
+
+11\. Unorgonized Ideas
+
+- [ ] Puppeteer interface with keyboard and mouse
+
+10\. Build Instructions
 ----------------------
 
 ### Windows
@@ -154,7 +170,7 @@ cmake --build build --target install -DCMAKE_INSTALL_PREFIX=bin
 ### Linux
 * Install dependencies
 ```
-sudo apt-get install -y clang pkg-config libsdl2-dev git cmake
+sudo apt-get install -y clang pkg-config libsdl2-dev libsdl2-net-dev git cmake
 ```
 * Clone the app
 ```
@@ -187,3 +203,4 @@ cd VoiceTuber && coddle
 ```
 ./VoiceTuber
 ```
+

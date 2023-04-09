@@ -16,6 +16,7 @@ auto PrjDialog::draw() -> bool
     for (auto &entry : std::filesystem::directory_iterator(cwd))
       if (entry.is_directory())
         dirs.push_back(entry.path());
+    std::sort(std::begin(dirs), std::end(dirs));
   }
 
   auto ret = false;

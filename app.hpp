@@ -5,6 +5,7 @@
 #include "prj-dialog.hpp"
 #include "save-factory.hpp"
 #include "tex-lib.hpp"
+#include "twitch.hpp"
 #include "wav-2-visemes.hpp"
 #include <functional>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,6 +28,7 @@ private:
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
+  // Twitch twitch;
   TexLib texLib;
   std::unique_ptr<Node> root;
   Node *hovered = nullptr;

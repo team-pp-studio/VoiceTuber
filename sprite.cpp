@@ -83,7 +83,7 @@ auto Sprite::isTransparent(glm::vec2 v) const -> bool
   if (texture.get().ch() == 3)
     return false;
   const auto x = static_cast<int>(v.x + (frame % numFrames) % cols * w());
-  const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * w());
+  const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * h());
   if (x < 0 || x >= texture.get().w() || y < 0 || y >= texture.get().h())
     return true;
   return texture.get().imageData()[(x + y * texture.get().w()) * texture.get().ch() + 3] < 127;

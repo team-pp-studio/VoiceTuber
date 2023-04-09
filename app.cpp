@@ -15,6 +15,15 @@ static auto getProjMat() -> glm::mat4
 
 App::App()
   : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
+    //twitch(
+    //  []() {
+    //    auto f = std::ifstream("/home/mika/prj/twitch_tts/twitch_auth.txt");
+    //    auto key = std::string{};
+    //    std::getline(f, key);
+    //    return key;
+    //  }(),
+    //  "mika314",
+    //  "mika314"),
     addMouthDialog("Add Mouth Dialog"),
     addEyeDialog("Add Eye Dialog"),
     addSpriteDialog("Add Sprite Dialog"),
@@ -154,6 +163,8 @@ auto App::renderUi() -> void
 
 auto App::processIo() -> void
 {
+  if (!root)
+    return;
   // Check if ImGui did not process any user input
   ImGuiIO &io = ImGui::GetIO();
   if (!io.WantCaptureMouse)
@@ -251,6 +262,7 @@ auto App::cancel() -> void
 auto App::tick() -> void
 {
   audioCapture.tick();
+  // twitch.tick();
 
   if (!root)
     return;
@@ -267,8 +279,10 @@ auto App::tick() -> void
   case EditMode::scale: selected->scaleUpdate(projMat, mousePos); break;
   case EditMode::rotate: selected->rotUpdate(projMat, mousePos); break;
   }
+  int x, y;
+  SDL_GetGlobalMouseState(&x, &y);
   for (auto mouseSink : mouseSinks)
-    mouseSink.get().ingest(projMat, mousePos);
+    mouseSink.get().ingest(projMat, glm::vec2{1.f * x, 1.f * y});
 }
 
 auto App::renderTree(Node &v) -> void
