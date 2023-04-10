@@ -136,6 +136,7 @@ considered to further refine and improve the application.
 * **stb** - A collection of single-file public domain libraries, specifically used in this project for decoding and encoding images in various formats.
 
 8\. TODO
+--------
 
 - [x] (bug) App crashes after deleting a mouth and clicking on another
       mouth.
@@ -147,6 +148,7 @@ considered to further refine and improve the application.
 - [ ] add "add" buttons in the add menu
 
 9\. Unorgonized Ideas
+---------------------
 
 - [ ] Puppeteer interface with keyboard and mouse
 - [ ] Puppeteer interfacing with the game controller
