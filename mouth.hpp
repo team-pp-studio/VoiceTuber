@@ -11,7 +11,7 @@ public:
 #undef SER_PROP_LIST
 
   Mouth(class Wav2Visemes &, TexLib &texLib, const std::string &fileName);
-  ~Mouth();
+  ~Mouth() final;
 
   static constexpr const char *className = "Mouth";
 

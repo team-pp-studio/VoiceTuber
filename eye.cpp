@@ -34,7 +34,7 @@ auto Eye::render(float dt, Node *hovered, Node *selected) -> void
     const auto NumSegments = 100;
     for (auto i = 0; i < NumSegments; ++i)
     {
-      const auto theta = 2.0f * std::numbers::pi * i / NumSegments;
+      const auto theta = 2.0f * std::numbers::pi_v<float> * i / NumSegments;
       const auto dx = radius * cosf(theta);
       const auto dy = radius * sinf(theta);
       glVertex3f(pivot.x + dx, pivot.y + dy, zOrder / 1024.f);

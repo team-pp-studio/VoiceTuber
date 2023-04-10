@@ -106,7 +106,7 @@ auto Wav2Visemes::sampleRate() const -> int
 
 auto Wav2Visemes::frameSize() const -> int
 {
-  return ps_endpointer_frame_size(ep);
+  return static_cast<int>(ps_endpointer_frame_size(ep));
 }
 
 auto Wav2Visemes::reg(VisemesSink &v) -> void

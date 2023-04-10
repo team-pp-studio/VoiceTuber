@@ -25,5 +25,5 @@ private:
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
-  auto ingest(const glm::mat4 &projMat, glm::vec2 v) -> void;
+  auto ingest(const glm::mat4 &projMat, glm::vec2 v) -> void final;
 };

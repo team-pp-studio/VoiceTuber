@@ -15,7 +15,7 @@ public:
 
   static constexpr const char *className = "Bouncer";
   Bouncer(class AudioCapture &);
-  ~Bouncer();
+  ~Bouncer() final;
 
 private:
   float strength = 100.f;

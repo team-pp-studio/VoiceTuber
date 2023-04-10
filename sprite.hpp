@@ -35,5 +35,5 @@ protected:
   int numFrames = 1;
 
 private:
-  std::reference_wrapper<const Texture> texture;
+  std::shared_ptr<const Texture> texture;
 };

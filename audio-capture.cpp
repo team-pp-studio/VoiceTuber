@@ -8,7 +8,7 @@ AudioCapture::AudioCapture(int sampleRate, int frameSize)
       ret.freq = sampleRate;
       ret.format = AUDIO_S16SYS;
       ret.channels = 1;
-      ret.samples = frameSize;
+      ret.samples = static_cast<Uint16>(frameSize);
       return ret;
     }()),
     audio(nullptr, 1, &want, &have, 0, [this](Uint8 *stream, int len) {

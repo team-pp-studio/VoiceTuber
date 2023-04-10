@@ -10,7 +10,7 @@ class Wav2Visemes final : public AudioSink
 {
 public:
   Wav2Visemes();
-  ~Wav2Visemes();
+  ~Wav2Visemes() final;
   auto ingest(Wav) -> void final;
   auto sampleRate() const -> int;
   auto frameSize() const -> int;

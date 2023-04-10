@@ -17,7 +17,7 @@ Sprite::Sprite(TexLib &texLib, const std::string &path)
 auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
 {
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture.get().texture());
+  glBindTexture(GL_TEXTURE_2D, texture->texture());
   glBegin(GL_QUADS);
   const auto fCols = static_cast<float>(cols);
   const auto fRows = static_cast<float>(rows);
@@ -70,21 +70,21 @@ auto Sprite::load(IStrm &strm) -> void
 
 auto Sprite::w() const -> float
 {
-  return 1.f * texture.get().w() / cols;
+  return 1.f * texture->w() / cols;
 }
 
 auto Sprite::h() const -> float
 {
-  return 1.f * texture.get().h() / rows;
+  return 1.f * texture->h() / rows;
 }
 
 auto Sprite::isTransparent(glm::vec2 v) const -> bool
 {
-  if (texture.get().ch() == 3)
+  if (texture->ch() == 3)
     return false;
   const auto x = static_cast<int>(v.x + (frame % numFrames) % cols * w());
   const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * h());
-  if (x < 0 || x >= texture.get().w() || y < 0 || y >= texture.get().h())
+  if (x < 0 || x >= texture->w() || y < 0 || y >= texture->h())
     return true;
-  return texture.get().imageData()[(x + y * texture.get().w()) * texture.get().ch() + 3] < 127;
+  return texture->imageData()[(x + y * texture->w()) * texture->ch() + 3] < 127;
 }
