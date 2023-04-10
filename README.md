@@ -146,10 +146,37 @@ considered to further refine and improve the application.
 - [ ] search for files in the dialog box
 - [ ] add "add" buttons in the add menu
 
-11\. Unorgonized Ideas
+9\. Unorgonized Ideas
 
 - [ ] Puppeteer interface with keyboard and mouse
 - [ ] Puppeteer interfacing with the game controller
+
+Channel Point/Bit/Chat Ideas.
+
+Vtuber/chat tts affected
+1. Outfit change/hair style change (Vtuber)
+1.A outfit/change on chat tts
+1.B change vtubers/chat tts color (like a multiple or screen rgb/hex code.
+2. Mouth fall off
+3. Throw/fall objects at vtuber/chat
+4. Part of model grows or shrinks
+
+Minigames
+1. Gacha outfit/asset (secret accessories to unlock via gacha)
+1.A claw machine (Credit idea to ValeofHearts)
+2. Take care of chat tts (tamagotchi)
+3. Chat duel? 
+4. Guess the amount (how much is in the jar)
+5.* FISHING MINIGAME (I have no idea, but fishing minigame)
+6.* COOKING/BAKING MINIGAME (Wichit loves cooking minigames.)
+
+
+extension necessary ideas
+* - items from previous list that may or may not benefit from this
+
+1. Draw the streamer a asset or shirt decal in browser. (will be approved by the streamer before being uploaded.)
+2. Move the vtuber or chat tts anywhere on the screen.
+
 
 10\. Build Instructions
 -----------------------
