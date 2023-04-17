@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
+#include "chat.hpp"
 #include "eye.hpp"
 #include "mouth.hpp"
 #include <fstream>
@@ -15,33 +16,25 @@ static auto getProjMat() -> glm::mat4
 
 App::App()
   : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
-    //twitch(
-    //  []() {
-    //    auto f = std::ifstream("/home/mika/prj/twitch_tts/twitch_auth.txt");
-    //    auto key = std::string{};
-    //    std::getline(f, key);
-    //    return key;
-    //  }(),
-    //  "mika314",
-    //  "mika314"),
     addMouthDialog("Add Mouth Dialog"),
     addEyeDialog("Add Eye Dialog"),
-    addSpriteDialog("Add Sprite Dialog"),
-    lastUpdate(std::chrono::high_resolution_clock::now())
+    addSpriteDialog("Add Sprite Dialog")
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   audioCapture.reg(wav2Visemes);
   saveFactory.reg<Bouncer>([this](std::string) { return std::make_unique<Bouncer>(audioCapture); });
   saveFactory.reg<Mouth>(
-    [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, texLib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, lib, std::move(name)); });
   saveFactory.reg<AnimSprite>(
-    [this](std::string name) { return std::make_unique<AnimSprite>(texLib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<AnimSprite>(lib, std::move(name)); });
   saveFactory.reg<Eye>(
-    [this](std::string name) { return std::make_unique<Eye>(*this, texLib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Eye>(*this, lib, std::move(name)); });
+  saveFactory.reg<Chat>(
+    [this](std::string name) { return std::make_unique<Chat>(lib, std::move(name)); });
 }
 
-auto App::render() -> void
+auto App::render(float dt) -> void
 {
 
   if (!root)
@@ -51,13 +44,10 @@ auto App::render() -> void
     return;
   }
 
-  auto now = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float> diff = now - lastUpdate;
-  lastUpdate = now;
-  root->renderAll(diff.count(), hovered, selected);
+  root->renderAll(dt, hovered, selected);
 }
 
-auto App::renderUi() -> void
+auto App::renderUi(float /*dt*/) -> void
 {
   if (!root)
   {
@@ -79,6 +69,19 @@ auto App::renderUi() -> void
     ImGui::SameLine();
     if (ImGui::Button("Add Sprite..."))
       postponedAction = [&]() { ImGui::OpenPopup(addSpriteDialog.dialogName); };
+    if (ImGui::Button("Add Twitch Chat..."))
+    {
+      // postponedAction = [&]() { ImGui::OpenPopup(addTwitchChatDialog.dialogName); };
+
+      // TODO-Mika delete this
+      auto chat = std::make_unique<Chat>(lib, "mika314");
+      auto oldSelected = selected;
+      selected = chat.get();
+      if (!oldSelected)
+        root->addChild(std::move(chat));
+      else
+        oldSelected->addChild(std::move(chat));
+    }
     if (postponedAction)
       postponedAction();
 
@@ -87,8 +90,8 @@ auto App::renderUi() -> void
       if (!std::filesystem::exists(addMouthDialog.getSelectedFile().filename()))
         std::filesystem::copy(addMouthDialog.getSelectedFile(),
                               addMouthDialog.getSelectedFile().filename());
-      auto mouth = std::make_unique<Mouth>(
-        wav2Visemes, texLib, addMouthDialog.getSelectedFile().filename().string());
+      auto mouth =
+        std::make_unique<Mouth>(wav2Visemes, lib, addMouthDialog.getSelectedFile().filename().string());
       auto oldSelected = selected;
       selected = mouth.get();
       if (!oldSelected)
@@ -100,8 +103,7 @@ auto App::renderUi() -> void
     {
       if (!std::filesystem::exists(addEyeDialog.getSelectedFile().filename()))
         std::filesystem::copy(addEyeDialog.getSelectedFile(), addEyeDialog.getSelectedFile().filename());
-      auto eye =
-        std::make_unique<Eye>(*this, texLib, addEyeDialog.getSelectedFile().filename().string());
+      auto eye = std::make_unique<Eye>(*this, lib, addEyeDialog.getSelectedFile().filename().string());
       auto oldSelected = selected;
       selected = eye.get();
       if (!oldSelected)
@@ -115,7 +117,7 @@ auto App::renderUi() -> void
         std::filesystem::copy(addSpriteDialog.getSelectedFile(),
                               addSpriteDialog.getSelectedFile().filename());
       auto sprite =
-        std::make_unique<AnimSprite>(texLib, addSpriteDialog.getSelectedFile().filename().string());
+        std::make_unique<AnimSprite>(lib, addSpriteDialog.getSelectedFile().filename().string());
       auto oldSelected = selected;
       selected = sprite.get();
       if (!oldSelected)
@@ -123,6 +125,18 @@ auto App::renderUi() -> void
       else
         oldSelected->addChild(std::move(sprite));
     }
+
+    // TODO-Mika
+    // if (addTwitchChatDialog.draw())
+    // {
+    //   auto chat = std::make_unique<Chat>(lib, addTwitchChatDialog.channel);
+    //   auto oldSelected = selected;
+    //   selected = chat.get();
+    //   if (!oldSelected)
+    //     root->addChild(std::move(chat));
+    //   else
+    //     oldSelected->addChild(std::move(chat));
+    // }
 
     ImGui::BeginDisabled(!selected);
     if (ImGui::Button("<"))
@@ -259,10 +273,10 @@ auto App::cancel() -> void
   editMode = EditMode::select;
 }
 
-auto App::tick() -> void
+auto App::tick(float dt) -> void
 {
   audioCapture.tick();
-  // twitch.tick();
+  lib.tick(dt);
 
   if (!root)
     return;

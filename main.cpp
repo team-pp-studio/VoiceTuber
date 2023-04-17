@@ -126,6 +126,7 @@ int main(int, char **)
 
   // Main loop
   bool done = false;
+  auto lastUpdate = std::chrono::high_resolution_clock::now();
 #ifdef __EMSCRIPTEN__
   // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen()
   // of the imgui.ini file. You may manually call LoadIniSettingsFromMemory() to load settings from
@@ -155,14 +156,18 @@ int main(int, char **)
         done = true;
     }
 
-    app.tick();
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> diff = now - lastUpdate;
+    lastUpdate = now;
+    const auto dt = diff.count();
+    app.tick(dt);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    app.renderUi();
+    app.renderUi(dt);
 
     ImGui::Render();
 
@@ -180,7 +185,7 @@ int main(int, char **)
     glOrtho(0, w, 0, h, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    app.render();
+    app.render(dt);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

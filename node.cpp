@@ -421,7 +421,7 @@ auto Node::rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
 
   // Calculate the angles between the pivot and start/end locations
   const auto startAngle =
-    std::atan2(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi;
+    atan2f(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi_v<float>;
   const auto endAngle =
     atan2f(endLoc.y - pivot.y, endLoc.x - pivot.x) * 180.f / std::numbers::pi_v<float>;
 
@@ -472,6 +472,11 @@ auto Node::loadAll(const class SaveFactory &saveFactory, IStrm &strm) -> void
     ::deser(strm, className);
     ::deser(strm, n);
     auto node = saveFactory.ctor(className, n);
+    if (!node)
+    {
+      LOG("class name", className, "name", n);
+      assert(node);
+    }
     node->loadAll(saveFactory, strm);
     addChild(std::move(node));
   }

@@ -5,12 +5,12 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(TexLib &texLib, const std::string &path)
+Sprite::Sprite(Lib &lib, const std::string &path)
   : Node([&path]() {
       std::filesystem::path fsPath(path);
       return fsPath.filename().string();
     }()),
-    texture(texLib.queryTex(path))
+    texture(lib.queryTex(path))
 {
 }
 
@@ -86,5 +86,9 @@ auto Sprite::isTransparent(glm::vec2 v) const -> bool
   const auto y = static_cast<int>(v.y + (rows - (frame % numFrames) / cols - 1) * h());
   if (x < 0 || x >= texture->w() || y < 0 || y >= texture->h())
     return true;
-  return texture->imageData()[(x + y * texture->w()) * texture->ch() + 3] < 127;
+
+  if (auto imageData = texture->imageData())
+    return imageData[(x + y * texture->w()) * texture->ch() + 3] < 127;
+  else
+    return false;
 }

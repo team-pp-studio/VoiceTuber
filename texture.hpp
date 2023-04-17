@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL.h>
 #include <SDL_opengl.h>
 #include <string>
 
@@ -6,6 +7,7 @@ class Texture
 {
 public:
   Texture(const std::string &path);
+  Texture(SDL_Surface *);
   ~Texture();
   Texture(const Texture &) = delete;
   auto ch() const -> int { return ch_; }
@@ -15,9 +17,9 @@ public:
   auto texture() const -> GLuint { return texture_; }
 
 private:
-  int ch_;
-  int w_;
-  int h_;
-  unsigned char *imageData_;
+  int ch_ = 4;
+  int w_ = 0;
+  int h_ = 0;
+  unsigned char *imageData_ = nullptr;
   GLuint texture_;
 };

@@ -10,7 +10,7 @@ public:
   SER_PROP(followStrength);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
-  Eye(class App &, TexLib &texLib, const std::string &fileName);
+  Eye(class App &, Lib &lib, const std::string &fileName);
   ~Eye() final;
 
   static constexpr const char *className = "Eye";

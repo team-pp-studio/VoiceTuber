@@ -2,7 +2,7 @@
 #include "app.hpp"
 #include <numbers>
 
-Eye::Eye(App &app, TexLib &texLib, const std::string &fileName) : AnimSprite(texLib, fileName), app(app)
+Eye::Eye(App &app, Lib &lib, const std::string &fileName) : AnimSprite(lib, fileName), app(app)
 {
   app.reg(*this);
 }

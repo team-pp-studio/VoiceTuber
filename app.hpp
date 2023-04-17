@@ -1,10 +1,10 @@
 #pragma once
 #include "audio-capture.hpp"
 #include "file-open.hpp"
+#include "lib.hpp"
 #include "mouse-sink.hpp"
 #include "prj-dialog.hpp"
 #include "save-factory.hpp"
-#include "tex-lib.hpp"
 #include "twitch.hpp"
 #include "wav-2-visemes.hpp"
 #include <functional>
@@ -16,10 +16,10 @@ class App
 {
 public:
   App();
-  auto render() -> void;
-  auto renderUi() -> void;
+  auto render(float dt) -> void;
+  auto renderUi(float dt) -> void;
   auto processIo() -> void;
-  auto tick() -> void;
+  auto tick(float dt) -> void;
   auto savePrj() -> void;
   auto reg(MouseSink &) -> void;
   auto unreg(MouseSink &) -> void;
@@ -28,8 +28,7 @@ private:
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;
-  // Twitch twitch;
-  TexLib texLib;
+  Lib lib;
   Node *hovered = nullptr;
   Node *selected = nullptr;
   enum class EditMode { select, translate, scale, rotate };
@@ -38,7 +37,7 @@ private:
   FileOpen addEyeDialog;
   FileOpen addSpriteDialog;
   PrjDialog prjDialog;
-  decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
+
   std::vector<std::reference_wrapper<MouseSink>> mouseSinks;
   std::unique_ptr<Node> root;
 

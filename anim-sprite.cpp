@@ -2,8 +2,8 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-AnimSprite::AnimSprite(TexLib &texLib, const std::string &fileName)
-  : Sprite(texLib, fileName), startTime(std::chrono::high_resolution_clock::now())
+AnimSprite::AnimSprite(Lib &lib, const std::string &fileName)
+  : Sprite(lib, fileName), startTime(std::chrono::high_resolution_clock::now())
 {
 }
 
