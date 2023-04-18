@@ -23,10 +23,10 @@ namespace
   };
 } // namespace
 
-Font::Font(const std::string &fileName, int size)
-  : font([&]() {
+Font::Font(std::string file, int ptsize)
+  : file_(std::move(file)), ptsize_(ptsize), font([this]() {
       FontInitializer::init();
-      return TTF_OpenFont(fileName.c_str(), size);
+      return TTF_OpenFont(file_.c_str(), ptsize_);
     }())
 {
   if (!font)
@@ -45,7 +45,6 @@ auto Font::render(glm::vec3 pos, const std::string &txt) -> void
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, tex.texture());
   glBegin(GL_QUADS);
-  glColor4f(1.f, 1.f, 1.f, 1.f);
   glTexCoord2f(.0f, .0f);
   glVertex3f(pos.x, pos.y + tex.h(), pos.z);
   glTexCoord2f(1.f, .0f);
@@ -61,13 +60,14 @@ auto Font::render(glm::vec3 pos, const std::string &txt) -> void
 
 auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
 {
+  // TODO-Mika clean cache if it too big
   {
     auto it = texturesCache.find(txt);
     if (it != texturesCache.end())
       return it->second;
   }
 
-  SDL_Surface *surface = TTF_RenderText_Blended(font, txt.c_str(), {255, 255, 255, 255});
+  SDL_Surface *surface = TTF_RenderUTF8_Blended(font, txt.c_str(), {255, 255, 255, 255});
   if (!surface)
   {
     std::ostringstream ss;
@@ -76,8 +76,6 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
     throw std::runtime_error(ss.str());
   }
 
-  LOG("Surface", surface->w, surface->h);
-
   auto tmp = texturesCache.emplace(txt, surface);
   assert(tmp.second);
 
@@ -85,7 +83,19 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
   return tmp.first->second;
 }
 
-auto Font::getH(const std::string &txt) const -> int
+auto Font::getSize(const std::string &txt) const -> glm::vec2
 {
-  return getTextureFromCache(txt).h();
+  int w, h;
+  TTF_SizeUTF8(font, txt.c_str(), &w, &h);
+  return glm::vec2{w, h};
+}
+
+auto Font::file() const -> const std::string &
+{
+  return file_;
+}
+
+auto Font::ptsize() const -> int
+{
+  return ptsize_;
 }
