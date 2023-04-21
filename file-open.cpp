@@ -3,13 +3,16 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-FileOpen::FileOpen(const char *dialogName) : dialogName(dialogName), cwd(std::filesystem::current_path())
+FileOpen::FileOpen(const char *dialogName, Cb cb)
+  : Dialog([this, cb = std::move(cb)] { cb(getSelectedFile()); }),
+    dialogName(dialogName),
+    cwd(std::filesystem::current_path())
 {
 }
 
 auto FileOpen::draw() -> bool
 {
-  if (!ImGui::BeginPopupModal(dialogName, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+  if (!ImGui::BeginPopupModal("modal", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     return false;
 
   auto ret = false;
@@ -91,6 +94,8 @@ auto FileOpen::draw() -> bool
   if (ImGui::Button("Cancel", ImVec2(120, 0)))
     ImGui::CloseCurrentPopup();
   ImGui::EndPopup();
+  if (ret)
+    cb();
   return ret;
 }
 

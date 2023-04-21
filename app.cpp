@@ -3,7 +3,9 @@
 #include "bouncer.hpp"
 #include "chat.hpp"
 #include "eye.hpp"
+#include "file-open.hpp"
 #include "mouth.hpp"
+#include "prj-dialog.hpp"
 #include <fstream>
 #include <log/log.hpp>
 
@@ -14,11 +16,7 @@ static auto getProjMat() -> glm::mat4
   return glm::make_mat4(projMatData);
 }
 
-App::App()
-  : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
-    addMouthDialog("Add Mouth Dialog"),
-    addEyeDialog("Add Eye Dialog"),
-    addSpriteDialog("Add Sprite Dialog")
+App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize())
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
@@ -36,7 +34,6 @@ App::App()
 
 auto App::render(float dt) -> void
 {
-
   if (!root)
   {
     glClearColor(.5f, .5f, .5f, 1.f);
@@ -51,24 +48,63 @@ auto App::renderUi(float /*dt*/) -> void
 {
   if (!root)
   {
-    if (prjDialog.draw())
-      loadPrj();
+    if (!dialog)
+      dialog = std::make_unique<PrjDialog>([this]() { loadPrj(); });
+    if (dialog->draw())
+      dialog = nullptr;
     return;
   }
+
   {
-    ImGui::Begin("Outliner");
     std::function<void(void)> postponedAction = nullptr;
+    ImGui::Begin("Outliner");
     if (ImGui::Button("Save"))
       savePrj();
     ImGui::SameLine();
     if (ImGui::Button("Add Mouth..."))
-      postponedAction = [&]() { ImGui::OpenPopup(addMouthDialog.dialogName); };
+      postponedAction = [&]() {
+        dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](const auto &filePath) {
+          if (!std::filesystem::exists(filePath.filename()))
+            std::filesystem::copy(filePath, filePath.filename());
+          auto mouth = std::make_unique<Mouth>(wav2Visemes, lib, filePath.filename().string());
+          auto oldSelected = selected;
+          selected = mouth.get();
+          if (!oldSelected)
+            root->addChild(std::move(mouth));
+          else
+            oldSelected->addChild(std::move(mouth));
+        });
+      };
     ImGui::SameLine();
     if (ImGui::Button("Add Eye..."))
-      postponedAction = [&]() { ImGui::OpenPopup(addEyeDialog.dialogName); };
+      postponedAction = [&]() {
+        dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](const auto &filePath) {
+          if (!std::filesystem::exists(filePath.filename()))
+            std::filesystem::copy(filePath, filePath.filename());
+          auto eye = std::make_unique<Eye>(*this, lib, filePath.filename().string());
+          auto oldSelected = selected;
+          selected = eye.get();
+          if (!oldSelected)
+            root->addChild(std::move(eye));
+          else
+            oldSelected->addChild(std::move(eye));
+        });
+      };
     ImGui::SameLine();
     if (ImGui::Button("Add Sprite..."))
-      postponedAction = [&]() { ImGui::OpenPopup(addSpriteDialog.dialogName); };
+      postponedAction = [&]() {
+        dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](const auto &filePath) {
+          if (!std::filesystem::exists(filePath.filename()))
+            std::filesystem::copy(filePath, filePath.filename());
+          auto sprite = std::make_unique<AnimSprite>(lib, filePath.filename().string());
+          auto oldSelected = selected;
+          selected = sprite.get();
+          if (!oldSelected)
+            root->addChild(std::move(sprite));
+          else
+            oldSelected->addChild(std::move(sprite));
+        });
+      };
     if (ImGui::Button("Add Twitch Chat..."))
     {
       // postponedAction = [&]() { ImGui::OpenPopup(addTwitchChatDialog.dialogName); };
@@ -83,48 +119,13 @@ auto App::renderUi(float /*dt*/) -> void
         oldSelected->addChild(std::move(chat));
     }
     if (postponedAction)
+    {
       postponedAction();
-
-    if (addMouthDialog.draw())
-    {
-      if (!std::filesystem::exists(addMouthDialog.getSelectedFile().filename()))
-        std::filesystem::copy(addMouthDialog.getSelectedFile(),
-                              addMouthDialog.getSelectedFile().filename());
-      auto mouth =
-        std::make_unique<Mouth>(wav2Visemes, lib, addMouthDialog.getSelectedFile().filename().string());
-      auto oldSelected = selected;
-      selected = mouth.get();
-      if (!oldSelected)
-        root->addChild(std::move(mouth));
-      else
-        oldSelected->addChild(std::move(mouth));
+      postponedAction = nullptr;
     }
-    if (addEyeDialog.draw())
-    {
-      if (!std::filesystem::exists(addEyeDialog.getSelectedFile().filename()))
-        std::filesystem::copy(addEyeDialog.getSelectedFile(), addEyeDialog.getSelectedFile().filename());
-      auto eye = std::make_unique<Eye>(*this, lib, addEyeDialog.getSelectedFile().filename().string());
-      auto oldSelected = selected;
-      selected = eye.get();
-      if (!oldSelected)
-        root->addChild(std::move(eye));
-      else
-        oldSelected->addChild(std::move(eye));
-    }
-    if (addSpriteDialog.draw())
-    {
-      if (!std::filesystem::exists(addSpriteDialog.getSelectedFile().filename()))
-        std::filesystem::copy(addSpriteDialog.getSelectedFile(),
-                              addSpriteDialog.getSelectedFile().filename());
-      auto sprite =
-        std::make_unique<AnimSprite>(lib, addSpriteDialog.getSelectedFile().filename().string());
-      auto oldSelected = selected;
-      selected = sprite.get();
-      if (!oldSelected)
-        root->addChild(std::move(sprite));
-      else
-        oldSelected->addChild(std::move(sprite));
-    }
+    if (dialog)
+      if (dialog->draw())
+        dialog = nullptr;
 
     // TODO-Mika
     // if (addTwitchChatDialog.draw())

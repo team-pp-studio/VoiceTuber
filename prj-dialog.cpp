@@ -2,6 +2,8 @@
 #include <functional>
 #include <imgui/imgui.h>
 
+PrjDialog::PrjDialog(Cb aCb) : Dialog(std::move(aCb)) {}
+
 auto PrjDialog::draw() -> bool
 {
   ImGui::Begin("New/Open Project");
@@ -96,5 +98,7 @@ auto PrjDialog::draw() -> bool
     ImGui::EndDisabled();
   }
   ImGui::End();
+  if (ret)
+    cb();
   return ret;
 }

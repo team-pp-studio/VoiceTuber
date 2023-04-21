@@ -6,6 +6,7 @@
 #include "app.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
+#include <chrono>
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 #include <sdlpp/sdlpp.hpp>

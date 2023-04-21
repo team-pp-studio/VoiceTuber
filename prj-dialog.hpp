@@ -1,11 +1,13 @@
 #pragma once
+#include "dialog.hpp"
 #include <filesystem>
 #include <vector>
 
-class PrjDialog
+class PrjDialog final : public Dialog
 {
 public:
-  auto draw() -> bool;
+  PrjDialog(Cb cb);
+  auto draw() -> bool final;
 
 private:
   std::vector<std::filesystem::path> dirs;

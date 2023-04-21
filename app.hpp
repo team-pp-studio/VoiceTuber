@@ -1,9 +1,8 @@
 #pragma once
 #include "audio-capture.hpp"
-#include "file-open.hpp"
+#include "dialog.hpp"
 #include "lib.hpp"
 #include "mouse-sink.hpp"
-#include "prj-dialog.hpp"
 #include "save-factory.hpp"
 #include "twitch.hpp"
 #include "wav-2-visemes.hpp"
@@ -33,11 +32,7 @@ private:
   Node *selected = nullptr;
   enum class EditMode { select, translate, scale, rotate };
   EditMode editMode = EditMode::select;
-  FileOpen addMouthDialog;
-  FileOpen addEyeDialog;
-  FileOpen addSpriteDialog;
-  PrjDialog prjDialog;
-
+  std::unique_ptr<Dialog> dialog = nullptr;
   std::vector<std::reference_wrapper<MouseSink>> mouseSinks;
   std::unique_ptr<Node> root;
 
