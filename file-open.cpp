@@ -3,19 +3,16 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-FileOpen::FileOpen(const char *dialogName, Cb cb)
-  : Dialog([this, cb = std::move(cb)] { cb(getSelectedFile()); }),
-    dialogName(dialogName),
+FileOpen::FileOpen(std::string dialogName, Cb aCb)
+  : Dialog(std::move(dialogName), [this, aCb = std::move(aCb)](bool r) { aCb(r, getSelectedFile()); }),
     cwd(std::filesystem::current_path())
 {
 }
 
 auto FileOpen::draw() -> bool
 {
-  if (!ImGui::BeginPopupModal("modal", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+  if (!Dialog::draw())
     return false;
-
-  auto ret = false;
 
   if (files.empty())
   {
@@ -63,7 +60,9 @@ auto FileOpen::draw() -> bool
           {
             selectedFile = file;
             ImGui::CloseCurrentPopup();
-            ret = true;
+            ImGui::EndPopup();
+            cb(true);
+            return false;
           }
         }
         else
@@ -83,20 +82,26 @@ auto FileOpen::draw() -> bool
   else
     ImGui::Text("No file selected");
 
-  ImGui::SameLine(700 - 2 * 120 - 10);
-  if (ImGui::Button("Open", ImVec2(120, 0)))
+  const auto BtnSz = 90;
+  ImGui::SameLine(700 - 2 * BtnSz - 10);
+  if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
   {
     ImGui::CloseCurrentPopup();
-    ret = true;
+    ImGui::EndPopup();
+    cb(true);
+    return false;
   }
   ImGui::SetItemDefaultFocus();
-  ImGui::SameLine(700 - 120);
-  if (ImGui::Button("Cancel", ImVec2(120, 0)))
+  ImGui::SameLine();
+  if (ImGui::Button("Cancel", ImVec2(BtnSz, 0)))
+  {
     ImGui::CloseCurrentPopup();
+    ImGui::EndPopup();
+    cb(false);
+    return false;
+  }
   ImGui::EndPopup();
-  if (ret)
-    cb();
-  return ret;
+  return true;
 }
 
 auto FileOpen::getSelectedFile() const -> std::filesystem::path

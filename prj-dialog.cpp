@@ -2,7 +2,7 @@
 #include <functional>
 #include <imgui/imgui.h>
 
-PrjDialog::PrjDialog(Cb aCb) : Dialog(std::move(aCb)) {}
+PrjDialog::PrjDialog(Cb aCb) : Dialog("New/Open Project", std::move(aCb)) {}
 
 auto PrjDialog::draw() -> bool
 {
@@ -61,8 +61,8 @@ auto PrjDialog::draw() -> bool
     ImGui::EndListBox();
   }
 
-  const auto btnWidth = 100.f;
-  ImGui::PushItemWidth(availableSpace.x - btnWidth);
+  const auto BtnSz = 90.f;
+  ImGui::PushItemWidth(availableSpace.x - BtnSz - 10);
   char buf[1024];
   strcpy(buf, selectedDir.data());
   ImGui::InputText("##dirname", buf, sizeof(buf));
@@ -72,7 +72,7 @@ auto PrjDialog::draw() -> bool
   ImGui::SameLine();
   if (hasSelected)
   {
-    if (ImGui::Button("Open", ImVec2{btnWidth, 0}))
+    if (ImGui::Button("Open", ImVec2{BtnSz, 0}))
     {
       std::filesystem::current_path(selectedDir);
       dirs.clear();
@@ -85,7 +85,7 @@ auto PrjDialog::draw() -> bool
   else
   {
     ImGui::BeginDisabled(selectedDir.empty());
-    if (ImGui::Button("New", ImVec2{btnWidth, 0}))
+    if (ImGui::Button("New", ImVec2{BtnSz, 0}))
     {
       if (std::filesystem::create_directories(selectedDir))
       {
@@ -99,6 +99,6 @@ auto PrjDialog::draw() -> bool
   }
   ImGui::End();
   if (ret)
-    cb();
+    cb(ret);
   return ret;
 }

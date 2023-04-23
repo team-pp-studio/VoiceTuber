@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
+#include "channel-dialog.hpp"
 #include "chat.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
@@ -49,7 +50,7 @@ auto App::renderUi(float /*dt*/) -> void
   if (!root)
   {
     if (!dialog)
-      dialog = std::make_unique<PrjDialog>([this]() { loadPrj(); });
+      dialog = std::make_unique<PrjDialog>([this](bool) { loadPrj(); });
     if (dialog->draw())
       dialog = nullptr;
     return;
@@ -63,7 +64,9 @@ auto App::renderUi(float /*dt*/) -> void
     ImGui::SameLine();
     if (ImGui::Button("Add Mouth..."))
       postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](const auto &filePath) {
+        dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](bool r, const auto &filePath) {
+          if (!r)
+            return;
           if (!std::filesystem::exists(filePath.filename()))
             std::filesystem::copy(filePath, filePath.filename());
           auto mouth = std::make_unique<Mouth>(wav2Visemes, lib, filePath.filename().string());
@@ -78,7 +81,9 @@ auto App::renderUi(float /*dt*/) -> void
     ImGui::SameLine();
     if (ImGui::Button("Add Eye..."))
       postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](const auto &filePath) {
+        dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](bool r, const auto &filePath) {
+          if (!r)
+            return;
           if (!std::filesystem::exists(filePath.filename()))
             std::filesystem::copy(filePath, filePath.filename());
           auto eye = std::make_unique<Eye>(*this, lib, filePath.filename().string());
@@ -93,7 +98,9 @@ auto App::renderUi(float /*dt*/) -> void
     ImGui::SameLine();
     if (ImGui::Button("Add Sprite..."))
       postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](const auto &filePath) {
+        dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](bool r, const auto &filePath) {
+          if (!r)
+            return;
           if (!std::filesystem::exists(filePath.filename()))
             std::filesystem::copy(filePath, filePath.filename());
           auto sprite = std::make_unique<AnimSprite>(lib, filePath.filename().string());
@@ -107,16 +114,19 @@ auto App::renderUi(float /*dt*/) -> void
       };
     if (ImGui::Button("Add Twitch Chat..."))
     {
-      // postponedAction = [&]() { ImGui::OpenPopup(addTwitchChatDialog.dialogName); };
-
-      // TODO-Mika delete this
-      auto chat = std::make_unique<Chat>(lib, "mika314");
-      auto oldSelected = selected;
-      selected = chat.get();
-      if (!oldSelected)
-        root->addChild(std::move(chat));
-      else
-        oldSelected->addChild(std::move(chat));
+      postponedAction = [&]() {
+        dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
+          if (!r)
+            return;
+          auto chat = std::make_unique<Chat>(lib, channel);
+          auto oldSelected = selected;
+          selected = chat.get();
+          if (!oldSelected)
+            root->addChild(std::move(chat));
+          else
+            oldSelected->addChild(std::move(chat));
+        });
+      };
     }
     if (postponedAction)
     {
@@ -124,20 +134,8 @@ auto App::renderUi(float /*dt*/) -> void
       postponedAction = nullptr;
     }
     if (dialog)
-      if (dialog->draw())
+      if (!dialog->draw())
         dialog = nullptr;
-
-    // TODO-Mika
-    // if (addTwitchChatDialog.draw())
-    // {
-    //   auto chat = std::make_unique<Chat>(lib, addTwitchChatDialog.channel);
-    //   auto oldSelected = selected;
-    //   selected = chat.get();
-    //   if (!oldSelected)
-    //     root->addChild(std::move(chat));
-    //   else
-    //     oldSelected->addChild(std::move(chat));
-    // }
 
     ImGui::BeginDisabled(!selected);
     if (ImGui::Button("<"))

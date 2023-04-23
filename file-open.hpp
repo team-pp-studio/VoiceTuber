@@ -6,8 +6,8 @@
 class FileOpen final : public Dialog
 {
 public:
-  using Cb = std::function<auto(const std::filesystem::path &)->void>;
-  FileOpen(const char *dialogName, Cb);
+  using Cb = std::function<auto(bool, const std::filesystem::path &)->void>;
+  FileOpen(std::string dialogName, Cb);
   auto draw() -> bool final;
 
 private:
@@ -15,6 +15,5 @@ private:
 
   std::vector<std::filesystem::path> files;
   std::filesystem::path selectedFile;
-  const char *dialogName;
   decltype(std::filesystem::current_path()) cwd;
 };
