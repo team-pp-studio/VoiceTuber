@@ -10,7 +10,7 @@ public:
   SER_PROP(followStrength);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
-  Eye(class App &, Lib &lib, const std::string &fileName);
+  Eye(class MouseTracking &, Lib &lib, const std::filesystem::path &);
   ~Eye() final;
 
   static constexpr const char *className = "Eye";
@@ -19,7 +19,7 @@ private:
   float radius = 20.f;
   float followStrength = 4.f;
   glm::vec2 mouse;
-  std::reference_wrapper<App> app;
+  std::reference_wrapper<MouseTracking> mouseTracking;
 
   auto load(IStrm &) -> void final;
   auto render(float dt, Node *hovered, Node *selected) -> void final;

@@ -2,8 +2,8 @@
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
-Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, const std::string &fileName)
-  : Sprite(lib, fileName), wav2Visemes(wav2Visemes)
+Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, const std::filesystem::path &path)
+  : Sprite(lib, path), wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;

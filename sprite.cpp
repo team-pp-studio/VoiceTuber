@@ -5,12 +5,12 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(Lib &lib, const std::string &path)
-  : Node([&path]() {
-      std::filesystem::path fsPath(path);
-      return fsPath.filename().string();
-    }()),
-    texture(lib.queryTex(path))
+Sprite::Sprite(Lib &lib, const std::filesystem::path &path)
+  : Node([&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
+      if (!std::filesystem::exists(path.filename()))
+        std::filesystem::copy(path, path.filename());
+      return path.filename();
+    }()))
 {
 }
 

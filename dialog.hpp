@@ -15,4 +15,5 @@ protected:
 
 private:
   std::string title;
+  bool first = true;
 };

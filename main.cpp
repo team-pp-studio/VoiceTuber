@@ -92,8 +92,9 @@ int main(int, char **)
   ImGuiStyle &style = ImGui::GetStyle();
   if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
   {
-    style.WindowRounding = 0.0f;
-    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    style.WindowRounding = 0.f;
+    style.FrameRounding = 5.f;
+    style.Colors[ImGuiCol_WindowBg].w = .8f;
   }
 
   // Setup Platform/Renderer backends

@@ -1,8 +1,9 @@
 #pragma once
-#include "node.hpp"
 #include "lib.hpp"
+#include "node.hpp"
 #include "wav-2-visemes.hpp"
 #include <SDL_opengl.h>
+#include <filesystem>
 #include <sdlpp/sdlpp.hpp>
 #include <string>
 #include <unordered_map>
@@ -18,7 +19,7 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  Sprite(Lib &, const std::string &path);
+  Sprite(Lib &, const std::filesystem::path &path);
   auto w() const -> float final;
   auto h() const -> float final;
   auto isTransparent(glm::vec2) const -> bool final;

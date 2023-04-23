@@ -7,6 +7,7 @@
 #include "file-open.hpp"
 #include "mouth.hpp"
 #include "prj-dialog.hpp"
+#include <SDL_opengl.h>
 #include <fstream>
 #include <log/log.hpp>
 
@@ -28,7 +29,7 @@ App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize())
   saveFactory.reg<AnimSprite>(
     [this](std::string name) { return std::make_unique<AnimSprite>(lib, std::move(name)); });
   saveFactory.reg<Eye>(
-    [this](std::string name) { return std::make_unique<Eye>(*this, lib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Eye>(mouseTracking, lib, std::move(name)); });
   saveFactory.reg<Chat>(
     [this](std::string name) { return std::make_unique<Chat>(lib, std::move(name)); });
 }
@@ -42,101 +43,90 @@ auto App::render(float dt) -> void
     return;
   }
 
-  root->renderAll(dt, hovered, selected);
+  if (showUi)
+    root->renderAll(dt, hovered, selected);
+  else
+    root->renderAll(dt, nullptr, nullptr);
 }
 
 auto App::renderUi(float /*dt*/) -> void
 {
   if (!root)
   {
+
     if (!dialog)
+    {
+      ImGui::OpenPopup("New/Open Project");
       dialog = std::make_unique<PrjDialog>([this](bool) { loadPrj(); });
+    }
     if (dialog->draw())
       dialog = nullptr;
     return;
   }
 
+  ImGuiIO &io = ImGui::GetIO();
+  ImGuiStyle &style = ImGui::GetStyle();
+  if (!showUi)
   {
-    std::function<void(void)> postponedAction = nullptr;
-    ImGui::Begin("Outliner");
-    if (ImGui::Button("Save"))
-      savePrj();
-    ImGui::SameLine();
-    if (ImGui::Button("Add Mouth..."))
-      postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](bool r, const auto &filePath) {
-          if (!r)
-            return;
-          if (!std::filesystem::exists(filePath.filename()))
-            std::filesystem::copy(filePath, filePath.filename());
-          auto mouth = std::make_unique<Mouth>(wav2Visemes, lib, filePath.filename().string());
-          auto oldSelected = selected;
-          selected = mouth.get();
-          if (!oldSelected)
-            root->addChild(std::move(mouth));
-          else
-            oldSelected->addChild(std::move(mouth));
-        });
-      };
-    ImGui::SameLine();
-    if (ImGui::Button("Add Eye..."))
-      postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](bool r, const auto &filePath) {
-          if (!r)
-            return;
-          if (!std::filesystem::exists(filePath.filename()))
-            std::filesystem::copy(filePath, filePath.filename());
-          auto eye = std::make_unique<Eye>(*this, lib, filePath.filename().string());
-          auto oldSelected = selected;
-          selected = eye.get();
-          if (!oldSelected)
-            root->addChild(std::move(eye));
-          else
-            oldSelected->addChild(std::move(eye));
-        });
-      };
-    ImGui::SameLine();
-    if (ImGui::Button("Add Sprite..."))
-      postponedAction = [&]() {
-        dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](bool r, const auto &filePath) {
-          if (!r)
-            return;
-          if (!std::filesystem::exists(filePath.filename()))
-            std::filesystem::copy(filePath, filePath.filename());
-          auto sprite = std::make_unique<AnimSprite>(lib, filePath.filename().string());
-          auto oldSelected = selected;
-          selected = sprite.get();
-          if (!oldSelected)
-            root->addChild(std::move(sprite));
-          else
-            oldSelected->addChild(std::move(sprite));
-        });
-      };
-    if (ImGui::Button("Add Twitch Chat..."))
-    {
-      postponedAction = [&]() {
-        dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
-          if (!r)
-            return;
-          auto chat = std::make_unique<Chat>(lib, channel);
-          auto oldSelected = selected;
-          selected = chat.get();
-          if (!oldSelected)
-            root->addChild(std::move(chat));
-          else
-            oldSelected->addChild(std::move(chat));
-        });
-      };
-    }
-    if (postponedAction)
-    {
-      postponedAction();
-      postponedAction = nullptr;
-    }
-    if (dialog)
-      if (!dialog->draw())
-        dialog = nullptr;
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+      style.Colors[ImGuiCol_WindowBg].w = .2f;
+    ImGui::Begin("##Show UI");
+    if (ImGui::Button("Show UI"))
+      showUi = true;
+    ImGui::End();
+    return;
+  }
 
+  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    style.Colors[ImGuiCol_WindowBg].w = .8f;
+  if (ImGui::BeginMainMenuBar())
+  {
+    if (ImGui::BeginMenu("File"))
+    {
+      if (ImGui::MenuItem("Save"))
+        savePrj();
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Edit"))
+    {
+      if (ImGui::BeginMenu("Add"))
+      {
+        if (ImGui::MenuItem("Mouth..."))
+          dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(Mouth::className, filePath);
+          });
+        if (ImGui::MenuItem("Eye..."))
+          dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(Eye::className, filePath);
+          });
+
+        if (ImGui::MenuItem("Sprite..."))
+          dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(AnimSprite::className, filePath);
+          });
+
+        if (ImGui::MenuItem("Twitch Chat..."))
+          dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
+            if (r)
+              addNode(Chat::className, channel);
+          });
+
+        ImGui::EndMenu();
+      }
+      if (ImGui::MenuItem("Preferences...")) {}
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
+
+  if (dialog)
+    if (!dialog->draw())
+      dialog = nullptr;
+  {
+    ImGui::Begin("Outliner");
     ImGui::BeginDisabled(!selected);
     if (ImGui::Button("<"))
       selected->unparent();
@@ -161,8 +151,9 @@ auto App::renderUi(float /*dt*/) -> void
 
     renderTree(*root);
 
-    ImGuiIO &io = ImGui::GetIO();
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    if (ImGui::Button("Hide UI"))
+      showUi = false;
     ImGui::End();
   }
   {
@@ -292,10 +283,7 @@ auto App::tick(float dt) -> void
   case EditMode::scale: selected->scaleUpdate(projMat, mousePos); break;
   case EditMode::rotate: selected->rotUpdate(projMat, mousePos); break;
   }
-  int x, y;
-  SDL_GetGlobalMouseState(&x, &y);
-  for (auto mouseSink : mouseSinks)
-    mouseSink.get().ingest(projMat, glm::vec2{1.f * x, 1.f * y});
+  mouseTracking.tick();
 }
 
 auto App::renderTree(Node &v) -> void
@@ -378,15 +366,13 @@ auto App::savePrj() -> void
   st.write(strm.str().data(), strm.str().size());
 }
 
-auto App::reg(MouseSink &v) -> void
+auto App::addNode(const std::string &class_, const std::string &name) -> void
 {
-  mouseSinks.push_back(v);
-}
-
-auto App::unreg(MouseSink &v) -> void
-{
-  mouseSinks.erase(std::remove_if(std::begin(mouseSinks),
-                                  std::end(mouseSinks),
-                                  [&](const auto &x) { return &x.get() == &v; }),
-                   std::end(mouseSinks));
-}
+  auto node = saveFactory.ctor(class_, name);
+  auto oldSelected = selected;
+  selected = node.get();
+  if (!oldSelected)
+    root->addChild(std::move(node));
+  else
+    oldSelected->addChild(std::move(node));
+};

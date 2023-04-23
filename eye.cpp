@@ -1,15 +1,16 @@
 #include "eye.hpp"
-#include "app.hpp"
+#include "mouse-tracking.hpp"
 #include <numbers>
 
-Eye::Eye(App &app, Lib &lib, const std::string &fileName) : AnimSprite(lib, fileName), app(app)
+Eye::Eye(MouseTracking &mouseTracking, Lib &lib, const std::filesystem::path &path)
+  : AnimSprite(lib, path), mouseTracking(mouseTracking)
 {
-  app.reg(*this);
+  mouseTracking.reg(*this);
 }
 
 Eye::~Eye()
 {
-  app.get().unreg(*this);
+  mouseTracking.get().unreg(*this);
 }
 
 auto Eye::render(float dt, Node *hovered, Node *selected) -> void
