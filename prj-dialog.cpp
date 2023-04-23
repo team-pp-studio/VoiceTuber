@@ -1,15 +1,15 @@
 #include "prj-dialog.hpp"
 #include <functional>
 #include <imgui/imgui.h>
+#include <log/log.hpp>
 
 PrjDialog::PrjDialog(Cb aCb) : Dialog("New/Open Project", std::move(aCb)) {}
 
-auto PrjDialog::draw() -> bool
+auto PrjDialog::internalDraw() -> DialogState
 {
-  ImGui::Begin("New/Open Project");
-
-  ImVec2 availableSpace = ImGui::GetContentRegionAvail();
-
+  auto availableSpace = ImGui::GetContentRegionAvail();
+  availableSpace.x = std::max(availableSpace.x, 500.f);
+  availableSpace.y = std::max(availableSpace.y, 250.f);
   // Adjust the width of the ListBox
   ImVec2 listBoxSize(availableSpace.x, availableSpace.y - 25); // Adjust the width and height as needed
   if (dirs.empty())
@@ -21,43 +21,49 @@ auto PrjDialog::draw() -> bool
     std::sort(std::begin(dirs), std::end(dirs));
   }
 
-  auto ret = false;
   auto hasSelected = false;
   if (ImGui::BeginListBox("##dirs", listBoxSize))
   {
-    std::function<void()> postponedAction = nullptr;
-    if (ImGui::Selectable("..", ".." == selectedDir, ImGuiSelectableFlags_AllowDoubleClick))
+    const auto oldSelectedDir = selectedDir;
+    if (ImGui::Selectable("..", ".." == oldSelectedDir, ImGuiSelectableFlags_AllowDoubleClick))
       if (ImGui::IsMouseDoubleClicked(0))
-        postponedAction = [this]() {
-          dirs.clear();
-          selectedDir = "";
-          const auto cwd = std::filesystem::current_path();
-          std::filesystem::current_path(cwd.parent_path());
-        };
+      {
+        dirs.clear();
+        selectedDir = "";
+        LOG(1);
+        const auto cwd = std::filesystem::current_path();
+        std::filesystem::current_path(cwd.parent_path());
+      }
 
     for (auto &dir : dirs)
     {
-      if (selectedDir == dir.filename())
+      if (oldSelectedDir == dir.filename())
         hasSelected = true;
       if (ImGui::Selectable(("> " + dir.filename().string()).c_str(),
-                            selectedDir == dir.filename(),
+                            oldSelectedDir == dir.filename(),
                             ImGuiSelectableFlags_AllowDoubleClick))
       {
         if (ImGui::IsMouseDoubleClicked(0))
-          postponedAction = [this, dir, &ret]() {
-            std::filesystem::current_path(dir);
-            dirs.clear();
-            selectedDir = "";
-            const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
-            if (std::filesystem::exists(projectFilePath))
-              ret = true;
-          };
+        {
+          std::filesystem::current_path(dir);
+          dirs.clear();
+          selectedDir = "";
+          LOG(2);
+          const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
+          if (std::filesystem::exists(projectFilePath))
+          {
+            ImGui::EndListBox();
+            return DialogState::ok;
+          }
+          break;
+        }
         else
+        {
           selectedDir = dir.filename().string();
+          LOG(selectedDir);
+        }
       }
     }
-    if (postponedAction)
-      postponedAction();
     ImGui::EndListBox();
   }
 
@@ -65,8 +71,11 @@ auto PrjDialog::draw() -> bool
   ImGui::PushItemWidth(availableSpace.x - BtnSz - 10);
   char buf[1024];
   strcpy(buf, selectedDir.data());
-  ImGui::InputText("##dirname", buf, sizeof(buf));
-  selectedDir = buf;
+  if (ImGui::InputText("##dirname", buf, sizeof(buf)))
+  {
+    selectedDir = buf;
+    LOG(selectedDir);
+  }
   ImGui::PopItemWidth();
 
   ImGui::SameLine();
@@ -77,9 +86,10 @@ auto PrjDialog::draw() -> bool
       std::filesystem::current_path(selectedDir);
       dirs.clear();
       selectedDir = "";
+      LOG(3);
       const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
       if (std::filesystem::exists(projectFilePath))
-        ret = true;
+        return DialogState::ok;
     }
   }
   else
@@ -92,13 +102,11 @@ auto PrjDialog::draw() -> bool
         std::filesystem::current_path(selectedDir);
         dirs.clear();
         selectedDir = "";
-        ret = true;
+        LOG(4);
+        return DialogState::ok;
       }
     }
     ImGui::EndDisabled();
   }
-  ImGui::End();
-  if (ret)
-    cb(ret);
-  return ret;
+  return DialogState::active;
 }

@@ -8,16 +8,18 @@
 class Twitch
 {
 public:
-  Twitch(std::string key, std::string user, std::string channel);
+  Twitch(std::string user, std::string key, std::string channel);
   Twitch(const Twitch &) = delete;
   ~Twitch();
-  auto tick(float dt) -> void;
+  auto isConnected() const -> bool;
   auto reg(TwitchSink &) -> void;
+  auto tick(float dt) -> void;
   auto unreg(TwitchSink &) -> void;
+  auto updateUserKey(const std::string &user, const std::string &key) -> void;
 
 private:
-  std::string key;
   std::string user;
+  std::string key;
   std::string channel;
   TCPsocket socket = nullptr;
   SDLNet_SocketSet socketSet = nullptr;

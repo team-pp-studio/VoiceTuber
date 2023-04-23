@@ -6,6 +6,7 @@
 #include "eye.hpp"
 #include "file-open.hpp"
 #include "mouth.hpp"
+#include "preferences-dialog.hpp"
 #include "prj-dialog.hpp"
 #include <SDL_opengl.h>
 #include <fstream>
@@ -18,7 +19,7 @@ static auto getProjMat() -> glm::mat4
   return glm::make_mat4(projMatData);
 }
 
-App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize())
+App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()), lib(preferences)
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
@@ -53,13 +54,9 @@ auto App::renderUi(float /*dt*/) -> void
 {
   if (!root)
   {
-
     if (!dialog)
-    {
-      ImGui::OpenPopup("New/Open Project");
       dialog = std::make_unique<PrjDialog>([this](bool) { loadPrj(); });
-    }
-    if (dialog->draw())
+    if (!dialog->draw())
       dialog = nullptr;
     return;
   }
@@ -116,7 +113,11 @@ auto App::renderUi(float /*dt*/) -> void
 
         ImGui::EndMenu();
       }
-      if (ImGui::MenuItem("Preferences...")) {}
+      if (ImGui::MenuItem("Preferences..."))
+        dialog = std::make_unique<PreferencesDialog>(preferences, [this](bool r) {
+          if (r)
+            lib.flush();
+        });
       ImGui::EndMenu();
     }
     ImGui::EndMainMenuBar();

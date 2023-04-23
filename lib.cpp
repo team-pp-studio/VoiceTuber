@@ -1,6 +1,8 @@
 #include "lib.hpp"
+#include "preferences.hpp"
 #include <cassert>
-#include <fstream>
+
+Lib::Lib(class Preferences &preferences) : preferences(preferences) {}
 
 auto Lib::queryTex(const std::string &v) -> std::shared_ptr<const Texture>
 {
@@ -28,15 +30,7 @@ auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
       return shared;
     twitchChannels.erase(it);
   }
-  auto shared = std::make_shared<Twitch>(
-    []() {
-      auto f = std::ifstream("/home/mika/prj/twitch_tts/twitch_auth.txt"); // TODO-Mika remove hardcoded values
-      auto key = std::string{};
-      std::getline(f, key);
-      return key;
-    }(),
-    "mika314",
-    v);
+  auto shared = std::make_shared<Twitch>(preferences.get().twitchUser, preferences.get().twitchKey, v);
   auto tmp = twitchChannels.emplace(v, shared);
   assert(tmp.second);
   return shared;
@@ -66,5 +60,16 @@ auto Lib::tick(float dt) -> void
     if (!l)
       continue;
     l->tick(dt);
+  }
+}
+
+auto Lib::flush() -> void
+{
+  for (auto &twitch : twitchChannels)
+  {
+    auto shared = twitch.second.lock();
+    if (!shared)
+      continue;
+    shared->updateUserKey(preferences.get().twitchUser, preferences.get().twitchKey);
   }
 }

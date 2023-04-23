@@ -8,12 +8,14 @@ public:
   using Cb = std::function<auto(bool)->void>;
   Dialog(std::string title, Cb cb);
   virtual ~Dialog() = default;
-  virtual auto draw() -> bool;
+  auto draw() -> bool;
 
 protected:
-  Cb cb;
+  enum class DialogState { active, ok, cancel };
+  virtual auto internalDraw() -> DialogState = 0;
 
 private:
+  Cb cb;
   std::string title;
   bool first = true;
 };

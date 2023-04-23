@@ -117,12 +117,17 @@ auto Chat::renderUi() -> void
 
   ImGui::PopID();
 
+  if (!twitch->isConnected())
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.7f, 0.7f, 1.0f));
+
   if (ImGui::BeginListBox("##Chat", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
   {
     for (const auto &msg : msgs)
       ImGui::Text("%s: %s", msg.displayName.c_str(), msg.msg.c_str());
     ImGui::EndListBox();
   }
+  if (!twitch->isConnected())
+    ImGui::PopStyleColor();
 }
 
 auto Chat::h() const -> float

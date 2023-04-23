@@ -3,6 +3,7 @@
 #include "dialog.hpp"
 #include "lib.hpp"
 #include "mouse-tracking.hpp"
+#include "preferences.hpp"
 #include "save-factory.hpp"
 #include "twitch.hpp"
 #include "wav-2-visemes.hpp"
@@ -22,6 +23,7 @@ public:
   auto savePrj() -> void;
 
 private:
+  Preferences preferences;
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
   AudioCapture audioCapture;

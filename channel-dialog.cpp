@@ -7,34 +7,19 @@ ChannelDialog::ChannelDialog(std::string initChannel, Cb aCb)
 {
 }
 
-auto ChannelDialog::draw() -> bool
+auto ChannelDialog::internalDraw() -> DialogState
 {
-  if (!Dialog::draw())
-    return false;
-
   char buf[1024];
   strcpy(buf, channel.data());
   if (ImGui::InputText("##channel", buf, sizeof(buf)))
     channel = buf;
-
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);
   if (ImGui::Button("OK", ImVec2(BtnSz, 0)))
-  {
-    ImGui::CloseCurrentPopup();
-    ImGui::EndPopup();
-    cb(true);
-    return false;
-  }
+    return DialogState::ok;
   ImGui::SetItemDefaultFocus();
   ImGui::SameLine();
   if (ImGui::Button("Cancel", ImVec2(BtnSz, 0)))
-  {
-    ImGui::CloseCurrentPopup();
-    ImGui::EndPopup();
-    cb(false);
-    return false;
-  }
-  ImGui::EndPopup();
-  return true;
+    return DialogState::cancel;
+  return DialogState::active;
 }

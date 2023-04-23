@@ -12,5 +12,19 @@ auto Dialog::draw() -> bool
   }
   if (!ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     return false;
-  return true;
+
+  switch (internalDraw())
+  {
+  case DialogState::active: ImGui::EndPopup(); return true;
+  case DialogState::ok:
+    ImGui::CloseCurrentPopup();
+    ImGui::EndPopup();
+    cb(true);
+    return false;
+  case DialogState::cancel:
+    ImGui::CloseCurrentPopup();
+    ImGui::EndPopup();
+    cb(false);
+    return false;
+  }
 }

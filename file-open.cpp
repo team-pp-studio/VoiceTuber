@@ -9,11 +9,8 @@ FileOpen::FileOpen(std::string dialogName, Cb aCb)
 {
 }
 
-auto FileOpen::draw() -> bool
+auto FileOpen::internalDraw() -> DialogState
 {
-  if (!Dialog::draw())
-    return false;
-
   if (files.empty())
   {
     // list files and directories in the current directory
@@ -59,10 +56,7 @@ auto FileOpen::draw() -> bool
           else
           {
             selectedFile = file;
-            ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-            cb(true);
-            return false;
+            return DialogState::ok;
           }
         }
         else
@@ -85,23 +79,12 @@ auto FileOpen::draw() -> bool
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);
   if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
-  {
-    ImGui::CloseCurrentPopup();
-    ImGui::EndPopup();
-    cb(true);
-    return false;
-  }
+    return DialogState::ok;
   ImGui::SetItemDefaultFocus();
   ImGui::SameLine();
   if (ImGui::Button("Cancel", ImVec2(BtnSz, 0)))
-  {
-    ImGui::CloseCurrentPopup();
-    ImGui::EndPopup();
-    cb(false);
-    return false;
-  }
-  ImGui::EndPopup();
-  return true;
+    return DialogState::cancel;
+  return DialogState::active;
 }
 
 auto FileOpen::getSelectedFile() const -> std::filesystem::path

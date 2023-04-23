@@ -153,17 +153,17 @@ namespace
 static const char *server = "irc.chat.twitch.tv";
 static const int port = 6667;
 
-Twitch::Twitch(std::string aKey, std::string aUser, std::string aChannel)
-  : key(std::move(aKey)), user(std::move(aUser)), channel(std::move(aChannel))
+Twitch::Twitch(std::string aUser, std::string aKey, std::string aChannel)
+  : user(std::move(aUser)), key(std::move(aKey)), channel(std::move(aChannel))
 {
   NetInitializer::init();
-
   init();
 }
 
 auto Twitch::init() -> void
 {
   LOG("Init", server, ":", port, "user", user, "channel", channel);
+  state = State::connecting;
   IPaddress ip;
   if (SDLNet_ResolveHost(&ip, server, port) < 0)
   {
@@ -396,6 +396,7 @@ auto Twitch::tick(float dt) -> void
           return;
         }
       }
+      state = State::connected;
       return;
     }
     if (command == "PING")
@@ -432,6 +433,7 @@ auto Twitch::unreg(TwitchSink &v) -> void
 
 auto Twitch::initiateRetry() -> void
 {
+  state = State::connecting;
   if (socketSet)
   {
     SDLNet_FreeSocketSet(socketSet);
@@ -444,4 +446,22 @@ auto Twitch::initiateRetry() -> void
   }
   retry = initRetry;
   initRetry = std::min(32.f, initRetry * 2.f);
+}
+
+auto Twitch::updateUserKey(const std::string &aUser, const std::string &aKey) -> void
+{
+  if (user == aUser && key == aKey)
+    return;
+  user = aUser;
+  key = aKey;
+  if (socketSet)
+    SDLNet_FreeSocketSet(socketSet);
+  if (socket)
+    SDLNet_TCP_Close(socket);
+  init();
+}
+
+auto Twitch::isConnected() const -> bool
+{
+  return state == State::connected;
 }

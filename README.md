@@ -130,6 +130,7 @@ considered to further refine and improve the application.
 * **Pocketsphinx** - A speech recognition library that converts spoken language into text.
 * **SDL2** - A cross-platform development library that provides low-level access to audio, keyboard, mouse, and display functions, as well as window management.
 * **SDL2_net** - A cross-platform networking library designed to work with SDL2
+* **cpptoml** - A header-only library for parsing [TOML][toml] configuration files.
 * **log** - Small logging library to simplify debugging and monitoring of application processes.
 * **sdlpp** - A compact C++ wrapper around SDL2, streamlining its integration and usage in C++ applications.
 * **ser** - A lightweight and efficient serialization/deserialization library for C++
