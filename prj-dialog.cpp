@@ -30,7 +30,6 @@ auto PrjDialog::internalDraw() -> DialogState
       {
         dirs.clear();
         selectedDir = "";
-        LOG(1);
         const auto cwd = std::filesystem::current_path();
         std::filesystem::current_path(cwd.parent_path());
       }
@@ -48,7 +47,6 @@ auto PrjDialog::internalDraw() -> DialogState
           std::filesystem::current_path(dir);
           dirs.clear();
           selectedDir = "";
-          LOG(2);
           const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
           if (std::filesystem::exists(projectFilePath))
           {
@@ -58,10 +56,7 @@ auto PrjDialog::internalDraw() -> DialogState
           break;
         }
         else
-        {
           selectedDir = dir.filename().string();
-          LOG(selectedDir);
-        }
       }
     }
     ImGui::EndListBox();
@@ -72,10 +67,7 @@ auto PrjDialog::internalDraw() -> DialogState
   char buf[1024];
   strcpy(buf, selectedDir.data());
   if (ImGui::InputText("##dirname", buf, sizeof(buf)))
-  {
     selectedDir = buf;
-    LOG(selectedDir);
-  }
   ImGui::PopItemWidth();
 
   ImGui::SameLine();
@@ -86,7 +78,6 @@ auto PrjDialog::internalDraw() -> DialogState
       std::filesystem::current_path(selectedDir);
       dirs.clear();
       selectedDir = "";
-      LOG(3);
       const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
       if (std::filesystem::exists(projectFilePath))
         return DialogState::ok;
@@ -102,7 +93,7 @@ auto PrjDialog::internalDraw() -> DialogState
         std::filesystem::current_path(selectedDir);
         dirs.clear();
         selectedDir = "";
-        LOG(4);
+        ImGui::EndDisabled();
         return DialogState::ok;
       }
     }
