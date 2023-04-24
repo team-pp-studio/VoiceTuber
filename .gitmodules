@@ -21,4 +21,4 @@
 	url = https://github.com/mika314/ser.git
 [submodule "3rd-party/cpptoml"]
 	path = 3rd-party/cpptoml
-	url = git@github.com:mika314/cpptoml.git
+	url = https://github.com/mika314/cpptoml.git
