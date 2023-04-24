@@ -105,7 +105,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\cpptoml\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -143,7 +143,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\cpptoml\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -208,11 +208,14 @@
     <ClInclude Include="dialog.hpp" />
     <ClInclude Include="eye.hpp" />
     <ClInclude Include="file-open.hpp" />
+    <ClInclude Include="font.hpp" />
     <ClInclude Include="imgui-impl-opengl3-loader.h" />
     <ClInclude Include="imgui-impl-opengl3.h" />
     <ClInclude Include="imgui-impl-sdl.h" />
     <ClInclude Include="imgui-impl-sdlrenderer.h" />
     <ClInclude Include="lib.hpp" />
+    <ClInclude Include="mouse-sink.hpp" />
+    <ClInclude Include="mouse-tracking.hpp" />
     <ClInclude Include="mouth.hpp" />
     <ClInclude Include="node.hpp" />
     <ClInclude Include="preferences-dialog.hpp" />
@@ -241,6 +244,7 @@
     <ClInclude Include="stb\stb_truetype.h" />
     <ClInclude Include="stb\stb_voxel_render.h" />
     <ClInclude Include="texture.hpp" />
+    <ClInclude Include="twitch.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
@@ -263,11 +267,13 @@
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
+    <ClCompile Include="font.cpp" />
     <ClCompile Include="imgui-impl-opengl3.cpp" />
     <ClCompile Include="imgui-impl-sdl.cpp" />
     <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mouse-tracking.cpp" />
     <ClCompile Include="mouth.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="preferences-dialog.cpp" />
@@ -278,6 +284,7 @@
     <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="stb\stb_vorbis.c" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="twitch.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -16,69 +16,11 @@
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
-    <ClInclude Include="imgui-impl-opengl3.h" />
-    <ClInclude Include="imgui-impl-opengl3-loader.h" />
-    <ClInclude Include="imgui-impl-sdl.h" />
-    <ClInclude Include="imgui-impl-sdlrenderer.h" />
-    <ClInclude Include="stb\stb_c_lexer.h" />
-    <ClInclude Include="stb\stb_connected_components.h" />
-    <ClInclude Include="stb\stb_divide.h" />
-    <ClInclude Include="stb\stb_ds.h" />
-    <ClInclude Include="stb\stb_dxt.h" />
-    <ClInclude Include="stb\stb_easy_font.h" />
-    <ClInclude Include="stb\stb_herringbone_wang_tile.h" />
-    <ClInclude Include="stb\stb_hexwave.h" />
-    <ClInclude Include="stb\stb_image.h" />
-    <ClInclude Include="stb\stb_image_resize.h" />
-    <ClInclude Include="stb\stb_image_write.h" />
-    <ClInclude Include="stb\stb_include.h" />
-    <ClInclude Include="stb\stb_leakcheck.h" />
-    <ClInclude Include="stb\stb_perlin.h" />
-    <ClInclude Include="stb\stb_rect_pack.h" />
-    <ClInclude Include="stb\stb_sprintf.h" />
-    <ClInclude Include="stb\stb_textedit.h" />
-    <ClInclude Include="stb\stb_tilemap_editor.h" />
-    <ClInclude Include="stb\stb_truetype.h" />
-    <ClInclude Include="stb\stb_voxel_render.h" />
-    <ClInclude Include="3rd-party\glm\glm\common.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\exponential.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\ext.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\fwd.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\geometric.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\glm.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\integer.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat2x2.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat2x3.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat2x4.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat3x2.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat3x3.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat3x4.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat4x2.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat4x3.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\mat4x4.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\matrix.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\packing.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\trigonometric.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\vec2.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\vec3.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\vec4.hpp" />
-    <ClInclude Include="3rd-party\glm\glm\vector_relational.hpp" />
-    <ClInclude Include="3rd-party\imgui\imconfig.h" />
-    <ClInclude Include="3rd-party\imgui\imgui.h" />
-    <ClInclude Include="3rd-party\imgui\imgui_internal.h" />
-    <ClInclude Include="3rd-party\imgui\imstb_rectpack.h" />
-    <ClInclude Include="3rd-party\imgui\imstb_textedit.h" />
-    <ClInclude Include="3rd-party\imgui\imstb_truetype.h" />
     <ClInclude Include="3rd-party\log\log.hpp" />
-    <ClInclude Include="3rd-party\sdlpp\sdlpp.hpp" />
     <ClInclude Include="3rd-party\ser\is_serializable.hpp" />
     <ClInclude Include="3rd-party\ser\istrm.hpp" />
     <ClInclude Include="3rd-party\ser\macro.hpp" />
-    <ClInclude Include="3rd-party\ser\ostrm.hpp" />
-    <ClInclude Include="3rd-party\ser\overloaded.hpp" />
-    <ClInclude Include="3rd-party\ser\proto.hpp" />
     <ClInclude Include="3rd-party\ser\schema.hpp" />
-    <ClInclude Include="3rd-party\ser\ser.hpp" />
     <ClInclude Include="eye.hpp" />
     <ClInclude Include="texture.hpp" />
     <ClInclude Include="channel-dialog.hpp" />
@@ -87,6 +29,184 @@
     <ClInclude Include="lib.hpp" />
     <ClInclude Include="preferences.hpp" />
     <ClInclude Include="preferences-dialog.hpp" />
+    <ClInclude Include="mouse-sink.hpp" />
+    <ClInclude Include="mouse-tracking.hpp" />
+    <ClInclude Include="font.hpp" />
+    <ClInclude Include="twitch.hpp" />
+    <ClInclude Include="3rd-party\imgui\imgui.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\imgui\imgui_internal.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-impl-opengl3.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-impl-opengl3-loader.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-impl-sdl.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui-impl-sdlrenderer.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\imgui\imstb_rectpack.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\imgui\imstb_textedit.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\imgui\imstb_truetype.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\integer.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\glm.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\imgui\imconfig.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\fwd.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat2x2.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat2x3.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat2x4.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat3x2.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat3x3.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat3x4.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat4x2.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat4x3.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\mat4x4.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\matrix.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_c_lexer.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_connected_components.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_divide.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_ds.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_dxt.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_easy_font.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_herringbone_wang_tile.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_hexwave.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_image.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_image_resize.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_image_write.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_include.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_leakcheck.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_perlin.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_rect_pack.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_sprintf.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_textedit.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_tilemap_editor.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_truetype.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_voxel_render.h">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\vec2.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\vec3.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\vec4.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\vector_relational.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\trigonometric.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\common.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\ext.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\ser\ostrm.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\ser\overloaded.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\packing.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\sdlpp\sdlpp.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\ser\ser.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\ser\proto.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\exponential.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd-party\glm\glm\geometric.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim-sprite.cpp" />
@@ -94,25 +214,13 @@
     <ClCompile Include="audio-capture.cpp" />
     <ClCompile Include="bouncer.cpp" />
     <ClCompile Include="file-open.cpp" />
-    <ClCompile Include="imgui-impl-opengl3.cpp" />
-    <ClCompile Include="imgui-impl-sdl.cpp" />
-    <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mouth.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="prj-dialog.cpp" />
     <ClCompile Include="save-factory.cpp" />
     <ClCompile Include="sprite.cpp" />
-    <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
-    <ClCompile Include="stb\stb_vorbis.c" />
-    <ClCompile Include="3rd-party\imgui\imgui.cpp" />
-    <ClCompile Include="3rd-party\imgui\imgui_demo.cpp" />
-    <ClCompile Include="3rd-party\imgui\imgui_draw.cpp" />
-    <ClCompile Include="3rd-party\imgui\imgui_tables.cpp" />
-    <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="3rd-party\ser\proto.cpp" />
-    <ClCompile Include="3rd-party\ser\ser.cpp" />
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="channel-dialog.cpp" />
@@ -121,5 +229,49 @@
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="preferences.cpp" />
     <ClCompile Include="preferences-dialog.cpp" />
+    <ClCompile Include="mouse-tracking.cpp" />
+    <ClCompile Include="font.cpp" />
+    <ClCompile Include="twitch.cpp" />
+    <ClCompile Include="3rd-party\imgui\imgui.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\imgui\imgui_demo.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\imgui\imgui_draw.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\imgui\imgui_tables.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-impl-opengl3.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-impl-sdl.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-impl-sdlrenderer.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="stb\stb_vorbis.c">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="stb-image.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\ser\ser.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="3rd-party\ser\proto.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="3rd-party">
+      <UniqueIdentifier>{36d646fd-996c-4edb-a561-cea7eeaf2f61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
