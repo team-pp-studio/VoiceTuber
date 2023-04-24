@@ -91,18 +91,18 @@ auto App::renderUi(float /*dt*/) -> void
         if (ImGui::MenuItem("Mouth..."))
           dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](bool r, const auto &filePath) {
             if (r)
-              addNode(Mouth::className, filePath);
+              addNode(Mouth::className, filePath.string());
           });
         if (ImGui::MenuItem("Eye..."))
           dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](bool r, const auto &filePath) {
             if (r)
-              addNode(Eye::className, filePath);
+              addNode(Eye::className, filePath.string());
           });
 
         if (ImGui::MenuItem("Sprite..."))
           dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](bool r, const auto &filePath) {
             if (r)
-              addNode(AnimSprite::className, filePath);
+              addNode(AnimSprite::className, filePath.string());
           });
 
         if (ImGui::MenuItem("Twitch Chat..."))

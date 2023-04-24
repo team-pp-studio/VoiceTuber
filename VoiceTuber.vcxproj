@@ -105,13 +105,13 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\SDL2_ttf\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -143,7 +143,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..;3rd-party;3rd-party\SDL2\include;3rd-party\glm;3rd-party\SDL2_ttf\include;3rd-party\SDL2_net\include;3rd-party\pocketsphinx\bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -151,8 +151,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rd-party\SDL2_net\lib\x64;3rd-party\SDL2\lib\x64;3rd-party\SDL2_ttf\lib\x64;3rd-party\pocketsphinx\bin\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;SDL2.lib;SDL2main.lib;pocketsphinx.lib;SDL2_net.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
@@ -203,14 +203,20 @@
     <ClInclude Include="audio-capture.hpp" />
     <ClInclude Include="audio-sink.hpp" />
     <ClInclude Include="bouncer.hpp" />
+    <ClInclude Include="channel-dialog.hpp" />
+    <ClInclude Include="chat.hpp" />
+    <ClInclude Include="dialog.hpp" />
     <ClInclude Include="eye.hpp" />
     <ClInclude Include="file-open.hpp" />
     <ClInclude Include="imgui-impl-opengl3-loader.h" />
     <ClInclude Include="imgui-impl-opengl3.h" />
     <ClInclude Include="imgui-impl-sdl.h" />
     <ClInclude Include="imgui-impl-sdlrenderer.h" />
+    <ClInclude Include="lib.hpp" />
     <ClInclude Include="mouth.hpp" />
     <ClInclude Include="node.hpp" />
+    <ClInclude Include="preferences-dialog.hpp" />
+    <ClInclude Include="preferences.hpp" />
     <ClInclude Include="prj-dialog.hpp" />
     <ClInclude Include="save-factory.hpp" />
     <ClInclude Include="sprite.hpp" />
@@ -234,7 +240,6 @@
     <ClInclude Include="stb\stb_tilemap_editor.h" />
     <ClInclude Include="stb\stb_truetype.h" />
     <ClInclude Include="stb\stb_voxel_render.h" />
-    <ClInclude Include="tex-lib.hpp" />
     <ClInclude Include="texture.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
@@ -253,20 +258,25 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="audio-capture.cpp" />
     <ClCompile Include="bouncer.cpp" />
+    <ClCompile Include="channel-dialog.cpp" />
+    <ClCompile Include="chat.cpp" />
+    <ClCompile Include="dialog.cpp" />
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
     <ClCompile Include="imgui-impl-opengl3.cpp" />
     <ClCompile Include="imgui-impl-sdl.cpp" />
     <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
+    <ClCompile Include="lib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mouth.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="preferences-dialog.cpp" />
+    <ClCompile Include="preferences.cpp" />
     <ClCompile Include="prj-dialog.cpp" />
     <ClCompile Include="save-factory.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="stb\stb_vorbis.c" />
-    <ClCompile Include="tex-lib.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>

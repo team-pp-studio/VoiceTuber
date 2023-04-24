@@ -80,8 +80,13 @@
     <ClInclude Include="3rd-party\ser\schema.hpp" />
     <ClInclude Include="3rd-party\ser\ser.hpp" />
     <ClInclude Include="eye.hpp" />
-    <ClInclude Include="tex-lib.hpp" />
     <ClInclude Include="texture.hpp" />
+    <ClInclude Include="channel-dialog.hpp" />
+    <ClInclude Include="chat.hpp" />
+    <ClInclude Include="dialog.hpp" />
+    <ClInclude Include="lib.hpp" />
+    <ClInclude Include="preferences.hpp" />
+    <ClInclude Include="preferences-dialog.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="anim-sprite.cpp" />
@@ -109,7 +114,12 @@
     <ClCompile Include="3rd-party\ser\proto.cpp" />
     <ClCompile Include="3rd-party\ser\ser.cpp" />
     <ClCompile Include="eye.cpp" />
-    <ClCompile Include="tex-lib.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="channel-dialog.cpp" />
+    <ClCompile Include="chat.cpp" />
+    <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="lib.cpp" />
+    <ClCompile Include="preferences.cpp" />
+    <ClCompile Include="preferences-dialog.cpp" />
   </ItemGroup>
 </Project>
