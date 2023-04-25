@@ -36,6 +36,7 @@ private:
   std::unique_ptr<Dialog> dialog = nullptr;
   std::unique_ptr<Node> root;
   bool showUi = true;
+  std::vector<std::function<auto()->void>> postponedActions;
 
   auto addNode(const std::string &class_, const std::string &name) -> void;
   auto cancel() -> void;

@@ -56,6 +56,7 @@ auto FileOpen::internalDraw() -> DialogState
           else
           {
             selectedFile = file;
+            ImGui::EndListBox();
             return DialogState::ok;
           }
         }
@@ -78,8 +79,10 @@ auto FileOpen::internalDraw() -> DialogState
 
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);
+  ImGui::BeginDisabled(selectedFile.empty());
   if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
     return DialogState::ok;
+  ImGui::EndDisabled();
   ImGui::SetItemDefaultFocus();
   ImGui::SameLine();
   if (ImGui::Button("Cancel", ImVec2(BtnSz, 0)))

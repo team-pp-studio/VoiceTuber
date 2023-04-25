@@ -5,6 +5,7 @@
 #include "chat.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
+#include "message-dialog.hpp"
 #include "mouth.hpp"
 #include "preferences-dialog.hpp"
 #include "prj-dialog.hpp"
@@ -164,6 +165,9 @@ auto App::renderUi(float /*dt*/) -> void
       selected->renderUi();
     ImGui::End();
   }
+  for (auto &action : postponedActions)
+    action();
+  postponedActions.clear();
 }
 
 auto App::processIo() -> void
@@ -371,11 +375,20 @@ auto App::savePrj() -> void
 
 auto App::addNode(const std::string &class_, const std::string &name) -> void
 {
-  auto node = saveFactory.ctor(class_, name);
-  auto oldSelected = selected;
-  selected = node.get();
-  if (!oldSelected)
-    root->addChild(std::move(node));
-  else
-    oldSelected->addChild(std::move(node));
+  try
+  {
+    auto node = saveFactory.ctor(class_, name);
+    auto oldSelected = selected;
+    selected = node.get();
+    if (!oldSelected)
+      root->addChild(std::move(node));
+    else
+      oldSelected->addChild(std::move(node));
+  }
+  catch (const std::runtime_error &e)
+  {
+    postponedActions.emplace_back(
+      [&]() { dialog = std::make_unique<MessageDialog>("Error", e.what()); });
+    LOG(e.what());
+  }
 };
