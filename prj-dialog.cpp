@@ -11,7 +11,7 @@ auto PrjDialog::internalDraw() -> DialogState
   availableSpace.x = std::max(availableSpace.x, 500.f);
   availableSpace.y = std::max(availableSpace.y, 250.f);
   // Adjust the width of the ListBox
-  ImVec2 listBoxSize(availableSpace.x, availableSpace.y - 25); // Adjust the width and height as needed
+  ImVec2 listBoxSize(availableSpace.x, availableSpace.y - 30); // Adjust the width and height as needed
   if (dirs.empty())
   {
     const auto cwd = std::filesystem::current_path();

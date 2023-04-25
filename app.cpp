@@ -40,7 +40,7 @@ auto App::render(float dt) -> void
 {
   if (!root)
   {
-    glClearColor(.5f, .5f, .5f, 1.f);
+    glClearColor(0x45 / 255.f, 0x44 / 255.f, 0x7d / 255.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     return;
   }
@@ -303,6 +303,7 @@ auto App::renderTree(Node &v) -> void
   const auto &nodes = v.getNodes();
   if (!nodes.empty())
   {
+    nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
     const auto nodeOpen = ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() && &v != root.get())
       selected = &v;

@@ -66,7 +66,7 @@ int main(int, char **)
     (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 
   auto window =
-    sdl::Window{"VoiceTuber", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 0, 0, window_flags};
+    sdl::Window{"VoiceTuber", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, window_flags};
   SDL_GLContext gl_context = SDL_GL_CreateContext(window.get());
   SDL_GL_MakeCurrent(window.get(), gl_context);
 
@@ -94,7 +94,61 @@ int main(int, char **)
   {
     style.WindowRounding = 0.f;
     style.FrameRounding = 5.f;
-    style.Colors[ImGuiCol_WindowBg].w = .8f;
+    style.Colors[ImGuiCol_Text] = ImVec4{0xff / 255.f, 0xff / 255.f, 0xff / 255.f, 1.f};
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4{0xc0 / 255.f, 0xc0 / 255.f, 0xc0 / 255.f, 1.f};
+    style.Colors[ImGuiCol_WindowBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, .8f};
+    style.Colors[ImGuiCol_ChildBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, 1.f};
+    style.Colors[ImGuiCol_PopupBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, 1.f};
+    style.Colors[ImGuiCol_Border] = ImVec4{0x6f / 255.f, 0x7d / 255.f, 0xaa / 255.f, 1.f};
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4{0x56 / 255.f, 0x58 / 255.f, 0x8d / 255.f, 1.f};
+    style.Colors[ImGuiCol_FrameBg] = ImVec4{0x6f / 255.f, 0x7d / 255.f, 0xaa / 255.f, 1.f};
+    // ImGuiCol_FrameBgHovered,
+    // ImGuiCol_FrameBgActive,
+    style.Colors[ImGuiCol_TitleBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, 1.f};
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, .1f};
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4{0x8f / 255.f, 0x9d / 255.f, 0xca / 255.f, 1.f};
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, 1.f};
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4{0x7f / 255.f, 0x8d / 255.f, 0xba / 255.f, 1.f};
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4{0xbb / 255.f, 0xc4 / 255.f, 0xdc / 255.f, 1.f};
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4{0xcb / 255.f, 0xd4 / 255.f, 0xec / 255.f, 1.f};
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4{0xdb / 255.f, 0xe4 / 255.f, 0xfc / 255.f, 1.f};
+    style.Colors[ImGuiCol_CheckMark] = ImVec4{0xbb / 255.f, 0xc4 / 255.f, 0xdc / 255.f, 1.f};
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4{0xbb / 255.f, 0xc4 / 255.f, 0xdc / 255.f, 1.f};
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4{0xcb / 255.f, 0xd4 / 255.f, 0xec / 255.f, 1.f};
+    style.Colors[ImGuiCol_Button] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, 1.f};
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4{0xe3 / 255.f, 0xbc / 255.f, 0xdb / 255.f, 1.f};
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4{0xf3 / 255.f, 0xcc / 255.f, 0xeb / 255.f, 1.f};
+    style.Colors[ImGuiCol_Header] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, 1.f};
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4{0xe3 / 255.f, 0xbc / 255.f, 0xdb / 255.f, 1.f};
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4{0xf3 / 255.f, 0xcc / 255.f, 0xeb / 255.f, 1.f};
+    // ImGuiCol_Separator,
+    // ImGuiCol_SeparatorHovered,
+    // ImGuiCol_SeparatorActive,
+    // ImGuiCol_ResizeGrip,
+    // ImGuiCol_ResizeGripHovered,
+    // ImGuiCol_ResizeGripActive,
+    style.Colors[ImGuiCol_Tab] = ImVec4{0xb1 / 255.f, 0x9e / 255.f, 0xc2 / 255.f, 1.f};
+    style.Colors[ImGuiCol_TabHovered] = ImVec4{0xe3 / 255.f, 0xbc / 255.f, 0xdb / 255.f, 1.f};
+    style.Colors[ImGuiCol_TabActive] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, 1.f};
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4{0xb1 / 255.f, 0x9e / 255.f, 0xc2 / 255.f, 1.f};
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, 1.f};
+    // ImGuiCol_DockingPreview,        // Preview overlay color when about to docking something
+    // ImGuiCol_DockingEmptyBg,
+    // ImGuiCol_PlotLines,
+    // ImGuiCol_PlotLinesHovered,
+    // ImGuiCol_PlotHistogram,
+    // ImGuiCol_PlotHistogramHovered,
+    // ImGuiCol_TableHeaderBg,         // Table header background
+    // ImGuiCol_TableBorderStrong,     // Table outer and header borders (prefer using Alpha=1.0 here)
+    // ImGuiCol_TableBorderLight,      // Table inner borders (prefer using Alpha=1.0 here)
+    // ImGuiCol_TableRowBg,            // Table row background (even rows)
+    // ImGuiCol_TableRowBgAlt,         // Table row background (odd rows)
+    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4{0xd3 / 255.f, 0xac / 255.f, 0xcb / 255.f, 1.f};
+    // ImGuiCol_DragDropTarget,        // Rectangle highlighting a drop target
+    // ImGuiCol_NavHighlight,          // Gamepad/keyboard: current highlighted item
+    // ImGuiCol_NavWindowingHighlight, // Highlight window when using CTRL+TAB
+    // ImGuiCol_NavWindowingDimBg,
+    // style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4{0x6f / 255.f, 0x7d / 255.f, 0xaa / 255.f, 1.f};
   }
 
   // Setup Platform/Renderer backends
@@ -120,7 +174,7 @@ int main(int, char **)
   // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+  io.Fonts->AddFontFromFileTTF("notepad_font/NotepadFont.ttf", 17.5f);
   // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
   // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 

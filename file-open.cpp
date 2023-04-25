@@ -81,7 +81,10 @@ auto FileOpen::internalDraw() -> DialogState
   ImGui::SameLine(700 - 2 * BtnSz - 10);
   ImGui::BeginDisabled(selectedFile.empty());
   if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
+  {
+    ImGui::EndDisabled();
     return DialogState::ok;
+  }
   ImGui::EndDisabled();
   ImGui::SetItemDefaultFocus();
   ImGui::SameLine();
