@@ -243,6 +243,10 @@ auto App::processIo() -> void
           auto parent = selected->parent();
           selected = n.get();
           parent->addChild(std::move(n));
+          editMode = EditMode::translate;
+          int mouseX, mouseY;
+          SDL_GetMouseState(&mouseX, &mouseY);
+          selected->translateStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
         }
       }
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))

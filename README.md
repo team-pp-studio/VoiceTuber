@@ -146,14 +146,14 @@ considered to further refine and improve the application.
 - [ ] (feature) undo
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [ ] add "add" buttons in the add menu
+- [x] add "add" buttons in the add menu
 - [x] (bug) pressing "Open" if nothing is selected crashes
 - [ ] (bug) changing the disk does not work
 - [ ] (bug) .. is confusing
-- [ ] (bug) after pressing d, make it g
+- [x] (bug) after pressing d, make it g
 - [ ] (feature) each node can have different amount of bounce
 - [ ] (feature) support for transparency
-- [ ] double-click to enable editing
+- [x] double-click to enable editing
 - [ ] drag&drop nodes in the hierarchy
 - [ ] TikTok companion app
 - [ ] outdoor streaming from the phone wiht PNGTuber overlay
