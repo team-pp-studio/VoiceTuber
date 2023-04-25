@@ -36,7 +36,7 @@ and equipment.
 
 ### 2.3. Streaming Platform Integration
 
-- [ ]  Twitch chat integration for seamless viewer interaction
+- [x]  Twitch chat integration for seamless viewer interaction
 - [ ]  Interactive features using Twitch bits or reward points, such as throwing objects at the model
 
 ### 2.4. Expression and Gesture Presets
@@ -50,7 +50,7 @@ and equipment.
 - [ ]  Customizable transitions for a professional and polished presentation
 
 ### 2.6. Mouse Tracking for Eye and Body Movements
-- [ ]  Avatar's eyes follow the user's cursor for a more lifelike and responsive experience
+- [x]  Avatar's eyes follow the user's cursor for a more lifelike and responsive experience
 - [ ]  Post-processing pass and body morphing based on mouse position, creating an effect where the body of the model follows the mouse
 
 ### 2.7. Audio Analysis for Animation Triggers
@@ -147,6 +147,13 @@ considered to further refine and improve the application.
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
 - [ ] add "add" buttons in the add menu
+- [ ] (bug) pressing "Open" if nothing is selected crashes
+- [ ] (bug) changing the disk does not work
+- [ ] (bug) .. is confusing
+- [ ] (bug) after pressing d, make it g
+- [ ] (feature) each node can have different amount of bounce
+- [ ] (feature) support for transparency
+
 
 9\. Unorgonized Ideas
 ---------------------
@@ -173,13 +180,11 @@ Minigames
 5.* FISHING MINIGAME (I have no idea, but fishing minigame)
 6.* COOKING/BAKING MINIGAME (Wichit loves cooking minigames.)
 
-
 extension necessary ideas
 * - items from previous list that may or may not benefit from this
 
 1. Draw the streamer a asset or shirt decal in browser. (will be approved by the streamer before being uploaded.)
 2. Move the vtuber or chat tts anywhere on the screen.
-
 
 10\. Build Instructions
 -----------------------

@@ -323,6 +323,8 @@ static const auto ver = uint32_t{2};
 
 auto App::loadPrj() -> void
 {
+  ImGui::LoadIniSettingsFromDisk("imgui.ini");
+
   std::ifstream st("prj.tpp", std::ofstream::binary);
   if (!st)
   {
