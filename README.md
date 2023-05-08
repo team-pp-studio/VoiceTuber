@@ -160,6 +160,7 @@ considered to further refine and improve the application.
 - [ ] stream directly from VoiceTuber
 - [ ] twitch extention (triggers for bits)
 - [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
+- [ ] (feature) automatically detect sprite sheets
 
 9\. Unorgonized Ideas
 ---------------------
