@@ -161,7 +161,8 @@ considered to further refine and improve the application.
 - [ ] twitch extention (triggers for bits)
 - [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [ ] (feature) automatically detect sprite sheets
-- [ ] (bug) Crash if an image is deleted from the project.
+- [ ] (bug) crash if an image is deleted from the project
+- [ ] (bug) there are some transparency issues
 
 9\. Unorgonized Ideas
 ---------------------
