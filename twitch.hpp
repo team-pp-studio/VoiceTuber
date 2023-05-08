@@ -2,13 +2,14 @@
 #include "twitch-sink.hpp"
 #include <SDL_net.h>
 #include <deque>
+#include <functional>
 #include <string>
 #include <vector>
 
 class Twitch
 {
 public:
-  Twitch(std::string user, std::string key, std::string channel);
+  Twitch(class Uv &, std::string user, std::string key, std::string channel);
   Twitch(const Twitch &) = delete;
   ~Twitch();
   auto isConnected() const -> bool;
@@ -18,6 +19,7 @@ public:
   auto updateUserKey(const std::string &user, const std::string &key) -> void;
 
 private:
+  std::reference_wrapper<Uv> uv;
   std::string user;
   std::string key;
   std::string channel;

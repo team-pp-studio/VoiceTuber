@@ -20,7 +20,7 @@ auto Lib::queryTex(const std::string &v) -> std::shared_ptr<const Texture>
   return shared;
 }
 
-auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
+auto Lib::queryTwitch(class Uv &uv, const std::string &v) -> std::shared_ptr<Twitch>
 {
   auto it = twitchChannels.find(v);
   if (it != std::end(twitchChannels))
@@ -30,7 +30,8 @@ auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
       return shared;
     twitchChannels.erase(it);
   }
-  auto shared = std::make_shared<Twitch>(preferences.get().twitchUser, preferences.get().twitchKey, v);
+  auto shared =
+    std::make_shared<Twitch>(uv, preferences.get().twitchUser, preferences.get().twitchKey, v);
   auto tmp = twitchChannels.emplace(v, shared);
   assert(tmp.second);
   return shared;

@@ -3,10 +3,10 @@
 #include <log/log.hpp>
 #include <sstream>
 
-Chat::Chat(class Lib &aLib, std::string n)
+Chat::Chat(class Lib &aLib, class Uv &uv, std::string n)
   : Node(n),
     lib(aLib),
-    twitch(aLib.queryTwitch(n)),
+    twitch(aLib.queryTwitch(uv, n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"notepad_font/NotepadFont.ttf"}, ptsize))
 {
   twitch->reg(*this);

@@ -33,7 +33,7 @@ App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()), li
   saveFactory.reg<Eye>(
     [this](std::string name) { return std::make_unique<Eye>(mouseTracking, lib, std::move(name)); });
   saveFactory.reg<Chat>(
-    [this](std::string name) { return std::make_unique<Chat>(lib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Chat>(lib, uv, std::move(name)); });
 }
 
 auto App::render(float dt) -> void
@@ -276,6 +276,7 @@ auto App::tick(float dt) -> void
 {
   audioCapture.tick();
   lib.tick(dt);
+  uv.tick();
 
   if (!root)
     return;

@@ -8,23 +8,6 @@
 
 namespace
 {
-  class NetInitializer
-  {
-  public:
-    NetInitializer()
-    {
-      const auto s = SDLNet_Init();
-      if (s < 0)
-      {
-        std::ostringstream ss;
-        ss << "Network initializetion failed: " << s;
-        throw std::runtime_error(ss.str());
-      }
-    }
-    ~NetInitializer() { SDLNet_Quit(); }
-    static auto init() -> void { static NetInitializer inst; }
-  };
-
   const char *RPL_WELCOME = "001";
   //  const char *RPL_YOURHOST = "002";
   //  const char *RPL_CREATED = "003";
@@ -153,10 +136,9 @@ namespace
 static const char *server = "irc.chat.twitch.tv";
 static const int port = 6667;
 
-Twitch::Twitch(std::string aUser, std::string aKey, std::string aChannel)
-  : user(std::move(aUser)), key(std::move(aKey)), channel(std::move(aChannel))
+Twitch::Twitch(class Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
+  : uv(uv), user(std::move(aUser)), key(std::move(aKey)), channel(std::move(aChannel))
 {
-  NetInitializer::init();
   init();
 }
 

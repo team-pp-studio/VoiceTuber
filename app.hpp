@@ -6,6 +6,7 @@
 #include "preferences.hpp"
 #include "save-factory.hpp"
 #include "twitch.hpp"
+#include "uv.hpp"
 #include "wav-2-visemes.hpp"
 #include <functional>
 #include <glm/gtc/type_ptr.hpp>
@@ -23,6 +24,7 @@ public:
   auto savePrj() -> void;
 
 private:
+  Uv uv;
   Preferences preferences;
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
