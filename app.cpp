@@ -272,10 +272,9 @@ auto App::cancel() -> void
   editMode = EditMode::select;
 }
 
-auto App::tick(float dt) -> void
+auto App::tick(float /*dt*/) -> void
 {
   audioCapture.tick();
-  lib.tick(dt);
   uv.tick();
 
   if (!root)

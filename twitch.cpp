@@ -134,111 +134,86 @@ namespace
 } // namespace
 
 static const char *server = "irc.chat.twitch.tv";
-static const int port = 6667;
+static const char *port = "6667";
 
 Twitch::Twitch(class Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
-  : uv(uv), user(std::move(aUser)), key(std::move(aKey)), channel(std::move(aChannel))
+  : uv(uv),
+    user(std::move(aUser)),
+    key(std::move(aKey)),
+    channel(std::move(aChannel)),
+    retry(uv.getTimer())
 {
   init();
 }
 
 auto Twitch::init() -> void
 {
-  LOG("Init", server, ":", port, "user", user, "channel", channel);
+  LOG("Init:", server, ":", port, "user", user, "channel", channel);
   state = State::connecting;
-  IPaddress ip;
-  if (SDLNet_ResolveHost(&ip, server, port) < 0)
-  {
-    LOG("SDLNet_ResolveHost() failed:", SDLNet_GetError());
-    retry = initRetry;
-    initRetry = std::min(32.f, initRetry * 2.f);
-    return;
-  }
+  retry.stop();
 
-  socket = SDLNet_TCP_Open(&ip);
-  if (!socket)
-  {
-    LOG("SDLNet_TCP_Open() failed:", SDLNet_GetError());
-    retry = initRetry;
-    initRetry = std::min(32.f, initRetry * 2.f);
-    return;
-  }
-
-  {
-    std::ostringstream msg;
-    msg << "PASS " << key << "\r\n";
-    const auto sz = static_cast<int>(msg.str().size());
-    if (SDLNet_TCP_Send(socket, msg.str().c_str(), sz) < sz)
+  auto s = uv.get().connect(server, port, [this](int status, Tcp aTcp) {
+    if (status < 0)
     {
-      LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
+      LOG(__func__, "error:", uv_err_name(status));
       initiateRetry();
       return;
     }
-  }
-
+    tcp = std::move(aTcp);
+    sendPassNickUser();
+  });
+  if (s < 0)
   {
-    std::ostringstream msg;
-    msg << "NICK " << user << "\r\n";
-    const auto sz = static_cast<int>(msg.str().size());
-    if (SDLNet_TCP_Send(socket, msg.str().c_str(), sz) < sz)
-    {
-      LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-      initiateRetry();
-      return;
-    }
-  }
-
-  {
-    const char *msg = "USER nobody unknown unknown :noname\r\n";
-    if (SDLNet_TCP_Send(socket, msg, static_cast<int>(strlen(msg))) < static_cast<int>(strlen(msg)))
-    {
-      LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-      initiateRetry();
-      return;
-    }
-  }
-  socketSet = SDLNet_AllocSocketSet(1);
-  SDLNet_TCP_AddSocket(socketSet, socket);
-}
-
-Twitch::~Twitch()
-{
-  if (socketSet)
-    SDLNet_FreeSocketSet(socketSet);
-  if (socket)
-    SDLNet_TCP_Close(socket);
-}
-
-auto Twitch::tick(float dt) -> void
-{
-  if (!socketSet)
-  {
-    assert(!socket);
-    retry -= dt;
-    if (retry > 0.f)
-      return;
-    init();
-  }
-
-  initRetry = std::max(initRetry - dt, 1.f);
-  auto numReady = SDLNet_CheckSockets(socketSet, 0);
-  if (numReady < 0)
-  {
-    LOG("SDLNet_CheckSockets() failed:", SDLNet_GetError());
+    LOG(__func__, "error:", uv_err_name(s));
     initiateRetry();
     return;
   }
-  if (!SDLNet_SocketReady(socket))
-    return;
-  char buffer[1024];
-  const auto bytesReceived = SDLNet_TCP_Recv(socket, buffer, sizeof(buffer));
-  if (bytesReceived <= 0)
+}
+
+auto Twitch::sendPassNickUser() -> void
+{
+  std::ostringstream msg;
+  msg << "PASS " << key << "\r\n";
+  msg << "NICK " << user << "\r\n";
+  msg << "USER nobody unknown unknown :noname\r\n";
+  auto s = tcp.write(msg.str(), [this](int status) {
+    if (status < 0)
+    {
+      LOG(__func__, "error:", uv_err_name(status));
+      initiateRetry();
+      return;
+    }
+    readStart();
+  });
+  if (s < 0)
   {
-    LOG("SDLNet_TCP_Recv() failed: \"", SDLNet_GetError(), "\" bytesReceived:", bytesReceived);
+    LOG(__func__, "error:", uv_err_name(s));
     initiateRetry();
     return;
   }
-  buf.insert(std::end(buf), buffer, buffer + bytesReceived);
+}
+
+auto Twitch::readStart() -> void
+{
+  auto s = tcp.readStart([this](int status, std::string msg) {
+    if (status < 0)
+    {
+      LOG(__func__, "error:", uv_err_name(status));
+      initiateRetry();
+    }
+    buf.insert(std::end(buf), std::begin(msg), std::end(msg));
+    parseMsg();
+  });
+  if (s < 0)
+  {
+    LOG(__func__, "error:", uv_err_name(s));
+    initiateRetry();
+    return;
+  }
+}
+
+auto Twitch::parseMsg() -> void
+{
   for (;;)
   {
     auto it = std::find(std::begin(buf), std::end(buf), '\n');
@@ -345,60 +320,62 @@ auto Twitch::tick(float dt) -> void
     }
 
     if (command == RPL_WELCOME)
-    {
-      {
-        const char *sendMsg = "CAP REQ :twitch.tv/tags\r\n";
-        if (SDLNet_TCP_Send(socket, sendMsg, static_cast<int>(strlen(sendMsg))) <
-            static_cast<int>(strlen(sendMsg)))
-        {
-          LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-          initiateRetry();
-          return;
-        }
-      }
-      {
-        const char *sendMsg = "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n";
-        if (SDLNet_TCP_Send(socket, sendMsg, static_cast<int>(strlen(sendMsg))) <
-            static_cast<int>(strlen(sendMsg)))
-        {
-          LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-          initiateRetry();
-          return;
-        }
-      }
-
-      {
-        std::ostringstream sendMsg;
-        sendMsg << "JOIN #" << channel << "\r\n";
-        const auto sz = static_cast<int>(sendMsg.str().size());
-        if (SDLNet_TCP_Send(socket, sendMsg.str().c_str(), sz) < sz)
-        {
-          LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-          initiateRetry();
-          return;
-        }
-      }
-      state = State::connected;
-      return;
-    }
-    if (command == "PING")
+      onWelcome();
+    else if (command == "PING")
     {
       if (parameters.empty())
       {
         LOG("Parameters on PING message are empty");
         return;
       }
-      std::ostringstream sendMsg;
-      sendMsg << "PONG " << parameters[0] << "\r\n";
-      const auto sz = static_cast<int>(sendMsg.str().size());
-      if (SDLNet_TCP_Send(socket, sendMsg.str().c_str(), sz) < sz)
-      {
-        LOG("SDLNet_TCP_Send() failed:", SDLNet_GetError());
-        initiateRetry();
-        return;
-      }
+      onPing(parameters[0]);
     }
   }
+}
+
+auto Twitch::onPing(const std::string &val) -> void
+{
+  std::ostringstream sendMsg;
+  sendMsg << "PONG " << val << "\r\n";
+  auto s = tcp.write(sendMsg.str(), [this](int status) {
+    if (status < 0)
+    {
+      LOG(__func__, "error:", uv_err_name(status));
+      initiateRetry();
+      return;
+    }
+  });
+  if (s < 0)
+  {
+    LOG(__func__, "error:", uv_err_name(s));
+    initiateRetry();
+    return;
+  }
+}
+
+auto Twitch::onWelcome() -> void
+{
+  std::ostringstream msg;
+  msg << "CAP REQ :twitch.tv/tags\r\n"
+      << "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n"
+      << "JOIN #" << channel << "\r\n";
+  auto s = tcp.write(msg.str(), [this](int status) {
+    if (status < 0)
+    {
+      LOG(__func__, "error:", uv_err_name(status));
+      initiateRetry();
+      return;
+    }
+  });
+  if (s < 0)
+  {
+    LOG(__func__, "error:", uv_err_name(s));
+    initiateRetry();
+    return;
+  }
+  LOG("Connected to twitch");
+  state = State::connected;
+  initRetry = 1000;
 }
 
 auto Twitch::reg(TwitchSink &v) -> void
@@ -416,18 +393,9 @@ auto Twitch::unreg(TwitchSink &v) -> void
 auto Twitch::initiateRetry() -> void
 {
   state = State::connecting;
-  if (socketSet)
-  {
-    SDLNet_FreeSocketSet(socketSet);
-    socketSet = nullptr;
-  }
-  if (socket)
-  {
-    SDLNet_TCP_Close(socket);
-    socket = nullptr;
-  }
-  retry = initRetry;
-  initRetry = std::min(32.f, initRetry * 2.f);
+  retry.start([this]() { init(); }, initRetry);
+  LOG("Retry in ", initRetry);
+  initRetry = std::min(32000, initRetry * 2);
 }
 
 auto Twitch::updateUserKey(const std::string &aUser, const std::string &aKey) -> void
@@ -436,10 +404,6 @@ auto Twitch::updateUserKey(const std::string &aUser, const std::string &aKey) ->
     return;
   user = aUser;
   key = aKey;
-  if (socketSet)
-    SDLNet_FreeSocketSet(socketSet);
-  if (socket)
-    SDLNet_TCP_Close(socket);
   init();
 }
 

@@ -53,17 +53,6 @@ auto Lib::queryFont(const std::string &path, int size) -> std::shared_ptr<Font>
   return shared;
 }
 
-auto Lib::tick(float dt) -> void
-{
-  for (auto &twitch : twitchChannels)
-  {
-    auto l = twitch.second.lock();
-    if (!l)
-      continue;
-    l->tick(dt);
-  }
-}
-
 auto Lib::flush() -> void
 {
   for (auto &twitch : twitchChannels)

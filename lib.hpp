@@ -14,7 +14,6 @@ public:
   auto queryFont(const std::string &, int size) -> std::shared_ptr<Font>;
   auto queryTex(const std::string &) -> std::shared_ptr<const Texture>;
   auto queryTwitch(class Uv &, const std::string &) -> std::shared_ptr<Twitch>;
-  auto tick(float dt) -> void;
 
 private:
   std::reference_wrapper<Preferences> preferences;

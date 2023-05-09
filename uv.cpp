@@ -12,15 +12,16 @@ Tcp::Tcp(uv_loop_t *loop) : socket(std::make_unique<uv_tcp_t>())
 auto Tcp::readStart(ReadCb cb) -> int
 {
   readCb = std::move(cb);
+  socket->data = this;
   return uv_read_start((uv_stream_t *)socket.get(),
-                       [](uv_handle_t * /*handle*/, size_t suggestedSize, uv_buf_t *buf) {
-                         // TODO-Mika Can we avoid extra memory allocation?
-                         buf->base = new char[suggestedSize];
-                         buf->len = suggestedSize;
+                       [](uv_handle_t *handle, size_t suggestedSize, uv_buf_t *aBuf) {
+                         auto self = static_cast<Tcp *>(handle->data);
+                         self->buf.resize(suggestedSize);
+                         aBuf->base = self->buf.data();
+                         aBuf->len = suggestedSize;
                        },
-                       [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf) {
-                         static_cast<Tcp *>(stream->data)->onRead(nread, buf);
-                         delete buf->base;
+                       [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
+                         static_cast<Tcp *>(stream->data)->onRead(nread, aBuf);
                        });
 }
 
@@ -38,12 +39,14 @@ namespace
 auto Tcp::write(std::string val, WriteCb cb) -> int
 {
   // TODO-Mika Can we combine two memory allocations into one?
+  socket->data = this;
   auto req = new uv_write_t;
   auto writeCtx = new WriteCtx;
   req->data = writeCtx;
   writeCtx->tcp = this;
+  const auto sz = static_cast<int>(val.size());
   writeCtx->buf = std::move(val);
-  writeCtx->uvBuf = uv_buf_init(writeCtx->buf.data(), static_cast<int>(val.size()));
+  writeCtx->uvBuf = uv_buf_init(writeCtx->buf.data(), sz);
   writeCtx->cb = std::move(cb);
   return uv_write(
     req, (uv_stream_t *)socket.get(), &writeCtx->uvBuf, 1, [](uv_write_t *aReq, int status) {
@@ -54,11 +57,17 @@ auto Tcp::write(std::string val, WriteCb cb) -> int
     });
 }
 
-auto Tcp::onRead(ssize_t nread, const uv_buf_t *buf) -> void
+auto Tcp::onRead(ssize_t nread, const uv_buf_t *aBuf) -> void
 {
+  if (nread < 0)
+  {
+    LOG(__func__, "error:", uv_err_name(static_cast<int>(nread)));
+    readCb(static_cast<int>(nread), std::string{});
+    return;
+  }
   if (!readCb)
     return;
-  readCb(std::string{buf->base, buf->base + nread});
+  readCb(0, std::string{aBuf->base, aBuf->base + nread});
 }
 
 Uv::Uv() : loop(uv_default_loop())
@@ -118,7 +127,7 @@ auto Uv::onResolved(int status, struct addrinfo *res, ConnectCb cb) -> void
 {
   if (status < 0)
   {
-    LOG("getaddrinfo callback error", uv_err_name(status));
+    LOG(__func__, "error:", uv_err_name(status));
     cb(status, Tcp{});
     return;
   }
@@ -132,21 +141,86 @@ auto Uv::onResolved(int status, struct addrinfo *res, ConnectCb cb) -> void
   auto connectCtx = new ConnectCtx2;
   connectReq->data = connectCtx;
   connectCtx->uv = this;
-  connectCtx->cb = std::move(cb);
+  connectCtx->tcp = Tcp{loop};
 
-  uv_tcp_connect(connectReq,
-                 connectCtx->tcp.socket.get(),
-                 (const struct sockaddr *)res->ai_addr,
-                 [](uv_connect_t *req, int aStatus) {
-                   auto ctx = static_cast<ConnectCtx2 *>(req->data);
-                   ctx->uv->onConnected(aStatus, std::move(ctx->tcp), std::move(ctx->cb));
-                   delete ctx;
-                   delete req;
-                 });
+  auto s = uv_tcp_connect(connectReq,
+                          connectCtx->tcp.socket.get(),
+                          (const struct sockaddr *)res->ai_addr,
+                          [](uv_connect_t *req, int aStatus) {
+                            LOG("Connected");
+                            auto ctx = static_cast<ConnectCtx2 *>(req->data);
+                            ctx->uv->onConnected(aStatus, std::move(ctx->tcp), std::move(ctx->cb));
+                            delete ctx;
+                            delete req;
+                          });
+  if (s < 0)
+  {
+    LOG(__func__, "error:", uv_err_name(s));
+    cb(s, Tcp{});
+    uv_freeaddrinfo(res);
+    return;
+  }
+  connectCtx->cb = std::move(cb);
   uv_freeaddrinfo(res);
 }
 
 auto Uv::onConnected(int status, Tcp tcp, ConnectCb cb) -> void
 {
   cb(status, std::move(tcp));
+}
+
+auto Uv::getTimer() -> Timer
+{
+  return Timer{loop};
+}
+
+Tcp::~Tcp()
+{
+  if (socket)
+  {
+    LOG("Graceful disconnect");
+    auto rawSocket = socket.release();
+    uv_read_stop((uv_stream_t *)rawSocket);
+    auto req = new uv_shutdown_t;
+    req->data = rawSocket;
+    uv_shutdown(req, (uv_stream_t *)rawSocket, [](uv_shutdown_t *handle, int status) {
+      LOG("Disconnected");
+      if (status < 0)
+        LOG(__func__, "error:", uv_err_name(status));
+      delete static_cast<uv_tcp_t *>(handle->data);
+      delete handle;
+    });
+  }
+}
+
+Timer::Timer(uv_loop_t *loop) : timer(std::make_unique<uv_timer_t>())
+{
+  uv_timer_init(loop, timer.get());
+  timer->data = this;
+}
+
+auto Timer::start(Cb aCb, uint64_t timeout, uint64_t repeat) -> int
+{
+  cb = std::move(aCb);
+  timer->data = this;
+  return uv_timer_start(
+    timer.get(),
+    [](uv_timer_t *handle) {
+      auto self = static_cast<Timer *>(handle->data);
+      if (!self->cb)
+        return;
+      self->cb();
+    },
+    timeout,
+    repeat);
+}
+
+auto Timer::stop() -> int
+{
+  return uv_timer_stop(timer.get());
+}
+
+Timer::~Timer()
+{
+  stop();
 }
