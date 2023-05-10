@@ -1,4 +1,6 @@
+#ifdef WIN32
 #define NOMINMAX
+#endif
 #include "twitch.hpp"
 #include <algorithm>
 #include <log/log.hpp>
