@@ -138,33 +138,38 @@ considered to further refine and improve the application.
 
 8\. TODO
 --------
+Top Priority
+- [ ] (bug) crash if an image is deleted from the project
+- [ ] (bug) after transpancy fix was made, bouncer stopped working.
+- [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
+- [ ] (bug) changing the disk does not work
+- [ ] (bug) .. is confusing
 
-- [x] (bug) App crashes after deleting a mouth and clicking on another
-      mouth.
-- [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
-      to have overshooting
+General Priority
 - [ ] (feature) undo
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [x] add "add" buttons in the add menu
-- [x] (bug) pressing "Open" if nothing is selected crashes
-- [ ] (bug) changing the disk does not work
-- [ ] (bug) .. is confusing
-- [x] (bug) after pressing d, make it g
+- [ ] (feature) automatically detect sprite sheets
+- [ ] (feature) automatically create and export sprite sheets based on 2 images
+- [ ] drag&drop nodes in the hierarchy
+- [ ] drag controls for move with gizmos
+- [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
+      to have overshooting
 - [ ] (feature) each node can have different amount of bounce
 - [ ] (feature) support for transparency
-- [x] double-click to enable editing
-- [ ] drag&drop nodes in the hierarchy
+- [ ] twitch extention (triggers for bits)
 - [ ] TikTok companion app
 - [ ] outdoor streaming from the phone wiht PNGTuber overlay
 - [ ] stream directly from VoiceTuber
-- [ ] twitch extention (triggers for bits)
-- [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
-- [ ] (feature) automatically detect sprite sheets
-- [ ] (bug) crash if an image is deleted from the project
-- [x] (bug) there are some transparency issues
-- [ ] (bug) after transpancy fix was made, bouncer stopped working.
 
+Completed
+- [x] (bug) there are some transparency issues
+- [x] (bug) after pressing d, make it g
+- [x] double-click to enable editing
+- [x] (bug) pressing "Open" if nothing is selected crashes
+- [x] (bug) App crashes after deleting a mouth and clicking on another mouth.
+- [x] add "add" buttons in the add menu 
+      
 9\. Unorgonized Ideas
 ---------------------
 
