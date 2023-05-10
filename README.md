@@ -225,6 +225,7 @@ $ mkdir -p build
 $ (cd build && cmake .. -DBUILD_TESTING=ON) # generate project with tests
 $ cmake --build build                       # add `-j <n>` with cmake >= 3.12
 ```
+*
     * This steps will build Debug version of libuv, open generated `.sln` file from `VoiceTuber/3rd-party/libuv/libuv.sln` in Visual Studio
     * Switch Solution Configuration to Release
     * Build Solution with `Build/Build Solution` menu
