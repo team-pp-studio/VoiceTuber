@@ -162,7 +162,8 @@ considered to further refine and improve the application.
 - [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [ ] (feature) automatically detect sprite sheets
 - [ ] (bug) crash if an image is deleted from the project
-- [ ] (bug) there are some transparency issues
+- [x] (bug) there are some transparency issues
+- [ ] (bug) after transpancy fix was made, bouncer stopped working.
 
 9\. Unorgonized Ideas
 ---------------------
