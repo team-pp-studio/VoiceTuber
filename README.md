@@ -202,6 +202,8 @@ extension necessary ideas
 1. Draw the streamer a asset or shirt decal in browser. (will be approved by the streamer before being uploaded.)
 2. Move the vtuber or chat tts anywhere on the screen.
 
+- [ ] Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model
+
 10\. Build Instructions
 -----------------------
 
