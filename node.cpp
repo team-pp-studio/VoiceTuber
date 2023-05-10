@@ -37,9 +37,33 @@ static auto getModelViewMatrix() -> glm::mat4
   return glm::make_mat4(modelMatrixData);
 }
 
+static auto setModelViewMatrix(glm::mat4 v) -> void
+{
+  glMatrixMode(GL_MODELVIEW);
+  glLoadMatrixf(glm::value_ptr(v));
+}
+
 Node::Node(std::string name) : name(std::move(name)) {}
 
 auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
+{
+  auto ns = std::vector<std::reference_wrapper<Node>>{};
+  getAllNodesCalcModelView(ns);
+
+  std::stable_sort(std::begin(ns), std::end(ns), [](const auto a, const auto b) {
+    return a.get().zOrder < b.get().zOrder;
+  });
+
+  glPushMatrix();
+  for (auto &n : ns)
+  {
+    setModelViewMatrix(n.get().modelViewMat);
+    n.get().render(dt, hovered, selected);
+  }
+  glPopMatrix();
+}
+
+auto Node::getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &out) -> void
 {
   glPushMatrix();
   // Apply transformations
@@ -49,9 +73,9 @@ auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
   glTranslatef(-pivot.x, -pivot.y, 0.0f);     // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
-  render(dt, hovered, selected);
+  out.push_back(*this);
   for (auto &n : nodes)
-    n->renderAll(dt, hovered, selected);
+    n->getAllNodesCalcModelView(out);
   glPopMatrix();
 }
 
@@ -274,20 +298,20 @@ auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
   else if (hovered == this)
     glColor4f(1.f, 1.f, 1.0f, .2f);
   glBegin(GL_LINE_STRIP);
-  glVertex3f(.0f, .0f, zOrder / 1024.f);
-  glVertex3f(w(), .0f, zOrder / 1024.f);
-  glVertex3f(w(), h(), zOrder / 1024.f);
-  glVertex3f(.0f, h(), zOrder / 1024.f);
-  glVertex3f(.0f, .0f, zOrder / 1024.f);
+  glVertex2f(.0f, .0f);
+  glVertex2f(w(), .0f);
+  glVertex2f(w(), h());
+  glVertex2f(.0f, h());
+  glVertex2f(.0f, .0f);
   glEnd();
   const auto d = std::max(w(), h()) * .05f;
   if (selected == this)
   {
     glBegin(GL_LINES);
-    glVertex3f(pivot.x - d, pivot.y - d, zOrder / 1024.f);
-    glVertex3f(pivot.x + d, pivot.y + d, zOrder / 1024.f);
-    glVertex3f(pivot.x - d, pivot.y + d, zOrder / 1024.f);
-    glVertex3f(pivot.x + d, pivot.y - d, zOrder / 1024.f);
+    glVertex2f(pivot.x - d, pivot.y - d);
+    glVertex2f(pivot.x + d, pivot.y + d);
+    glVertex2f(pivot.x - d, pivot.y + d);
+    glVertex2f(pivot.x + d, pivot.y - d);
     glEnd();
   }
 }

@@ -74,6 +74,7 @@ private:
   auto collectUnderNodes(const glm::mat4 &projMat,
                          glm::vec2 v,
                          std::vector<std::reference_wrapper<Node>> &) -> void;
+  auto getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &) -> void;
 
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};

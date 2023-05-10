@@ -39,20 +39,20 @@ Font::~Font()
     TTF_CloseFont(font);
 }
 
-auto Font::render(glm::vec3 pos, const std::string &txt) -> void
+auto Font::render(glm::vec2 pos, const std::string &txt) -> void
 {
   auto &tex = getTextureFromCache(txt);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, tex.texture());
   glBegin(GL_QUADS);
   glTexCoord2f(.0f, .0f);
-  glVertex3f(pos.x, pos.y + tex.h(), pos.z);
+  glVertex2f(pos.x, pos.y + tex.h());
   glTexCoord2f(1.f, .0f);
-  glVertex3f(pos.x + tex.w(), pos.y + tex.h(), pos.z);
+  glVertex2f(pos.x + tex.w(), pos.y + tex.h());
   glTexCoord2f(1.f, 1.f);
-  glVertex3f(pos.x + tex.w(), pos.y, pos.z);
+  glVertex2f(pos.x + tex.w(), pos.y);
   glTexCoord2f(.0f, 1.f);
-  glVertex3f(pos.x, pos.y, pos.z);
+  glVertex2f(pos.x, pos.y);
   glEnd();
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);

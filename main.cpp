@@ -227,8 +227,6 @@ int main(int, char **)
 
     ImGui::Render();
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f); // Change the reference value (0.1f) to your desired threshold

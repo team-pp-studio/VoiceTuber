@@ -52,11 +52,11 @@ auto Chat::render(float dt, Node *hovered, Node *selected) -> void
       if (y > h())
         break;
       const auto isLast = ln == (wrappedLines.rend() - 1);
-      font->render(glm::vec3{isLast ? displayNameDim.x : 0, y, zOrder / 1024.f}, *ln);
+      font->render(glm::vec2{isLast ? displayNameDim.x : 0, y}, *ln);
       if (isLast)
       {
         glColor3f(it->color.x, it->color.y, it->color.z);
-        font->render(glm::vec3{0.f, y, zOrder / 1024.f}, it->displayName);
+        font->render(glm::vec2{0.f, y}, it->displayName);
       }
       y += displayNameDim.y;
     }

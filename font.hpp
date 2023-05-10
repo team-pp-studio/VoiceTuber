@@ -12,7 +12,7 @@ class Font
 public:
   Font(std::string, int);
   ~Font();
-  auto render(glm::vec3, const std::string &) -> void;
+  auto render(glm::vec2, const std::string &) -> void;
   auto getSize(const std::string &) const -> glm::vec2;
   auto file() const -> const std::string &;
   auto ptsize() const -> int;
