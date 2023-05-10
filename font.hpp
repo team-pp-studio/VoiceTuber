@@ -4,6 +4,7 @@
 #include <SDL_ttf.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <list>
 #include <string>
 #include <unordered_map>
 
@@ -21,7 +22,9 @@ private:
   std::string file_;
   int ptsize_;
   decltype(TTF_OpenFont("", 0)) font;
-  mutable std::unordered_map<std::string, Texture> texturesCache;
+  mutable std::unordered_map<std::string, std::pair<Texture, std::list<std::string>::iterator>>
+    texturesCache;
+  mutable std::list<std::string> cacheAge;
 
   auto getTextureFromCache(const std::string &text) const -> Texture &;
 };

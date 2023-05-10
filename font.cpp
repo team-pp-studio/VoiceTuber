@@ -60,27 +60,43 @@ auto Font::render(glm::vec2 pos, const std::string &txt) -> void
 
 auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
 {
-  // TODO-Mika clean cache if it too big
   {
     auto it = texturesCache.find(txt);
     if (it != texturesCache.end())
-      return it->second;
+    {
+      cacheAge.erase(it->second.second);
+      cacheAge.push_back(txt);
+      it->second.second = std::end(cacheAge);
+      --it->second.second;
+      return it->second.first;
+    }
   }
 
   SDL_Surface *surface = TTF_RenderUTF8_Blended(font, txt.c_str(), {255, 255, 255, 255});
   if (!surface)
   {
-    std::ostringstream ss;
-    ss << "TTF_RenderText_Blended" << TTF_GetError();
-    LOG(ss.str());
-    throw std::runtime_error(ss.str());
+    LOG("TTF_RenderText_Blended", TTF_GetError());
+    surface = SDL_CreateRGBSurfaceWithFormat(0,  // The flags are obsolete and should be set to 0.
+                                             16, //  The width in pixels of the surface to create.
+                                             16, //  The height in pixels of the surface to create.
+                                             32, // The depth in bits of the surface to create.
+                                             SDL_PIXELFORMAT_RGBA32);
   }
 
-  auto tmp = texturesCache.emplace(txt, surface);
+  auto tmp = texturesCache.emplace(txt, std::pair{surface, std::begin(cacheAge)});
   assert(tmp.second);
 
   SDL_FreeSurface(surface);
-  return tmp.first->second;
+  cacheAge.push_back(txt);
+  tmp.first->second.second = std::end(cacheAge);
+  --tmp.first->second.second;
+  while (cacheAge.size() > 200)
+  {
+    texturesCache.erase(cacheAge.front());
+    cacheAge.erase(std::begin(cacheAge));
+  }
+  LOG(cacheAge.size(), texturesCache.size());
+  return tmp.first->second.first;
 }
 
 auto Font::getSize(const std::string &txt) const -> glm::vec2
