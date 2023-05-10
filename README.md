@@ -209,6 +209,17 @@ cmake -S . -B build
 cmake --build build
 cmake --build build --target install -DCMAKE_INSTALL_PREFIX=bin
 ```
+* Build libuv
+    * Assume CMake is installed from the Pocketsphinx sections
+    * In the cloned project, locate the libuv copy at `VoiceTuber/3rd-party/libuv`. Run the following commands in `cmd`:
+```
+$ mkdir -p build
+$ (cd build && cmake .. -DBUILD_TESTING=ON) # generate project with tests
+$ cmake --build build                       # add `-j <n>` with cmake >= 3.12
+```
+    * This steps will build Debug version of libuv, open generated `.sln` file from `VoiceTuber/3rd-party/libuv/libuv.sln` in Visual Studio
+    * Switch Solution Configuration to Release
+    * Build Solution with `Build/Build Solution` menu
 * Build the rest of the project
     * Open `VoiceTuber.sln` in Visual Studio 2022
     * Use the menu option `Build/Build Solution`
