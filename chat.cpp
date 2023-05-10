@@ -33,6 +33,7 @@ auto Chat::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   Node::load(strm);
+  font = lib.get().queryFont(SDL_GetBasePath() + std::string{"notepad_font/NotepadFont.ttf"}, ptsize);
 }
 
 auto Chat::render(float dt, Node *hovered, Node *selected) -> void
