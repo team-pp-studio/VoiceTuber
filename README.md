@@ -149,7 +149,6 @@ General Priority
 - [ ] (feature) undo
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [ ] (feature) automatically detect sprite sheets
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [ ] drag&drop nodes in the hierarchy
 - [ ] drag controls for move with gizmos
