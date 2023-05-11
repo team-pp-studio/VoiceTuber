@@ -76,10 +76,9 @@ private:
                          std::vector<std::reference_wrapper<Node>> &) -> void;
   auto getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &) -> void;
 
+protected:
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
-
-protected:
   glm::vec2 pivot = {.0f, .0f};
   float animRot = 0.f;
 

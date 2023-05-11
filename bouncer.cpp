@@ -26,7 +26,7 @@ auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
   zOrder = INT_MIN;
   glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
-  glTranslatef(.0f, offset, .0f);
+  loc.y = offset;
   Node::render(dt, hovered, selected);
 }
 

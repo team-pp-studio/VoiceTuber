@@ -139,8 +139,8 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
-- [ ] (bug) crash if an image is deleted from the project
-- [ ] (bug) after transpancy fix was made, bouncer stopped working.
+- [x] (bug) crash if an image is deleted from the project
+- [x] (bug) after transpancy fix was made, bouncer stopped working.
 - [ ] (Feature) App works when minimized.
 - [ ] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [ ] (bug) changing the disk does not work
