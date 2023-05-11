@@ -7,9 +7,17 @@
 
 Sprite::Sprite(Lib &lib, const std::filesystem::path &path)
   : Node([&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
-      if (!std::filesystem::exists(path.filename()))
-        std::filesystem::copy(path, path.filename());
-      return path.filename().string();
+      try
+      {
+        if (!std::filesystem::exists(path.filename()))
+          std::filesystem::copy(path, path.filename());
+        return path.filename().string();
+      }
+      catch (std::runtime_error &e)
+      {
+        LOG(e.what());
+        return std::string{"engine:missing.png"};
+      }
     }()))
 {
 }

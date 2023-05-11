@@ -14,14 +14,45 @@
 Texture::Texture(const std::string &path)
   : imageData_([&]() {
       stbi_set_flip_vertically_on_load(1);
-      auto ret = stbi_load(path.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
-      if (!ret)
+      if (path.find("engine:") != 0)
       {
-        std::ostringstream ss;
-        ss << "Error loading image: " << path;
-        throw std::runtime_error(ss.str());
+        try
+        {
+          auto ret = stbi_load(path.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+          if (!ret)
+          {
+            std::ostringstream ss;
+            ss << "Error loading image: " << path;
+            throw std::runtime_error(ss.str());
+          }
+          return ret;
+        }
+        catch (std::runtime_error &e)
+        {
+          LOG(e.what());
+          auto engineImgPath = SDL_GetBasePath() + std::string{"corrupted.png"};
+          auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+          if (!ret)
+          {
+            std::ostringstream ss;
+            ss << "Error loading image: " << engineImgPath;
+            throw std::runtime_error(ss.str());
+          }
+          return ret;
+        }
       }
-      return ret;
+      else
+      {
+        auto engineImgPath = SDL_GetBasePath() + path.substr(7);
+        auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+        if (!ret)
+        {
+          std::ostringstream ss;
+          ss << "Error loading image: " << engineImgPath;
+          throw std::runtime_error(ss.str());
+        }
+        return ret;
+      }
     }()),
     texture_([&]() {
       assert((ch_ == 4 || ch_ == 3) && "The number of channels should be 3 or 4.");
