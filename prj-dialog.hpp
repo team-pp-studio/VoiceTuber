@@ -15,6 +15,6 @@ private:
 
   std::vector<std::filesystem::path> dirs;
   std::string selectedDir;
-  std::string currentDir;
+  decltype(std::filesystem::current_path()) cwd;
   std::shared_ptr<const Texture> upDir;
 };

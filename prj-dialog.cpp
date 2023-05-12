@@ -4,7 +4,9 @@
 #include <log/log.hpp>
 
 PrjDialog::PrjDialog(Lib &lib, Cb aCb)
-  : Dialog("New/Open Project", std::move(aCb)), upDir(lib.queryTex("engine:up-dir.png", true))
+  : Dialog("New/Open Project", std::move(aCb)),
+    cwd(std::filesystem::current_path()),
+    upDir(lib.queryTex("engine:up-dir.png", true))
 {
 }
 
@@ -18,7 +20,6 @@ auto PrjDialog::internalDraw() -> DialogState
                      availableSpace.y - 30 - 64); // Adjust the width and height as needed
   if (dirs.empty())
   {
-    const auto cwd = std::filesystem::current_path();
     for (auto &entry : std::filesystem::directory_iterator(cwd))
       if (entry.is_directory())
         dirs.push_back(entry.path());
@@ -31,14 +32,12 @@ auto PrjDialog::internalDraw() -> DialogState
   {
     dirs.clear();
     selectedDir = "";
-    const auto cwd = std::filesystem::current_path();
-    std::filesystem::current_path(cwd.parent_path());
+    cwd = cwd.parent_path();
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Go Up");
   ImGui::SameLine();
-  currentDir = std::filesystem::current_path().string();
-  ImGui::Text("%s", currentDir.c_str());
+  ImGui::Text("%s", cwd.string().c_str());
 
   if (ImGui::BeginListBox("##dirs", listBoxSize))
   {
@@ -54,7 +53,7 @@ auto PrjDialog::internalDraw() -> DialogState
       {
         if (ImGui::IsMouseDoubleClicked(0))
         {
-          std::filesystem::current_path(dir);
+          cwd = dir;
           dirs.clear();
           selectedDir = "";
           const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
@@ -85,12 +84,16 @@ auto PrjDialog::internalDraw() -> DialogState
   {
     if (ImGui::Button("Open", ImVec2{BtnSz, 0}))
     {
-      std::filesystem::current_path(selectedDir);
+      cwd = cwd / selectedDir;
       dirs.clear();
       selectedDir = "";
-      const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
+
+      const auto projectFilePath = cwd / "prj.tpp";
       if (std::filesystem::exists(projectFilePath))
+      {
+        std::filesystem::current_path(cwd);
         return DialogState::ok;
+      }
     }
   }
   else
@@ -98,9 +101,10 @@ auto PrjDialog::internalDraw() -> DialogState
     ImGui::BeginDisabled(selectedDir.empty());
     if (ImGui::Button("New", ImVec2{BtnSz, 0}))
     {
-      if (std::filesystem::create_directories(selectedDir))
+      cwd = cwd / selectedDir;
+      if (std::filesystem::create_directories(cwd))
       {
-        std::filesystem::current_path(selectedDir);
+        std::filesystem::current_path(cwd);
         dirs.clear();
         selectedDir = "";
         ImGui::EndDisabled();
