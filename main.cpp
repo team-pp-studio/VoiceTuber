@@ -7,6 +7,7 @@
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
 #include <chrono>
+#include <filesystem>
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 #include <sdlpp/sdlpp.hpp>
@@ -27,6 +28,8 @@ int main(int, char **)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
+
+  std::filesystem::current_path(SDL_GetBasePath());
 
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)

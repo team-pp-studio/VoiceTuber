@@ -56,7 +56,7 @@ auto App::renderUi(float /*dt*/) -> void
   if (!root)
   {
     if (!dialog)
-      dialog = std::make_unique<PrjDialog>([this](bool) { loadPrj(); });
+      dialog = std::make_unique<PrjDialog>(lib, [this](bool) { loadPrj(); });
     if (!dialog->draw())
       dialog = nullptr;
     return;
@@ -90,21 +90,24 @@ auto App::renderUi(float /*dt*/) -> void
       if (ImGui::BeginMenu("Add"))
       {
         if (ImGui::MenuItem("Mouth..."))
-          dialog = std::make_unique<FileOpen>("Add Mouth Dialog", [this](bool r, const auto &filePath) {
-            if (r)
-              addNode(Mouth::className, filePath.string());
-          });
+          dialog =
+            std::make_unique<FileOpen>(lib, "Add Mouth Dialog", [this](bool r, const auto &filePath) {
+              if (r)
+                addNode(Mouth::className, filePath.string());
+            });
         if (ImGui::MenuItem("Eye..."))
-          dialog = std::make_unique<FileOpen>("Add Eye Dialog", [this](bool r, const auto &filePath) {
-            if (r)
-              addNode(Eye::className, filePath.string());
-          });
+          dialog =
+            std::make_unique<FileOpen>(lib, "Add Eye Dialog", [this](bool r, const auto &filePath) {
+              if (r)
+                addNode(Eye::className, filePath.string());
+            });
 
         if (ImGui::MenuItem("Sprite..."))
-          dialog = std::make_unique<FileOpen>("Add Sprite Dialog", [this](bool r, const auto &filePath) {
-            if (r)
-              addNode(AnimSprite::className, filePath.string());
-          });
+          dialog =
+            std::make_unique<FileOpen>(lib, "Add Sprite Dialog", [this](bool r, const auto &filePath) {
+              if (r)
+                addNode(AnimSprite::className, filePath.string());
+            });
 
         if (ImGui::MenuItem("Twitch Chat..."))
           dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {

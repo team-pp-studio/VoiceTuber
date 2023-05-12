@@ -3,9 +3,10 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-FileOpen::FileOpen(std::string dialogName, Cb aCb)
+FileOpen::FileOpen(Lib &lib, std::string dialogName, Cb aCb)
   : Dialog(std::move(dialogName), [this, aCb = std::move(aCb)](bool r) { aCb(r, getSelectedFile()); }),
-    cwd(std::filesystem::current_path())
+    cwd(std::filesystem::current_path()),
+    upDir(lib.queryTex("engine:up-dir.png", true))
 {
 }
 
@@ -19,18 +20,22 @@ auto FileOpen::internalDraw() -> DialogState
     std::sort(files.begin(), files.end());
   }
 
+  const auto sz = ImGui::GetFontSize();
+  if (ImGui::ImageButton((void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
+  {
+    files.clear();
+    selectedFile = "";
+    cwd = cwd.parent_path();
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Go Up");
+  ImGui::SameLine();
+  ImGui::Text("%s", cwd.string().c_str());
+
   // Populate the files in the list box
   if (ImGui::BeginListBox("##files", ImVec2(700, 400)))
   {
     std::function<void()> postponedAction = nullptr;
-    if (ImGui::Selectable("..", ".." == selectedFile, ImGuiSelectableFlags_AllowDoubleClick))
-      if (ImGui::IsMouseDoubleClicked(0))
-        postponedAction = [this]() {
-          files.clear();
-          selectedFile = "";
-          cwd = cwd.parent_path();
-        };
-
     for (auto &file : files)
     {
       const auto isHidden = file.filename().string().front() == '.';
@@ -82,8 +87,18 @@ auto FileOpen::internalDraw() -> DialogState
   ImGui::BeginDisabled(selectedFile.empty());
   if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
   {
-    ImGui::EndDisabled();
-    return DialogState::ok;
+    if (!std::filesystem::is_directory(selectedFile))
+    {
+      ImGui::EndDisabled();
+
+      return DialogState::ok;
+    }
+    else
+    {
+      cwd = selectedFile;
+      files.clear();
+      selectedFile = "";
+    }
   }
   ImGui::EndDisabled();
   ImGui::SetItemDefaultFocus();
