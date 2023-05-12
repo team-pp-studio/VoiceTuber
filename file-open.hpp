@@ -16,7 +16,7 @@ private:
   auto getSelectedFile() const -> std::filesystem::path;
 
   std::vector<std::filesystem::path> files;
-  std::filesystem::path selectedFile;
+  std::string selectedFile;
   decltype(std::filesystem::current_path()) cwd;
   std::shared_ptr<const Texture> upDir;
 };

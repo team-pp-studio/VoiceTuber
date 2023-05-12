@@ -3,6 +3,10 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 PrjDialog::PrjDialog(Lib &lib, Cb aCb)
   : Dialog("New/Open Project", std::move(aCb)),
     cwd(std::filesystem::current_path()),
@@ -18,13 +22,6 @@ auto PrjDialog::internalDraw() -> DialogState
   // Adjust the width of the ListBox
   ImVec2 listBoxSize(availableSpace.x,
                      availableSpace.y - 30 - 64); // Adjust the width and height as needed
-  if (dirs.empty())
-  {
-    for (auto &entry : std::filesystem::directory_iterator(cwd))
-      if (entry.is_directory())
-        dirs.push_back(entry.path());
-    std::sort(std::begin(dirs), std::end(dirs));
-  }
 
   auto hasSelected = false;
   const auto sz = ImGui::GetFontSize();
@@ -32,12 +29,51 @@ auto PrjDialog::internalDraw() -> DialogState
   {
     dirs.clear();
     selectedDir = "";
+#ifdef _WIN32
+    if (cwd != cwd.parent_path())
+      cwd = cwd.parent_path();
+    else
+      cwd = "";
+#else
     cwd = cwd.parent_path();
+#endif
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Go Up");
   ImGui::SameLine();
   ImGui::Text("%s", cwd.string().c_str());
+
+  if (dirs.empty())
+  {
+    if (!cwd.string().empty())
+    {
+      try
+      {
+        for (auto &entry : std::filesystem::directory_iterator(cwd))
+          if (entry.is_directory())
+            dirs.push_back(entry.path());
+      }
+      catch (std::runtime_error &e)
+      {
+        LOG(e.what());
+      }
+      std::sort(std::begin(dirs), std::end(dirs));
+    }
+    else
+    {
+#ifdef _WIN32
+      char d = 'A';
+      for (auto drives = GetLogicalDrives(); drives != 0; drives >>= 1, ++d)
+      {
+        if (drives & 0x1)
+        {
+          auto drive = d + std::string{":\\"};
+          dirs.push_back(drive);
+        }
+      }
+#endif
+    }
+  }
 
   if (ImGui::BeginListBox("##dirs", listBoxSize))
   {
@@ -45,10 +81,16 @@ auto PrjDialog::internalDraw() -> DialogState
 
     for (auto &dir : dirs)
     {
-      if (oldSelectedDir == dir.filename())
+      const auto dirStr = [&dir]() {
+        if (dir.filename().string().empty())
+          return dir.string();
+        else
+          return dir.filename().string();
+      }();
+      if (oldSelectedDir == dirStr)
         hasSelected = true;
-      if (ImGui::Selectable(("> " + dir.filename().string()).c_str(),
-                            oldSelectedDir == dir.filename(),
+      if (ImGui::Selectable(("> " + dirStr).c_str(),
+                            oldSelectedDir == dirStr,
                             ImGuiSelectableFlags_AllowDoubleClick))
       {
         if (ImGui::IsMouseDoubleClicked(0))
@@ -56,16 +98,17 @@ auto PrjDialog::internalDraw() -> DialogState
           cwd = dir;
           dirs.clear();
           selectedDir = "";
-          const auto projectFilePath = std::filesystem::path(selectedDir) / "prj.tpp";
+          const auto projectFilePath = cwd / "prj.tpp";
           if (std::filesystem::exists(projectFilePath))
           {
             ImGui::EndListBox();
+            std::filesystem::current_path(cwd);
             return DialogState::ok;
           }
           break;
         }
         else
-          selectedDir = dir.filename().string();
+          selectedDir = dirStr;
       }
     }
     ImGui::EndListBox();
