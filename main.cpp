@@ -178,6 +178,12 @@ int main(int, char **)
   // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
   // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 
+  int originalX, originalY;
+  int width, height;
+  auto isMinimized = false;
+  window.getPosition(&originalX, &originalY);
+  window.getSize(&width, &height);
+
   App app;
 
   // Main loop
@@ -207,9 +213,39 @@ int main(int, char **)
       ImGui_ImplSDL2_ProcessEvent(&event);
       if (event.type == SDL_QUIT)
         done = true;
-      if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
-          event.window.windowID == SDL_GetWindowID(window.get()))
+      else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
+               event.window.windowID == SDL_GetWindowID(window.get()))
         done = true;
+      else if (event.type == SDL_WINDOWEVENT)
+      {
+        if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
+        {
+          LOG("minimized", isMinimized);
+          if (!isMinimized)
+          {
+            window.restore();
+            window.restore();
+            window.setPosition(10'000, originalY);
+            window.setSize(width, height);
+          }
+          else
+          {
+            window.restore();
+            window.restore();
+            window.setPosition(originalX, originalY);
+            window.setSize(width, height);
+          }
+          isMinimized = !isMinimized;
+        }
+        else
+        {
+          if (!isMinimized)
+          {
+            window.getPosition(&originalX, &originalY);
+            window.getSize(&width, &height);
+          }
+        }
+      }
     }
 
     auto now = std::chrono::high_resolution_clock::now();
@@ -231,8 +267,8 @@ int main(int, char **)
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f); // Change the reference value (0.1f) to your desired threshold
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    const auto w = (int)io.DisplaySize.x;
-    const auto h = (int)io.DisplaySize.y;
+    const auto w = (int)io.DisplaySize.x == 0 ? width : (int)io.DisplaySize.x;
+    const auto h = (int)io.DisplaySize.y == 0 ? height : (int)io.DisplaySize.y;
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
