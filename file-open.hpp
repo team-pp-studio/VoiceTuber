@@ -1,5 +1,7 @@
 #pragma once
 #include "dialog.hpp"
+#include "lib.hpp"
+#include "texture.hpp"
 #include <filesystem>
 #include <vector>
 
@@ -7,7 +9,7 @@ class FileOpen final : public Dialog
 {
 public:
   using Cb = std::function<auto(bool, const std::filesystem::path &)->void>;
-  FileOpen(std::string dialogName, Cb);
+  FileOpen(Lib &, std::string dialogName, Cb);
 
 private:
   auto internalDraw() -> DialogState final;
@@ -16,4 +18,5 @@ private:
   std::vector<std::filesystem::path> files;
   std::filesystem::path selectedFile;
   decltype(std::filesystem::current_path()) cwd;
+  std::shared_ptr<const Texture> upDir;
 };

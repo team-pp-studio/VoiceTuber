@@ -3,15 +3,19 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-PrjDialog::PrjDialog(Cb aCb) : Dialog("New/Open Project", std::move(aCb)) {}
+PrjDialog::PrjDialog(Lib &lib, Cb aCb)
+  : Dialog("New/Open Project", std::move(aCb)), upDir(lib.queryTex("engine:up-dir.png", true))
+{
+}
 
 auto PrjDialog::internalDraw() -> DialogState
 {
   auto availableSpace = ImGui::GetContentRegionAvail();
-  availableSpace.x = std::max(availableSpace.x, 500.f);
-  availableSpace.y = std::max(availableSpace.y, 250.f);
+  availableSpace.x = std::max(availableSpace.x, 700.f);
+  availableSpace.y = std::max(availableSpace.y, 250.f + 64 + 30);
   // Adjust the width of the ListBox
-  ImVec2 listBoxSize(availableSpace.x, availableSpace.y - 30); // Adjust the width and height as needed
+  ImVec2 listBoxSize(availableSpace.x,
+                     availableSpace.y - 30 - 64); // Adjust the width and height as needed
   if (dirs.empty())
   {
     const auto cwd = std::filesystem::current_path();
@@ -22,17 +26,23 @@ auto PrjDialog::internalDraw() -> DialogState
   }
 
   auto hasSelected = false;
+  const auto sz = ImGui::GetFontSize();
+  if (ImGui::ImageButton((void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
+  {
+    dirs.clear();
+    selectedDir = "";
+    const auto cwd = std::filesystem::current_path();
+    std::filesystem::current_path(cwd.parent_path());
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Go Up");
+  ImGui::SameLine();
+  currentDir = std::filesystem::current_path();
+  ImGui::Text("%s", currentDir.c_str());
+
   if (ImGui::BeginListBox("##dirs", listBoxSize))
   {
     const auto oldSelectedDir = selectedDir;
-    if (ImGui::Selectable("..", ".." == oldSelectedDir, ImGuiSelectableFlags_AllowDoubleClick))
-      if (ImGui::IsMouseDoubleClicked(0))
-      {
-        dirs.clear();
-        selectedDir = "";
-        const auto cwd = std::filesystem::current_path();
-        std::filesystem::current_path(cwd.parent_path());
-      }
 
     for (auto &dir : dirs)
     {

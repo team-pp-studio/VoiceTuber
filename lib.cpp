@@ -4,9 +4,9 @@
 
 Lib::Lib(class Preferences &preferences) : preferences(preferences) {}
 
-auto Lib::queryTex(const std::string &v) -> std::shared_ptr<const Texture>
+auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Texture>
 {
-  auto it = textures.find(v);
+  auto it = textures.find(std::pair{v, isUi});
   if (it != std::end(textures))
   {
     auto shared = it->second.lock();
@@ -14,8 +14,8 @@ auto Lib::queryTex(const std::string &v) -> std::shared_ptr<const Texture>
       return shared;
     textures.erase(it);
   }
-  auto shared = std::make_shared<Texture>(v);
-  auto tmp = textures.emplace(v, shared);
+  auto shared = std::make_shared<Texture>(v, isUi);
+  auto tmp = textures.emplace(std::pair{v, isUi}, shared);
   assert(tmp.second);
   return shared;
 }

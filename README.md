@@ -144,7 +144,7 @@ Top Priority
 - [x] (Feature) App works when minimized.
 - [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [ ] (bug) changing the disk does not work
-- [ ] (bug) .. is confusing
+- [x] (bug) .. is confusing
 
 General Priority
 - [ ] Azure TTS 

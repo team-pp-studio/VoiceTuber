@@ -6,7 +6,7 @@
 class Texture
 {
 public:
-  Texture(const std::string &path);
+  Texture(const std::string &path, bool isUi = false);
   Texture(SDL_Surface *);
   ~Texture();
   Texture(const Texture &) = delete;

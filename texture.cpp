@@ -11,9 +11,9 @@
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
 
-Texture::Texture(const std::string &path)
+Texture::Texture(const std::string &path, bool isUi)
   : imageData_([&]() {
-      stbi_set_flip_vertically_on_load(1);
+      stbi_set_flip_vertically_on_load(!isUi ? 1 : 0);
       if (path.find("engine:") != 0)
       {
         try
