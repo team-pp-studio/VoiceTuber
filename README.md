@@ -143,7 +143,7 @@ Top Priority
 - [x] (bug) after transpancy fix was made, bouncer stopped working.
 - [x] (Feature) App works when minimized.
 - [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
-- [ ] (bug) changing the disk does not work
+- [x] (bug) changing the disk does not work
 - [x] (bug) .. is confusing
 
 General Priority
