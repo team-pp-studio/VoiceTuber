@@ -37,7 +37,7 @@ auto PrjDialog::internalDraw() -> DialogState
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Go Up");
   ImGui::SameLine();
-  currentDir = std::filesystem::current_path();
+  currentDir = std::filesystem::current_path().string();
   ImGui::Text("%s", currentDir.c_str());
 
   if (ImGui::BeginListBox("##dirs", listBoxSize))
