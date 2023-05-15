@@ -164,6 +164,20 @@ General Priority
 - [ ] outdoor streaming from the phone wiht PNGTuber overlay
 - [ ] stream directly from VoiceTuber
 
+Vale's feedback
+- [ ] We don't clear draws - NMI
+- [ ] Vale can't figure out how to open a project - NMI
+- [ ] Vale don't like tha they can select what mic is being used
+- [ ] Don't expect the placement of stuff (UI UX) - NMI
+- [ ] Really wants drag and drop
+- [ ] And freaked out over Ctrl-Z - NMI
+- [ ] They REALLY expected That value bars were able to be clicked and dragged - NMI
+- [ ] Does it have auto save?
+- [ ] Don't like the separation of windows.thinks that should be an option - NMI
+- [ ] REALLY WANTS CLICK AND DRAG - NMI
+- [ ] And vale broke the model by Ctrl-Z - NMI
+- [ ] Drag and drop files into the software
+
 Completed
 - [x] (bug) there are some transparency issues
 - [x] (bug) after pressing d, make it g
