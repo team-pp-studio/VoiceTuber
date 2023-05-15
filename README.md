@@ -139,24 +139,23 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
-- [x] (bug) crash if an image is deleted from the project
-- [x] (bug) after transpancy fix was made, bouncer stopped working.
-- [x] (Feature) App works when minimized.
-- [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
-- [x] (bug) changing the disk does not work
-- [x] (bug) .. is confusing
+- [ ] (feature) undo
+- [ ] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
+- [ ] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
+- [ ] Don't expect the placement of stuff (UI UX)
+   - [ ] Swap description and value
+   - [ ] Placement of bouncer options confusing
+- [ ] (feature) each node can have different amount of bounc
+
 
 General Priority
-- [ ] Azure TTS 
-- [ ] (feature) undo
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
+- [ ] Really wants drag and drop files
+- [ ] Azure TTS 
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
-- [ ] drag&drop nodes in the hierarchy
-- [ ] drag controls for move with gizmos
 - [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
       to have overshooting
-- [ ] (feature) each node can have different amount of bounce
 - [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model
 )
 - [ ] twitch extention (triggers for bits)
@@ -185,6 +184,12 @@ Completed
 - [x] (bug) pressing "Open" if nothing is selected crashes
 - [x] (bug) App crashes after deleting a mouth and clicking on another mouth.
 - [x] add "add" buttons in the add menu 
+- [x] (bug) crash if an image is deleted from the project
+- [x] (bug) after transpancy fix was made, bouncer stopped working.
+- [x] (Feature) App works when minimized.
+- [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
+- [x] (bug) changing the disk does not work
+- [x] (bug) .. is confusing
       
 9\. Unorgonized Ideas
 ---------------------
