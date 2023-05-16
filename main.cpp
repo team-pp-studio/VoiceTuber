@@ -85,6 +85,8 @@ int main(int, char **)
                                                         // io.ConfigViewportsNoAutoMerge = true;
                                                         // io.ConfigViewportsNoTaskBarIcon = true;
 
+  io.ConfigWindowsMoveFromTitleBarOnly = true;
+
   // Setup Dear ImGui style
   // ImGui::StyleColorsDark();
   ImGui::StyleColorsLight();
