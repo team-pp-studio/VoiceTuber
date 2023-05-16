@@ -141,7 +141,7 @@ int main(int, char **)
     // ImGuiCol_PlotLinesHovered,
     // ImGuiCol_PlotHistogram,
     // ImGuiCol_PlotHistogramHovered,
-    // ImGuiCol_TableHeaderBg,         // Table header background
+    style.Colors[ImGuiCol_TableHeaderBg] = ImVec4{0x6f / 255.f, 0x7d / 255.f, 0xaa / 255.f, 1.f};
     // ImGuiCol_TableBorderStrong,     // Table outer and header borders (prefer using Alpha=1.0 here)
     // ImGuiCol_TableBorderLight,      // Table inner borders (prefer using Alpha=1.0 here)
     // ImGuiCol_TableRowBg,            // Table row background (even rows)
@@ -177,13 +177,12 @@ int main(int, char **)
   // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
   // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-  io.Fonts->AddFontFromFileTTF("notepad_font/NotepadFont.ttf", 17.5f);
+  io.Fonts->AddFontFromFileTTF("assets/notepad_font/NotepadFont.ttf", 17.5f);
   // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
   // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 
   int originalX, originalY;
   int width, height;
-  auto isMinimized = false;
   window.getPosition(&originalX, &originalY);
   window.getSize(&width, &height);
 
@@ -223,8 +222,8 @@ int main(int, char **)
       {
         if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
         {
-          LOG("minimized", isMinimized);
-          if (!isMinimized)
+          LOG("minimized", app.isMinimized);
+          if (!app.isMinimized)
           {
             window.restore();
             window.restore();
@@ -238,11 +237,11 @@ int main(int, char **)
             window.setPosition(originalX, originalY);
             window.setSize(width, height);
           }
-          isMinimized = !isMinimized;
+          app.isMinimized = !app.isMinimized;
         }
         else
         {
-          if (!isMinimized)
+          if (!app.isMinimized)
           {
             window.getPosition(&originalX, &originalY);
             window.getSize(&width, &height);

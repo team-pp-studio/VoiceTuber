@@ -1,4 +1,5 @@
 #pragma once
+#include "lib.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/vec2.hpp>
 #include <imgui/imgui.h>
@@ -32,7 +33,7 @@ public:
 #undef SER_PROP_LIST
 
   using Nodes = std::vector<std::unique_ptr<Node>>;
-  Node(std::string name);
+  Node(Lib &, std::string name);
   virtual ~Node() = default;
 
   auto addChild(std::unique_ptr<Node>) -> void;
@@ -101,4 +102,13 @@ private:
   glm::vec2 initLoc;
   glm::vec2 initScale;
   float initRot;
+  std::shared_ptr<const Texture> arrowN;
+  std::shared_ptr<const Texture> arrowNE;
+  std::shared_ptr<const Texture> arrowE;
+  std::shared_ptr<const Texture> arrowSE;
+  std::shared_ptr<const Texture> arrowS;
+  std::shared_ptr<const Texture> arrowSW;
+  std::shared_ptr<const Texture> arrowW;
+  std::shared_ptr<const Texture> arrowNW;
+  std::shared_ptr<const Texture> center;
 };

@@ -1,26 +1,25 @@
 #pragma once
-
 #include "audio-sink.hpp"
 #include "node.hpp"
-#include <imgui/imgui.h>
 
-class Bouncer final : public Node, public AudioSink
+class Bouncer2 final : public Node, public AudioSink
 {
 public:
 #define SER_PROP_LIST \
   SER_PROP(strength); \
-  SER_PROP(clearColor);
+  SER_PROP(easing);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  static constexpr const char *className = "Bouncer";
-  Bouncer(class Lib &, class AudioCapture &);
-  ~Bouncer() final;
+  static constexpr const char *className = "Bouncer2";
+  Bouncer2(class Lib &, class AudioCapture &, std::string name);
+  ~Bouncer2() final;
 
 private:
   float strength = 100.f;
-  ImVec4 clearColor = ImVec4(123.f / 256.f, 164.f / 256.f, 119.f / 256.f, 1.00f);
+  float easing = 50.f;
   float offset = 0.f;
+  float a = 0.f;
   std::reference_wrapper<AudioCapture> audioCapture;
   auto ingest(Wav) -> void final;
   auto render(float dt, Node *hovered, Node *selected) -> void final;

@@ -10,8 +10,8 @@ Wav2Visemes::Wav2Visemes()
       auto ret = ps_config_init(nullptr);
       ps_default_search_args(ret);
       ps_config_set_str(ret, "lm", nullptr);
-      ps_config_set_str(ret, "allphone", "pocketsphinx-model/en-us/en-us-phone.lm.bin");
-      ps_config_set_str(ret, "hmm", "pocketsphinx-model/en-us/en-us");
+      ps_config_set_str(ret, "allphone", "assets/pocketsphinx-model/en-us/en-us-phone.lm.bin");
+      ps_config_set_str(ret, "hmm", "assets/pocketsphinx-model/en-us/en-us");
       ps_config_set_bool(ret, "backtrace", TRUE);
       ps_config_set_float(ret, "beam", 1e-20);
       ps_config_set_float(ret, "lw", 2.0);

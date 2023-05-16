@@ -1,6 +1,6 @@
 #include "prj-dialog.hpp"
+#include "ui.hpp"
 #include <functional>
-#include <imgui/imgui.h>
 #include <log/log.hpp>
 
 #ifdef _WIN32
@@ -75,7 +75,7 @@ auto PrjDialog::internalDraw() -> DialogState
     }
   }
 
-  if (ImGui::BeginListBox("##dirs", listBoxSize))
+  if (auto dirsListBox = Ui::ListBox{"##dirs", listBoxSize})
   {
     const auto oldSelectedDir = selectedDir;
 
@@ -89,9 +89,8 @@ auto PrjDialog::internalDraw() -> DialogState
       }();
       if (oldSelectedDir == dirStr)
         hasSelected = true;
-      if (ImGui::Selectable(("> " + dirStr).c_str(),
-                            oldSelectedDir == dirStr,
-                            ImGuiSelectableFlags_AllowDoubleClick))
+      if (ImGui::Selectable(
+            ("> " + dirStr).c_str(), oldSelectedDir == dirStr, ImGuiSelectableFlags_AllowDoubleClick))
       {
         if (ImGui::IsMouseDoubleClicked(0))
         {
@@ -101,7 +100,6 @@ auto PrjDialog::internalDraw() -> DialogState
           const auto projectFilePath = cwd / "prj.tpp";
           if (std::filesystem::exists(projectFilePath))
           {
-            ImGui::EndListBox();
             std::filesystem::current_path(cwd);
             return DialogState::ok;
           }
@@ -111,7 +109,6 @@ auto PrjDialog::internalDraw() -> DialogState
           selectedDir = dirStr;
       }
     }
-    ImGui::EndListBox();
   }
 
   const auto BtnSz = 90.f;
@@ -141,7 +138,7 @@ auto PrjDialog::internalDraw() -> DialogState
   }
   else
   {
-    ImGui::BeginDisabled(selectedDir.empty());
+    auto newBtnDisabled = Ui::Disabled(selectedDir.empty());
     if (ImGui::Button("New", ImVec2{BtnSz, 0}))
     {
       cwd = cwd / selectedDir;
@@ -150,11 +147,9 @@ auto PrjDialog::internalDraw() -> DialogState
         std::filesystem::current_path(cwd);
         dirs.clear();
         selectedDir = "";
-        ImGui::EndDisabled();
         return DialogState::ok;
       }
     }
-    ImGui::EndDisabled();
   }
   return DialogState::active;
 }

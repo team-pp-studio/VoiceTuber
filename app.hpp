@@ -23,6 +23,8 @@ public:
   auto tick(float dt) -> void;
   auto savePrj() -> void;
 
+  bool isMinimized = false;
+
 private:
   Uv uv;
   Preferences preferences;

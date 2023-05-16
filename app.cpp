@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
+#include "bouncer2.hpp"
 #include "channel-dialog.hpp"
 #include "chat.hpp"
 #include "eye.hpp"
@@ -9,6 +10,8 @@
 #include "mouth.hpp"
 #include "preferences-dialog.hpp"
 #include "prj-dialog.hpp"
+#include "root.hpp"
+#include "ui.hpp"
 #include <SDL_opengl.h>
 #include <fstream>
 #include <log/log.hpp>
@@ -25,7 +28,10 @@ App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()), li
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   audioCapture.reg(wav2Visemes);
-  saveFactory.reg<Bouncer>([this](std::string) { return std::make_unique<Bouncer>(audioCapture); });
+  saveFactory.reg<Bouncer>([this](std::string) { return std::make_unique<Bouncer>(lib, audioCapture); });
+  saveFactory.reg<Bouncer2>(
+    [this](std::string name) { return std::make_unique<Bouncer2>(lib, audioCapture, std::move(name)); });
+  saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib); });
   saveFactory.reg<Mouth>(
     [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, lib, std::move(name)); });
   saveFactory.reg<AnimSprite>(
@@ -45,7 +51,7 @@ auto App::render(float dt) -> void
     return;
   }
 
-  if (showUi)
+  if (showUi && !isMinimized)
     root->renderAll(dt, hovered, selected);
   else
     root->renderAll(dt, nullptr, nullptr);
@@ -64,30 +70,28 @@ auto App::renderUi(float /*dt*/) -> void
 
   ImGuiIO &io = ImGui::GetIO();
   ImGuiStyle &style = ImGui::GetStyle();
+  if (isMinimized)
+    return;
   if (!showUi)
   {
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
       style.Colors[ImGuiCol_WindowBg].w = .2f;
-    ImGui::Begin("##Show UI");
+    auto showUiWindow = Ui::Window("##Show UI");
     if (ImGui::Button("Show UI"))
       showUi = true;
-    ImGui::End();
     return;
   }
 
   if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     style.Colors[ImGuiCol_WindowBg].w = .8f;
-  if (ImGui::BeginMainMenuBar())
+  if (auto mainMenu = Ui::MainMenuBar{})
   {
-    if (ImGui::BeginMenu("File"))
-    {
+    if (auto fileMenu = Ui::Menu{"File"})
       if (ImGui::MenuItem("Save"))
         savePrj();
-      ImGui::EndMenu();
-    }
-    if (ImGui::BeginMenu("Edit"))
+    if (auto editMenu = Ui::Menu{"Edit"})
     {
-      if (ImGui::BeginMenu("Add"))
+      if (auto addMenu = Ui::Menu{"Add"})
       {
         if (ImGui::MenuItem("Mouth..."))
           dialog =
@@ -114,59 +118,59 @@ auto App::renderUi(float /*dt*/) -> void
             if (r)
               addNode(Chat::className, channel);
           });
-
-        ImGui::EndMenu();
+        if (ImGui::MenuItem("Bouncer"))
+          addNode(Bouncer2::className, "bouncer");
       }
       if (ImGui::MenuItem("Preferences..."))
         dialog = std::make_unique<PreferencesDialog>(preferences, [this](bool r) {
           if (r)
             lib.flush();
         });
-      ImGui::EndMenu();
     }
-    ImGui::EndMainMenuBar();
   }
 
   if (dialog)
     if (!dialog->draw())
       dialog = nullptr;
   {
-    ImGui::Begin("Outliner");
-    ImGui::BeginDisabled(!selected);
-    if (ImGui::Button("<"))
-      selected->unparent();
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Unparent");
-    ImGui::SameLine();
-    if (ImGui::Button("^"))
-      selected->moveUp();
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Move up");
-    ImGui::SameLine();
-    if (ImGui::Button("V"))
-      selected->moveDown();
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Move down");
-    ImGui::SameLine();
-    if (ImGui::Button(">"))
-      selected->parentWithBellow();
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Parent with below");
-    ImGui::EndDisabled();
-
+    auto outlinerWindow = Ui::Window("Outliner");
+    {
+      auto hierarchyButtonsDisabled = Ui::Disabled(!selected);
+      if (ImGui::Button("<"))
+        selected->unparent();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Unparent");
+      ImGui::SameLine();
+      if (ImGui::Button("^"))
+        selected->moveUp();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Move up");
+      ImGui::SameLine();
+      if (ImGui::Button("V"))
+        selected->moveDown();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Move down");
+      ImGui::SameLine();
+      if (ImGui::Button(">"))
+        selected->parentWithBellow();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Parent with below");
+    }
     renderTree(*root);
-
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     if (ImGui::Button("Hide UI"))
       showUi = false;
-    ImGui::End();
   }
   {
-    ImGui::Begin("Details");
-    root->renderUi();
+    auto detailsWindpw = Ui::Window("Details");
     if (selected)
-      selected->renderUi();
-    ImGui::End();
+      if (auto detailsTable = Ui::Table{"Details", 2, ImGuiTableFlags_SizingStretchProp})
+      {
+        ImGui::TableSetupColumn("Property     ", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableHeadersRow();
+        selected->renderUi();
+      }
   }
   for (auto &action : postponedActions)
     action();
@@ -312,7 +316,7 @@ auto App::renderTree(Node &v) -> void
   {
     nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
     const auto nodeOpen = ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());
-    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen() && &v != root.get())
+    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
       selected = &v;
     if (nodeOpen)
     {
@@ -340,8 +344,8 @@ auto App::loadPrj() -> void
   std::ifstream st("prj.tpp", std::ofstream::binary);
   if (!st)
   {
-    root = std::make_unique<Bouncer>(audioCapture);
-    LOG("Error opening file prj.tpp");
+    root = std::make_unique<Root>(lib);
+    LOG("Create new project");
     return;
   }
 
@@ -356,7 +360,7 @@ auto App::loadPrj() -> void
   ::deser(strm, v);
   if (v != ver)
   {
-    root = std::make_unique<Bouncer>(audioCapture);
+    root = std::make_unique<Root>(lib);
     LOG("Version mismatch expected:", ver, ", received:", v);
     return;
   }

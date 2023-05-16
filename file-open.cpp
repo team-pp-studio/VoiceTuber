@@ -1,6 +1,6 @@
 #include "file-open.hpp"
+#include "ui.hpp"
 #include <functional>
-#include <imgui/imgui.h>
 #include <log/log.hpp>
 
 #ifdef _WIN32
@@ -8,8 +8,7 @@
 #endif
 
 FileOpen::FileOpen(Lib &lib, std::string dialogName, Cb aCb)
-  : Dialog(std::move(dialogName),
-           [this, aCb = std::move(aCb)](bool r) { aCb(r, getSelectedFile()); }),
+  : Dialog(std::move(dialogName), [this, aCb = std::move(aCb)](bool r) { aCb(r, getSelectedFile()); }),
     cwd(std::filesystem::current_path()),
     upDir(lib.queryTex("engine:up-dir.png", true))
 {
@@ -45,7 +44,7 @@ auto FileOpen::internalDraw() -> DialogState
         for (auto &entry : std::filesystem::directory_iterator(cwd))
           files.push_back(entry.path());
       }
-      catch (std::runtime_error&e)
+      catch (std::runtime_error &e)
       {
         LOG(e.what());
       }
@@ -67,7 +66,7 @@ auto FileOpen::internalDraw() -> DialogState
     }
   }
   // Populate the files in the list box
-  if (ImGui::BeginListBox("##files", ImVec2(700, 400)))
+  if (auto listBoxFiles = Ui::ListBox{"##files", ImVec2(700, 400)})
   {
     std::function<void()> postponedAction = nullptr;
     for (auto &file : files)
@@ -104,7 +103,6 @@ auto FileOpen::internalDraw() -> DialogState
             else
             {
               selectedFile = fileStr;
-              ImGui::EndListBox();
               return DialogState::ok;
             }
           }
@@ -121,7 +119,6 @@ auto FileOpen::internalDraw() -> DialogState
     }
     if (postponedAction)
       postponedAction();
-    ImGui::EndListBox();
   }
 
   // Show the selected file
@@ -132,23 +129,20 @@ auto FileOpen::internalDraw() -> DialogState
 
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);
-  ImGui::BeginDisabled(selectedFile.empty());
-  if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
   {
-    if (!std::filesystem::is_directory(cwd / selectedFile))
+    auto openDisable = Ui::Disabled{selectedFile.empty()};
+    if (ImGui::Button("Open", ImVec2(BtnSz, 0)))
     {
-      ImGui::EndDisabled();
-
-      return DialogState::ok;
-    }
-    else
-    {
-      cwd = cwd / selectedFile;
-      files.clear();
-      selectedFile = "";
+      if (!std::filesystem::is_directory(cwd / selectedFile))
+        return DialogState::ok;
+      else
+      {
+        cwd = cwd / selectedFile;
+        files.clear();
+        selectedFile = "";
+      }
     }
   }
-  ImGui::EndDisabled();
   ImGui::SetItemDefaultFocus();
   ImGui::SameLine();
   if (ImGui::Button("Cancel", ImVec2(BtnSz, 0)))

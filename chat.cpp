@@ -1,13 +1,14 @@
 #include "chat.hpp"
 #include "lib.hpp"
+#include "ui.hpp"
 #include <log/log.hpp>
 #include <sstream>
 
 Chat::Chat(class Lib &aLib, class Uv &uv, std::string n)
-  : Node(n),
+  : Node(aLib, n),
     lib(aLib),
     twitch(aLib.queryTwitch(uv, n)),
-    font(aLib.queryFont(SDL_GetBasePath() + std::string{"notepad_font/NotepadFont.ttf"}, ptsize))
+    font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize))
 {
   twitch->reg(*this);
 }
@@ -33,7 +34,8 @@ auto Chat::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   Node::load(strm);
-  font = lib.get().queryFont(SDL_GetBasePath() + std::string{"notepad_font/NotepadFont.ttf"}, ptsize);
+  font =
+    lib.get().queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
 }
 
 auto Chat::render(float dt, Node *hovered, Node *selected) -> void
@@ -98,35 +100,39 @@ auto Chat::wrapText(const std::string &text, float initOffset) const -> std::vec
 auto Chat::renderUi() -> void
 {
   Node::renderUi();
-  ImGui::PushID("Chat");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+  ImGui::TableNextColumn();
+  Ui::textRj("Size");
+  ImGui::TableNextColumn();
   ImGui::DragFloat("##width",
                    &size.x,
                    1.f,
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
-  ImGui::SameLine();
-  ImGui::DragFloat(
-    "Size", &size.y, 1.f, -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), "%.1f");
-  ImGui::PopItemWidth();
+  ImGui::DragFloat("##Height",
+                   &size.y,
+                   1.f,
+                   -std::numeric_limits<float>::max(),
+                   std::numeric_limits<float>::max(),
+                   "%.1f");
 
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  if (ImGui::InputInt("Font Size", &ptsize))
-    font = lib.get().queryFont(SDL_GetBasePath() + std::string{"notepad_font/NotepadFont.ttf"}, ptsize);
-  ImGui::PopItemWidth();
-
-  ImGui::PopID();
+  ImGui::TableNextColumn();
+  Ui::textRj("Font Size");
+  ImGui::TableNextColumn();
+  if (ImGui::InputInt("##Font Size", &ptsize))
+    font = lib.get().queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"},
+                               ptsize);
 
   if (!twitch->isConnected())
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.7f, 0.7f, 1.0f));
 
-  if (ImGui::BeginListBox("##Chat", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
-  {
+  ImGui::TableNextColumn();
+  Ui::textRj("Chat");
+  ImGui::TableNextColumn();
+  if (auto chatListBox =
+        Ui::ListBox{"##Chat", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())})
     for (const auto &msg : msgs)
       ImGui::Text("%s: %s", msg.displayName.c_str(), msg.msg.c_str());
-    ImGui::EndListBox();
-  }
   if (!twitch->isConnected())
     ImGui::PopStyleColor();
 }

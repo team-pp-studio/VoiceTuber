@@ -142,10 +142,10 @@ Top Priority
 - [ ] (feature) undo
 - [ ] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
 - [ ] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
-- [ ] Don't expect the placement of stuff (UI UX)
-   - [ ] Swap description and value
-   - [ ] Placement of bouncer options confusing
-- [ ] (feature) each node can have different amount of bounc
+- [x] Don't expect the placement of stuff (UI UX)
+   - [x] Swap description and value
+   - [x] Placement of bouncer options confusing
+- [x] (feature) each node can have different amount of bounce
 
 
 General Priority

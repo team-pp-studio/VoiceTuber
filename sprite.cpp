@@ -1,4 +1,5 @@
 #include "sprite.hpp"
+#include "ui.hpp"
 #include <cassert>
 #include <cstdint>
 #include <filesystem>
@@ -6,7 +7,7 @@
 #include <log/log.hpp>
 
 Sprite::Sprite(Lib &lib, const std::filesystem::path &path)
-  : Node([&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
+  : Node(lib, [&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
       try
       {
         if (!std::filesystem::exists(path.filename()))
@@ -49,19 +50,24 @@ auto Sprite::render(float dt, Node *hovered, Node *selected) -> void
 auto Sprite::renderUi() -> void
 {
   Node::renderUi();
-  ImGui::PushID("Sprite");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::InputInt("Cols", &cols);
+  ImGui::TableNextColumn();
+  Ui::textRj("Cols");
+  ImGui::TableNextColumn();
+  ImGui::InputInt("##Cols", &cols);
   if (cols < 1)
     cols = 1;
-  ImGui::InputInt("Rows", &rows);
+  ImGui::TableNextColumn();
+  Ui::textRj("Rows");
+  ImGui::TableNextColumn();
+  ImGui::InputInt("##Rows", &rows);
   if (rows < 1)
     rows = 1;
-  ImGui::InputInt("NumFrames", &numFrames);
+  ImGui::TableNextColumn();
+  Ui::textRj("NumFrames");
+  ImGui::TableNextColumn();
+  ImGui::InputInt("##NumFrames", &numFrames);
   if (numFrames < 1)
     numFrames = 1;
-  ImGui::PopItemWidth();
-  ImGui::PopID();
 }
 
 auto Sprite::save(OStrm &strm) const -> void

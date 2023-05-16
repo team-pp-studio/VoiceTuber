@@ -30,6 +30,15 @@ private:
   float animRotV = 0.f;
   glm::vec2 lastProjPivot = {0.f, 0.f};
   glm::vec2 lastProjPivotV = {0.f, 0.f};
+  std::shared_ptr<const Texture> arrowN;
+  std::shared_ptr<const Texture> arrowNE;
+  std::shared_ptr<const Texture> arrowE;
+  std::shared_ptr<const Texture> arrowSE;
+  std::shared_ptr<const Texture> arrowS;
+  std::shared_ptr<const Texture> arrowSW;
+  std::shared_ptr<const Texture> arrowW;
+  std::shared_ptr<const Texture> arrowNW;
+  std::shared_ptr<const Texture> center;
 
   auto load(IStrm &) -> void override;
   auto render(float dt, Node *hovered, Node *selected) -> void override;

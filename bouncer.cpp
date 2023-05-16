@@ -1,10 +1,12 @@
 #include "bouncer.hpp"
 #include "audio-capture.hpp"
+#include "ui.hpp"
 #include <SDL_opengl.h>
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer::Bouncer(class AudioCapture &audioCapture) : Node("bouncer"), audioCapture(audioCapture)
+Bouncer::Bouncer(Lib &lib, class AudioCapture &audioCapture)
+  : Node(lib, "bouncer"), audioCapture(audioCapture)
 {
   audioCapture.reg(*this);
 }
@@ -32,18 +34,22 @@ auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
 
 auto Bouncer::renderUi() -> void
 {
-  ImGui::PushID("Bouncer");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::ColorEdit4("BG color", (float *)&clearColor); // Edit 3 floats representing a color
-  ImGui::DragFloat("Bounce",
+  Node::renderUi();
+  ImGui::TableNextColumn();
+  Ui::textRj("BG color");
+  ImGui::TableNextColumn();
+  ImGui::ColorEdit4(
+    "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+  ImGui::TableNextColumn();
+  Ui::textRj("Bounce");
+  ImGui::TableNextColumn();
+  ImGui::DragFloat("##Bounce",
                    &strength,
                    1.f,
                    0.f,
                    std::numeric_limits<float>::max(),
                    "%.1f",
                    ImGuiSliderFlags_AlwaysClamp);
-  ImGui::PopItemWidth();
-  ImGui::PopID();
 }
 
 auto Bouncer::save(OStrm &strm) const -> void

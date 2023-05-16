@@ -1,5 +1,6 @@
 #include "preferences-dialog.hpp"
 #include "preferences.hpp"
+#include "ui.hpp"
 #include <imgui/imgui.h>
 
 PreferencesDialog::PreferencesDialog(class Preferences &preferences, Cb cb)
@@ -10,10 +11,10 @@ PreferencesDialog::PreferencesDialog(class Preferences &preferences, Cb cb)
 auto PreferencesDialog::internalDraw() -> DialogState
 {
   const auto BtnSz = 90;
-  if (ImGui::BeginTable("##preferences",
-                        2,
-                        ImGuiTableFlags_SizingFixedFit,
-                        ImVec2{ImGui::GetFontSize() * (40.f + 8.f), 100.f}))
+  if (auto preferencesTable = Ui::Table{"##preferences",
+                                        2,
+                                        ImGuiTableFlags_SizingFixedFit,
+                                        ImVec2{ImGui::GetFontSize() * (40.f + 8.f), 100.f}})
   {
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, ImGui::GetFontSize() * 8.f);
     ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthFixed, ImGui::GetFontSize() * 40.f);
@@ -40,7 +41,6 @@ auto PreferencesDialog::internalDraw() -> DialogState
         preferences.get().twitchKey = buf;
       ImGui::PopItemWidth();
     }
-    ImGui::EndTable();
   }
 
   ImGui::SetCursorPosX(ImGui::GetWindowWidth() - BtnSz - ImGui::GetStyle().WindowPadding.x);

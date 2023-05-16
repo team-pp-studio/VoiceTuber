@@ -1,5 +1,6 @@
 #include "node.hpp"
 #include "save-factory.hpp"
+#include "ui.hpp"
 #include <SDL_opengl.h>
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -43,7 +44,19 @@ static auto setModelViewMatrix(glm::mat4 v) -> void
   glLoadMatrixf(glm::value_ptr(v));
 }
 
-Node::Node(std::string name) : name(std::move(name)) {}
+Node::Node(Lib &lib, std::string name)
+  : name(std::move(name)),
+    arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
+    arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
+    arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
+    arrowSE(lib.queryTex("engine:arrow-se-circle.png", true)),
+    arrowS(lib.queryTex("engine:arrow-s-circle.png", true)),
+    arrowSW(lib.queryTex("engine:arrow-sw-circle.png", true)),
+    arrowW(lib.queryTex("engine:arrow-w-circle.png", true)),
+    arrowNW(lib.queryTex("engine:arrow-nw-circle.png", true)),
+    center(lib.queryTex("engine:center-circle.png", true))
+{
+}
 
 auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
 {
@@ -81,53 +94,67 @@ auto Node::getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &o
 
 auto Node::renderUi() -> void
 {
-  ImGui::Text("# %s", name.c_str());
-  ImGui::PushID("Location");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
-  ImGui::DragFloat("##XLocation",
+  ImGui::TableNextColumn();
+  ImGui::Text("#");
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", name.c_str());
+  ImGui::TableNextColumn();
+  Ui::textRj("Location");
+  ImGui::TableNextColumn();
+
+  ImGui::DragFloat("##XLoc",
                    &loc.x,
                    1.f,
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
-  ImGui::SameLine();
-  ImGui::DragFloat("Location",
+  ImGui::DragFloat("##YLoc",
                    &loc.y,
                    1.f,
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
   {
+    ImGui::TableNextColumn();
+    Ui::textRj("Size");
+    ImGui::TableNextColumn();
     ImGui::PushStyleColor(
       ImGuiCol_Text,
       ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
     auto width = w();
     auto height = h();
     ImGui::InputFloat("##Width", &width, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
-    ImGui::SameLine();
-    ImGui::InputFloat("Size", &height, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputFloat("##Height", &height, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
     ImGui::PopStyleColor(); // Restore the original text color
   }
 
-  ImGui::PopItemWidth();
-  ImGui::PopID();
-
-  ImGui::PushID("Scale");
+  ImGui::TableNextColumn();
+  Ui::textRj("Scale");
+  ImGui::TableNextColumn();
   if (uniformScaling)
   {
-    ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-    float avgScale = (scale.x + scale.y) / 2.0f;
-    if (ImGui::DragFloat("##X",
-                         &avgScale,
-                         0.01f,
-                         -std::numeric_limits<float>::max(),
-                         std::numeric_limits<float>::max(),
-                         "%.2f"))
-      scale.x = scale.y = avgScale;
+    {
+      float avgScale = (scale.x + scale.y) / 2.0f;
+      if (ImGui::DragFloat("##X",
+                           &avgScale,
+                           0.01f,
+                           -std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           "%.2f"))
+        scale.x = scale.y = avgScale;
+    }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("##Scale", &uniformScaling))
+    {
+      if (uniformScaling)
+      {
+        float avgScale = (scale.x + scale.y) / 2.0f;
+        scale.x = scale.y = avgScale;
+      }
+    }
   }
   else
   {
-    ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
     ImGui::DragFloat("##X",
                      &scale.x,
                      0.01f,
@@ -135,6 +162,14 @@ auto Node::renderUi() -> void
                      std::numeric_limits<float>::max(),
                      "%.2f");
     ImGui::SameLine();
+    if (ImGui::Checkbox("##Scale", &uniformScaling))
+    {
+      if (uniformScaling)
+      {
+        float avgScale = (scale.x + scale.y) / 2.0f;
+        scale.x = scale.y = avgScale;
+      }
+    }
     ImGui::DragFloat("##Y",
                      &scale.y,
                      0.01f,
@@ -142,89 +177,72 @@ auto Node::renderUi() -> void
                      std::numeric_limits<float>::max(),
                      "%.2f");
   }
-  ImGui::SameLine();
-  if (ImGui::Checkbox("Scale", &uniformScaling))
-  {
-    if (uniformScaling)
-    {
-      float avgScale = (scale.x + scale.y) / 2.0f;
-      scale.x = scale.y = avgScale;
-    }
-  }
-  ImGui::PopItemWidth();
-  ImGui::PopID();
-
-  ImGui::PushID("ZOrder");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::InputInt("ZOrder", &zOrder);
-  ImGui::PopItemWidth();
-  ImGui::PopID();
-
-  ImGui::PushID("Pivot");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+  ImGui::TableNextColumn();
+  Ui::textRj("ZOrder");
+  ImGui::TableNextColumn();
+  ImGui::InputInt("##ZOrder", &zOrder);
+  ImGui::TableNextColumn();
+  Ui::textRj("Pivot");
+  ImGui::TableNextColumn();
   ImGui::DragFloat("##XPivot",
                    &pivot.x,
                    1.f,
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
-  ImGui::SameLine();
-  ImGui::DragFloat("Pivot",
+  ImGui::DragFloat("##YPivot",
                    &pivot.y,
                    1.f,
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
-  if (ImGui::Button("NW"))
+  const auto sz = ImGui::GetFontSize();
+  if (Ui::BtnImg("nw", *arrowNW, sz, sz))
   {
     pivot = glm::vec2{0, h()};
   }
   ImGui::SameLine();
-  if (ImGui::Button("N "))
+  if (Ui::BtnImg("n", *arrowN, sz, sz))
   {
     pivot = glm::vec2{w() / 2, h()};
   }
   ImGui::SameLine();
-  if (ImGui::Button("NE"))
+  if (Ui::BtnImg("ne", *arrowNE, sz, sz))
   {
     pivot = glm::vec2{w(), h()};
   }
-  if (ImGui::Button("W "))
+  if (Ui::BtnImg("w", *arrowW, sz, sz))
   {
-    pivot = glm::vec2{w(), h() / 2};
+    pivot = glm::vec2{0, h() / 2};
   }
   ImGui::SameLine();
-  if (ImGui::Button("C "))
+  if (Ui::BtnImg("c", *center, sz, sz))
   {
     pivot = glm::vec2{w() / 2, h() / 2};
   }
   ImGui::SameLine();
-  if (ImGui::Button("E "))
+  if (Ui::BtnImg("e", *arrowE, sz, sz))
   {
     pivot = glm::vec2{w(), h() / 2};
   }
-  if (ImGui::Button("SW"))
+  if (Ui::BtnImg("sw", *arrowSW, sz, sz))
   {
     pivot = glm::vec2{0, 0};
   }
   ImGui::SameLine();
-  if (ImGui::Button("S "))
+  if (Ui::BtnImg("s", *arrowS, sz, sz))
   {
     pivot = glm::vec2{w() / 2, 0};
   }
   ImGui::SameLine();
-  if (ImGui::Button("SE"))
+  if (Ui::BtnImg("se", *arrowSE, sz, sz))
   {
     pivot = glm::vec2{w(), 0};
   }
-  ImGui::PopItemWidth();
-  ImGui::PopID();
-
-  ImGui::PushID("Rotation");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::SliderFloat("Rotation", &rot, -360.0f, 360.0f, "%.1f");
-  ImGui::PopItemWidth();
-  ImGui::PopID();
+  ImGui::TableNextColumn();
+  Ui::textRj("Rotation");
+  ImGui::TableNextColumn();
+  ImGui::SliderFloat("##Rotation", &rot, -360.0f, 360.0f, "%.1f");
 }
 
 static glm::vec3 mouseToModelViewCoords(glm::vec2 mouse,

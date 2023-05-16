@@ -30,7 +30,7 @@ Texture::Texture(const std::string &path, bool isUi)
         catch (std::runtime_error &e)
         {
           LOG(e.what());
-          auto engineImgPath = SDL_GetBasePath() + std::string{"corrupted.png"};
+          auto engineImgPath = SDL_GetBasePath() + std::string{"assets/corrupted.png"};
           auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
           if (!ret)
           {
@@ -43,7 +43,7 @@ Texture::Texture(const std::string &path, bool isUi)
       }
       else
       {
-        auto engineImgPath = SDL_GetBasePath() + path.substr(7);
+        auto engineImgPath = SDL_GetBasePath() + std::string{"assets/"} + path.substr(7);
         auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
         {

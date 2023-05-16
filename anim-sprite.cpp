@@ -1,9 +1,20 @@
 #include "anim-sprite.hpp"
+#include "ui.hpp"
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
 AnimSprite::AnimSprite(Lib &lib, const std::filesystem::path &path)
-  : Sprite(lib, path), startTime(std::chrono::high_resolution_clock::now())
+  : Sprite(lib, path),
+    startTime(std::chrono::high_resolution_clock::now()),
+    arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
+    arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
+    arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
+    arrowSE(lib.queryTex("engine:arrow-se-circle.png", true)),
+    arrowS(lib.queryTex("engine:arrow-s-circle.png", true)),
+    arrowSW(lib.queryTex("engine:arrow-sw-circle.png", true)),
+    arrowW(lib.queryTex("engine:arrow-w-circle.png", true)),
+    arrowNW(lib.queryTex("engine:arrow-nw-circle.png", true)),
+    center(lib.queryTex("engine:center-circle.png", true))
 {
 }
 
@@ -35,7 +46,11 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   lastProjPivotV = v;
 
   if (!physics)
+  {
+    animRotV = {};
+    animRot = {};
     return;
+  }
 
   if (glm::length(end - pivot) < 1.f)
     return;
@@ -61,87 +76,107 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 auto AnimSprite::renderUi() -> void
 {
   Sprite::renderUi();
-  ImGui::PushID("AnimSprite");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
-  ImGui::DragFloat(
-    "FPS", &fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
-  ImGui::Checkbox("Physics", &physics);
 
-  ImGui::BeginDisabled(!physics);
-  ImGui::PushID("End");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
-  ImGui::DragFloat("##XEnd",
-                   &end.x,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
-  ImGui::SameLine();
+  ImGui::TableNextColumn();
+  Ui::textRj("FPS");
+  ImGui::TableNextColumn();
   ImGui::DragFloat(
-    "End", &end.y, 1.f, -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), "%.1f");
-  if (ImGui::Button("NW"))
+    "##FPS", &fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::TableNextColumn();
+  Ui::textRj("Physics");
+  ImGui::TableNextColumn();
+  ImGui::Checkbox("##Physics", &physics);
+  ImGui::TableNextColumn();
   {
-    end = glm::vec2{0, h()};
+    auto physicsDisabled = Ui::Disabled{!physics};
+    Ui::textRj("End");
+    ImGui::TableNextColumn();
+    ImGui::DragFloat("##XEnd",
+                     &end.x,
+                     1.f,
+                     -std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max(),
+                     "%.1f");
+    ImGui::DragFloat("##YEnd",
+                     &end.y,
+                     1.f,
+                     -std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max(),
+                     "%.1f");
+    const auto sz = ImGui::GetFontSize();
+    if (Ui::BtnImg("nw2", *arrowNW, sz, sz))
+    {
+      end = glm::vec2{0, h()};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("n2", *arrowN, sz, sz))
+    {
+      end = glm::vec2{w() / 2, h()};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("ne2", *arrowNE, sz, sz))
+    {
+      end = glm::vec2{w(), h()};
+    }
+    if (Ui::BtnImg("w2", *arrowW, sz, sz))
+    {
+      end = glm::vec2{0, h() / 2};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("c2", *center, sz, sz))
+    {
+      end = glm::vec2{w() / 2, h() / 2};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("e2", *arrowE, sz, sz))
+    {
+      end = glm::vec2{w(), h() / 2};
+    }
+    if (Ui::BtnImg("sw2", *arrowSW, sz, sz))
+    {
+      end = glm::vec2{0, 0};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("s2", *arrowS, sz, sz))
+    {
+      end = glm::vec2{w() / 2, 0};
+    }
+    ImGui::SameLine();
+    if (Ui::BtnImg("se2", *arrowSE, sz, sz))
+    {
+      end = glm::vec2{w(), 0};
+    }
+    ImGui::TableNextColumn();
+    Ui::textRj("Force");
+    ImGui::TableNextColumn();
+    ImGui::DragFloat("##Force",
+                     &force,
+                     .1f,
+                     0,
+                     std::numeric_limits<float>::max(),
+                     "%.1f",
+                     ImGuiSliderFlags_AlwaysClamp);
+    ImGui::TableNextColumn();
+    Ui::textRj("Damping");
+    ImGui::TableNextColumn();
+    ImGui::DragFloat("##Damping",
+                     &damping,
+                     .1f,
+                     0,
+                     std::numeric_limits<float>::max(),
+                     "%.1f",
+                     ImGuiSliderFlags_AlwaysClamp);
+    ImGui::TableNextColumn();
+    Ui::textRj("Springness");
+    ImGui::TableNextColumn();
+    ImGui::DragFloat("##Springness",
+                     &springness,
+                     .1f,
+                     0,
+                     std::numeric_limits<float>::max(),
+                     "%.1f",
+                     ImGuiSliderFlags_AlwaysClamp);
   }
-  ImGui::SameLine();
-  if (ImGui::Button("N "))
-  {
-    end = glm::vec2{w() / 2, h()};
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("NE"))
-  {
-    end = glm::vec2{w(), h()};
-  }
-  if (ImGui::Button("W "))
-  {
-    end = glm::vec2{w(), h() / 2};
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("C "))
-  {
-    end = glm::vec2{w() / 2, h() / 2};
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("E "))
-  {
-    end = glm::vec2{w(), h() / 2};
-  }
-  if (ImGui::Button("SW"))
-  {
-    end = glm::vec2{0, 0};
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("S "))
-  {
-    end = glm::vec2{w() / 2, 0};
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("SE"))
-  {
-    end = glm::vec2{w(), 0};
-  }
-  ImGui::PopItemWidth();
-  ImGui::PopID();
-  ImGui::DragFloat(
-    "Force", &force, .1f, 0, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
-  ImGui::DragFloat("Damping",
-                   &damping,
-                   .1f,
-                   0,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
-  ImGui::DragFloat("Springness",
-                   &springness,
-                   .1f,
-                   0,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
-  ImGui::EndDisabled();
-  ImGui::PopItemWidth();
-  ImGui::PopID();
 }
 
 auto AnimSprite::save(OStrm &strm) const -> void

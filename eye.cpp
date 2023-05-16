@@ -1,5 +1,6 @@
 #include "eye.hpp"
 #include "mouse-tracking.hpp"
+#include "ui.hpp"
 #include <numbers>
 
 Eye::Eye(MouseTracking &mouseTracking, Lib &lib, const std::filesystem::path &path)
@@ -63,19 +64,21 @@ auto Eye::load(IStrm &strm) -> void
 auto Eye::renderUi() -> void
 {
   Sprite::renderUi();
-  ImGui::PushID("AnimSprite");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
+  ImGui::TableNextColumn();
+  Ui::textRj("Radius");
+  ImGui::TableNextColumn();
   ImGui::DragFloat(
-    "Radius", &radius, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
-  ImGui::DragFloat("Strength",
+    "##Radius", &radius, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
+  ImGui::TableNextColumn();
+  Ui::textRj("Strength");
+  ImGui::TableNextColumn();
+  ImGui::DragFloat("##Strength",
                    &followStrength,
                    1,
                    1,
                    std::numeric_limits<float>::max(),
                    "%.1f",
                    ImGuiSliderFlags_AlwaysClamp);
-  ImGui::PopItemWidth();
-  ImGui::PopID();
 }
 
 auto Eye::ingest(const glm::mat4 &projMat, glm::vec2 v) -> void

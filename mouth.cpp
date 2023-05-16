@@ -1,4 +1,5 @@
 #include "mouth.hpp"
+#include "ui.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
@@ -37,12 +38,14 @@ auto Mouth::render(float dt, Node *hovered, Node *selected) -> void
 auto Mouth::renderUi() -> void
 {
   Sprite::renderUi();
-  ImGui::PushID("Mouth");
-  ImGui::PushItemWidth(ImGui::GetFontSize() * 16 + 8);
+  ImGui::TableNextColumn();
+
   {
     ImGui::PushStyleColor(
       ImGuiCol_Text,
       ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
+    Ui::textRj("Viseme");
+    ImGui::TableNextColumn();
     char str[16];
     switch (viseme)
     {
@@ -62,13 +65,16 @@ auto Mouth::renderUi() -> void
     case Viseme::O: strcpy(str, "O"); break;
     case Viseme::U: strcpy(str, "U"); break;
     }
-    ImGui::InputText("Viseme", str, ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("##Viseme", str, ImGuiInputTextFlags_ReadOnly);
     ImGui::PopStyleColor(); // Restore the original text color
   }
 
-  auto visUi = [&](auto vis, auto txt) {
+  auto visUi = [&](auto vis, auto txt, auto txt2) {
     auto &f = viseme2Sprite[vis];
-    if (ImGui::InputInt(txt, &f))
+    ImGui::TableNextColumn();
+    Ui::textRj(txt);
+    ImGui::TableNextColumn();
+    if (ImGui::InputInt(txt2, &f))
     {
       viseme = vis;
       using namespace std::chrono_literals;
@@ -86,24 +92,21 @@ auto Mouth::renderUi() -> void
       freezeTime = std::chrono::high_resolution_clock::now() + 1s;
     }
   };
-  visUi(Viseme::sil, "sil");
-  visUi(Viseme::PP, "PP ");
-  visUi(Viseme::FF, "FF ");
-  visUi(Viseme::TH, "TH ");
-  visUi(Viseme::DD, "DD ");
-  visUi(Viseme::kk, "kk ");
-  visUi(Viseme::CH, "CH ");
-  visUi(Viseme::SS, "SS ");
-  visUi(Viseme::nn, "nn ");
-  visUi(Viseme::RR, "RR ");
-  visUi(Viseme::aa, "aa ");
-  visUi(Viseme::E, "E  ");
-  visUi(Viseme::I, "I  ");
-  visUi(Viseme::O, "O  ");
-  visUi(Viseme::U, "U  ");
-
-  ImGui::PopItemWidth();
-  ImGui::PopID();
+  visUi(Viseme::sil, "sil", "##sil");
+  visUi(Viseme::PP, "PP", "##PP");
+  visUi(Viseme::FF, "FF", "##FF");
+  visUi(Viseme::TH, "TH", "##TH");
+  visUi(Viseme::DD, "DD", "##DD");
+  visUi(Viseme::kk, "kk", "##kk");
+  visUi(Viseme::CH, "CH", "##CH");
+  visUi(Viseme::SS, "SS", "##SS");
+  visUi(Viseme::nn, "nn", "##nn");
+  visUi(Viseme::RR, "RR", "##RR");
+  visUi(Viseme::aa, "aa", "##aa");
+  visUi(Viseme::E, "E", "##E");
+  visUi(Viseme::I, "I", "##I");
+  visUi(Viseme::O, "O", "##O");
+  visUi(Viseme::U, "U", "##U");
 }
 
 auto Mouth::ingest(Viseme v) -> void
