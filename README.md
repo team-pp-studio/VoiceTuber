@@ -254,7 +254,7 @@ $ cmake --build build                       # add `-j <n>` with cmake >= 3.12
 ### Linux
 * Install dependencies
 ```
-sudo apt-get install -y clang pkg-config libsdl2-dev libsdl2-net-dev git cmake
+sudo apt-get install -y clang pkg-config libsdl2-dev libuv1-dev git cmake
 ```
 * Clone the app
 ```
