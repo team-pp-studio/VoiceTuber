@@ -103,7 +103,7 @@ auto AnimSprite::renderUi() -> void
                      -std::numeric_limits<float>::max(),
                      std::numeric_limits<float>::max(),
                      "%.1f");
-    const auto sz = ImGui::GetFontSize();
+    const auto sz = 2 * ImGui::GetFontSize();
     if (Ui::BtnImg("nw2", *arrowNW, sz, sz))
     {
       end = glm::vec2{0, h()};

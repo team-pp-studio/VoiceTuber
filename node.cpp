@@ -196,7 +196,7 @@ auto Node::renderUi() -> void
                    -std::numeric_limits<float>::max(),
                    std::numeric_limits<float>::max(),
                    "%.1f");
-  const auto sz = ImGui::GetFontSize();
+  const auto sz = 2 * ImGui::GetFontSize();
   if (Ui::BtnImg("nw", *arrowNW, sz, sz))
   {
     pivot = glm::vec2{0, h()};
