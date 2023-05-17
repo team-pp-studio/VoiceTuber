@@ -61,8 +61,8 @@ Texture::Texture(const std::string &path, bool isUi)
       glGenTextures(1, &ret);
       glBindTexture(GL_TEXTURE_2D, ret);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -70,7 +70,6 @@ Texture::Texture(const std::string &path, bool isUi)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData_);
       else
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData_);
-      glGenerateMipmap(GL_TEXTURE_2D);
       return ret;
     }())
 {
@@ -82,8 +81,8 @@ Texture::Texture(SDL_Surface *surface)
       glGenTextures(1, &texture);
       glBindTexture(GL_TEXTURE_2D, texture);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -98,7 +97,6 @@ Texture::Texture(SDL_Surface *surface)
                    GL_UNSIGNED_BYTE,
                    surface->pixels);
       glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-      glGenerateMipmap(GL_TEXTURE_2D);
 
       return texture;
     }())

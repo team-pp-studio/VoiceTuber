@@ -206,6 +206,9 @@
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
+    <ClInclude Include="bouncer2.hpp" />
+    <ClInclude Include="root.hpp" />
+    <ClInclude Include="ui.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3rd-party\imgui\imgui.cpp">
@@ -268,6 +271,9 @@
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="bouncer2.cpp" />
+    <ClCompile Include="root.cpp" />
+    <ClCompile Include="ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd-party">
