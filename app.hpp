@@ -6,6 +6,7 @@
 #include "preferences.hpp"
 #include "save-factory.hpp"
 #include "twitch.hpp"
+#include "undo.hpp"
 #include "uv.hpp"
 #include "wav-2-visemes.hpp"
 #include <functional>
@@ -33,10 +34,10 @@ private:
   AudioCapture audioCapture;
   MouseTracking mouseTracking;
   Lib lib;
+  Undo undo;
   Node *hovered = nullptr;
   Node *selected = nullptr;
   enum class EditMode { select, translate, scale, rotate };
-  EditMode editMode = EditMode::select;
   std::unique_ptr<Dialog> dialog = nullptr;
   std::unique_ptr<Node> root;
   bool showUi = true;

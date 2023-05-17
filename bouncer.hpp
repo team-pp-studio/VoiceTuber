@@ -14,7 +14,7 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Bouncer";
-  Bouncer(class Lib &, class AudioCapture &);
+  Bouncer(Lib &, Undo &, class AudioCapture &);
   ~Bouncer() final;
 
 private:

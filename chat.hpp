@@ -17,7 +17,7 @@ public:
 
   static constexpr const char *className = "Chat";
 
-  Chat(class Lib &, class Uv &, std::string name);
+  Chat(Lib &, Undo &, class Uv &, std::string name);
   ~Chat() final;
 
 private:

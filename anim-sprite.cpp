@@ -3,8 +3,8 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-AnimSprite::AnimSprite(Lib &lib, const std::filesystem::path &path)
-  : Sprite(lib, path),
+AnimSprite::AnimSprite(Lib &lib, Undo &undo, const std::filesystem::path &path)
+  : Sprite(lib, undo, path),
     startTime(std::chrono::high_resolution_clock::now()),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -104,45 +104,45 @@ auto AnimSprite::renderUi() -> void
                      std::numeric_limits<float>::max(),
                      "%.1f");
     const auto sz = 2 * ImGui::GetFontSize();
-    if (Ui::BtnImg("nw2", *arrowNW, sz, sz))
+    if (Ui::btnImg("nw2", *arrowNW, sz, sz))
     {
       end = glm::vec2{0, h()};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("n2", *arrowN, sz, sz))
+    if (Ui::btnImg("n2", *arrowN, sz, sz))
     {
       end = glm::vec2{w() / 2, h()};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("ne2", *arrowNE, sz, sz))
+    if (Ui::btnImg("ne2", *arrowNE, sz, sz))
     {
       end = glm::vec2{w(), h()};
     }
-    if (Ui::BtnImg("w2", *arrowW, sz, sz))
+    if (Ui::btnImg("w2", *arrowW, sz, sz))
     {
       end = glm::vec2{0, h() / 2};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("c2", *center, sz, sz))
+    if (Ui::btnImg("c2", *center, sz, sz))
     {
       end = glm::vec2{w() / 2, h() / 2};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("e2", *arrowE, sz, sz))
+    if (Ui::btnImg("e2", *arrowE, sz, sz))
     {
       end = glm::vec2{w(), h() / 2};
     }
-    if (Ui::BtnImg("sw2", *arrowSW, sz, sz))
+    if (Ui::btnImg("sw2", *arrowSW, sz, sz))
     {
       end = glm::vec2{0, 0};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("s2", *arrowS, sz, sz))
+    if (Ui::btnImg("s2", *arrowS, sz, sz))
     {
       end = glm::vec2{w() / 2, 0};
     }
     ImGui::SameLine();
-    if (Ui::BtnImg("se2", *arrowSE, sz, sz))
+    if (Ui::btnImg("se2", *arrowSE, sz, sz))
     {
       end = glm::vec2{w(), 0};
     }

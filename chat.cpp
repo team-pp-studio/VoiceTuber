@@ -4,8 +4,8 @@
 #include <log/log.hpp>
 #include <sstream>
 
-Chat::Chat(class Lib &aLib, class Uv &uv, std::string n)
-  : Node(aLib, n),
+Chat::Chat(class Lib &aLib, Undo &undo, class Uv &uv, std::string n)
+  : Node(aLib, undo, n),
     lib(aLib),
     twitch(aLib.queryTwitch(uv, n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize))

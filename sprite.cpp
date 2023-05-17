@@ -6,8 +6,8 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(Lib &lib, const std::filesystem::path &path)
-  : Node(lib, [&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
+Sprite::Sprite(Lib &lib, Undo &undo, const std::filesystem::path &path)
+  : Node(lib, undo, [&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
       try
       {
         if (!std::filesystem::exists(path.filename()))

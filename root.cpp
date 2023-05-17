@@ -4,7 +4,7 @@
 #include <limits>
 #include <log/log.hpp>
 
-Root::Root(Lib &lib) : Node(lib, "root") {}
+Root::Root(Lib &lib, Undo &undo) : Node(lib, undo, "root") {}
 
 Root::~Root() {}
 

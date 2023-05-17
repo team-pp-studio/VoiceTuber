@@ -1,6 +1,7 @@
 #include "node.hpp"
 #include "save-factory.hpp"
 #include "ui.hpp"
+#include "undo.hpp"
 #include <SDL_opengl.h>
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -44,8 +45,9 @@ static auto setModelViewMatrix(glm::mat4 v) -> void
   glLoadMatrixf(glm::value_ptr(v));
 }
 
-Node::Node(Lib &lib, std::string name)
+Node::Node(Lib &lib, Undo &undo, std::string name)
   : name(std::move(name)),
+    undo(undo),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
     arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
@@ -102,18 +104,20 @@ auto Node::renderUi() -> void
   Ui::textRj("Location");
   ImGui::TableNextColumn();
 
-  ImGui::DragFloat("##XLoc",
-                   &loc.x,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
-  ImGui::DragFloat("##YLoc",
-                   &loc.y,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
+  Ui::dragFloat(undo,
+                "##XLoc",
+                loc.x,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
+  Ui::dragFloat(undo,
+                "##YLoc",
+                loc.y,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
   {
     ImGui::TableNextColumn();
     Ui::textRj("Size");
@@ -141,7 +145,10 @@ auto Node::renderUi() -> void
                            -std::numeric_limits<float>::max(),
                            std::numeric_limits<float>::max(),
                            "%.2f"))
-        scale.x = scale.y = avgScale;
+      {
+        undo.get().record([avgScale, this]() { scale.x = scale.y = avgScale; },
+                          [oldScale = scale, this]() { scale = oldScale; });
+      }
     }
     ImGui::SameLine();
     if (ImGui::Checkbox("##Scale", &uniformScaling))
@@ -155,12 +162,13 @@ auto Node::renderUi() -> void
   }
   else
   {
-    ImGui::DragFloat("##X",
-                     &scale.x,
-                     0.01f,
-                     -std::numeric_limits<float>::max(),
-                     std::numeric_limits<float>::max(),
-                     "%.2f");
+    Ui::dragFloat(undo,
+                  "##X",
+                  scale.x,
+                  0.01f,
+                  -std::numeric_limits<float>::max(),
+                  std::numeric_limits<float>::max(),
+                  "%.2f");
     ImGui::SameLine();
     if (ImGui::Checkbox("##Scale", &uniformScaling))
     {
@@ -170,79 +178,73 @@ auto Node::renderUi() -> void
         scale.x = scale.y = avgScale;
       }
     }
-    ImGui::DragFloat("##Y",
-                     &scale.y,
-                     0.01f,
-                     -std::numeric_limits<float>::max(),
-                     std::numeric_limits<float>::max(),
-                     "%.2f");
+    Ui::dragFloat(undo,
+                  "##Y",
+                  scale.y,
+                  0.01f,
+                  -std::numeric_limits<float>::max(),
+                  std::numeric_limits<float>::max(),
+                  "%.2f");
   }
   ImGui::TableNextColumn();
   Ui::textRj("ZOrder");
   ImGui::TableNextColumn();
-  ImGui::InputInt("##ZOrder", &zOrder);
+  Ui::inputInt(undo, "##ZOrder", zOrder);
   ImGui::TableNextColumn();
   Ui::textRj("Pivot");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##XPivot",
-                   &pivot.x,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
-  ImGui::DragFloat("##YPivot",
-                   &pivot.y,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
+  Ui::dragFloat(undo,
+                "##XPivot",
+                pivot.x,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
+  Ui::dragFloat(undo,
+                "##YPivot",
+                pivot.y,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
   const auto sz = 2 * ImGui::GetFontSize();
-  if (Ui::BtnImg("nw", *arrowNW, sz, sz))
-  {
-    pivot = glm::vec2{0, h()};
-  }
+  if (Ui::btnImg("nw", *arrowNW, sz, sz))
+    undo.get().record([newPivot = glm::vec2{0, h()}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("n", *arrowN, sz, sz))
-  {
-    pivot = glm::vec2{w() / 2, h()};
-  }
+  if (Ui::btnImg("n", *arrowN, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w() / 2, h()}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("ne", *arrowNE, sz, sz))
-  {
-    pivot = glm::vec2{w(), h()};
-  }
-  if (Ui::BtnImg("w", *arrowW, sz, sz))
-  {
-    pivot = glm::vec2{0, h() / 2};
-  }
+  if (Ui::btnImg("ne", *arrowNE, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w(), h()}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+  if (Ui::btnImg("w", *arrowW, sz, sz))
+    undo.get().record([newPivot = glm::vec2{0, h() / 2}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("c", *center, sz, sz))
-  {
-    pivot = glm::vec2{w() / 2, h() / 2};
-  }
+  if (Ui::btnImg("c", *center, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w() / 2, h() / 2}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("e", *arrowE, sz, sz))
-  {
-    pivot = glm::vec2{w(), h() / 2};
-  }
-  if (Ui::BtnImg("sw", *arrowSW, sz, sz))
-  {
-    pivot = glm::vec2{0, 0};
-  }
+  if (Ui::btnImg("e", *arrowE, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w(), h() / 2}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+  if (Ui::btnImg("sw", *arrowSW, sz, sz))
+    undo.get().record([newPivot = glm::vec2{0, 0}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("s", *arrowS, sz, sz))
-  {
-    pivot = glm::vec2{w() / 2, 0};
-  }
+  if (Ui::btnImg("s", *arrowS, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w() / 2, 0}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::SameLine();
-  if (Ui::BtnImg("se", *arrowSE, sz, sz))
-  {
-    pivot = glm::vec2{w(), 0};
-  }
+  if (Ui::btnImg("se", *arrowSE, sz, sz))
+    undo.get().record([newPivot = glm::vec2{w(), 0}, this]() { pivot = newPivot; },
+                      [oldPivot = pivot, this]() { pivot = oldPivot; });
   ImGui::TableNextColumn();
   Ui::textRj("Rotation");
   ImGui::TableNextColumn();
-  ImGui::SliderFloat("##Rotation", &rot, -360.0f, 360.0f, "%.1f");
+  Ui::sliderFloat(undo, "##Rotation", rot, -360.0f, 360.0f, "%.1f");
 }
 
 static glm::vec3 mouseToModelViewCoords(glm::vec2 mouse,
@@ -436,6 +438,7 @@ auto Node::translateStart(glm::vec2 mouse) -> void
 {
   startMousePos = mouse;
   initLoc = loc;
+  editMode_ = EditMode::translate;
 }
 
 auto Node::translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
@@ -454,6 +457,7 @@ auto Node::rotStart(glm::vec2 mouse) -> void
 {
   startMousePos = mouse;
   initRot = rot;
+  editMode_ = EditMode::rotate;
 }
 
 auto Node::rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
@@ -481,6 +485,7 @@ auto Node::scaleStart(glm::vec2 mouse) -> void
 {
   startMousePos = mouse;
   initScale = scale;
+  editMode_ = EditMode::scale;
 }
 
 auto Node::scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
@@ -557,4 +562,53 @@ auto Node::parent() -> Node *
 auto Node::getName() const -> std::string
 {
   return name;
+}
+
+auto Node::update(const glm::mat4 &projMat, glm::vec2 mouse) -> void
+{
+  switch (editMode_)
+  {
+  case EditMode::translate: translateUpdate(projMat, mouse); break;
+  case EditMode::rotate: rotUpdate(projMat, mouse); break;
+  case EditMode::scale: scaleUpdate(projMat, mouse); break;
+  case EditMode::select: break;
+  }
+}
+auto Node::cancel() -> void
+{
+  switch (editMode_)
+  {
+  case EditMode::translate: translateCancel(); break;
+  case EditMode::rotate: rotCancel(); break;
+  case EditMode::scale: scaleCancel(); break;
+  case EditMode::select: break;
+  }
+  editMode_ = EditMode::select;
+}
+
+auto Node::commit() -> void
+{
+  switch (editMode_)
+  {
+  case EditMode::translate:
+    undo.get().record([newLoc = loc, this]() { loc = newLoc; },
+                      [oldLoc = initLoc, this]() { loc = oldLoc; });
+    break;
+  case EditMode::rotate:
+    undo.get().record([newRot = rot, this]() { rot = newRot; },
+                      [oldRot = initRot, this]() { rot = oldRot; });
+    break;
+  case EditMode::scale:
+    undo.get().record([newScale = scale, this]() { scale = newScale; },
+                      [oldScale = initScale, this]() { scale = oldScale; });
+    break;
+  case EditMode::select: break;
+  }
+
+  editMode_ = EditMode::select;
+}
+
+auto Node::editMode() const -> EditMode
+{
+  return editMode_;
 }

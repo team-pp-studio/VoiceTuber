@@ -12,7 +12,7 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Bouncer2";
-  Bouncer2(class Lib &, class AudioCapture &, std::string name);
+  Bouncer2(Lib &, Undo &, class AudioCapture &, std::string name);
   ~Bouncer2() final;
 
 private:

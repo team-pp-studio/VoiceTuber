@@ -5,8 +5,8 @@
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer::Bouncer(Lib &lib, class AudioCapture &audioCapture)
-  : Node(lib, "bouncer"), audioCapture(audioCapture)
+Bouncer::Bouncer(Lib &lib, Undo &undo, class AudioCapture &audioCapture)
+  : Node(lib, undo, "bouncer"), audioCapture(audioCapture)
 {
   audioCapture.reg(*this);
 }

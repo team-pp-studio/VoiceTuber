@@ -3,8 +3,8 @@
 #include "ui.hpp"
 #include <numbers>
 
-Eye::Eye(MouseTracking &mouseTracking, Lib &lib, const std::filesystem::path &path)
-  : AnimSprite(lib, path), mouseTracking(mouseTracking)
+Eye::Eye(MouseTracking &mouseTracking, Lib &lib, Undo &undo, const std::filesystem::path &path)
+  : AnimSprite(lib, undo, path), mouseTracking(mouseTracking)
 {
   mouseTracking.reg(*this);
 }

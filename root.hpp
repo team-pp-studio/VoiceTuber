@@ -11,7 +11,7 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Root";
-  Root(class Lib &);
+  Root(class Lib &, Undo &);
   ~Root() final;
 
 private:

@@ -19,7 +19,7 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  Sprite(Lib &, const std::filesystem::path &path);
+  Sprite(Lib &, Undo &, const std::filesystem::path &path);
   auto w() const -> float final;
   auto h() const -> float final;
   auto isTransparent(glm::vec2) const -> bool final;

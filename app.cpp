@@ -28,18 +28,22 @@ App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()), li
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   audioCapture.reg(wav2Visemes);
-  saveFactory.reg<Bouncer>([this](std::string) { return std::make_unique<Bouncer>(lib, audioCapture); });
-  saveFactory.reg<Bouncer2>(
-    [this](std::string name) { return std::make_unique<Bouncer2>(lib, audioCapture, std::move(name)); });
-  saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib); });
-  saveFactory.reg<Mouth>(
-    [this](std::string name) { return std::make_unique<Mouth>(wav2Visemes, lib, std::move(name)); });
+  saveFactory.reg<Bouncer>(
+    [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioCapture); });
+  saveFactory.reg<Bouncer2>([this](std::string name) {
+    return std::make_unique<Bouncer2>(lib, undo, audioCapture, std::move(name));
+  });
+  saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib, undo); });
+  saveFactory.reg<Mouth>([this](std::string name) {
+    return std::make_unique<Mouth>(wav2Visemes, lib, undo, std::move(name));
+  });
   saveFactory.reg<AnimSprite>(
-    [this](std::string name) { return std::make_unique<AnimSprite>(lib, std::move(name)); });
-  saveFactory.reg<Eye>(
-    [this](std::string name) { return std::make_unique<Eye>(mouseTracking, lib, std::move(name)); });
+    [this](std::string name) { return std::make_unique<AnimSprite>(lib, undo, std::move(name)); });
+  saveFactory.reg<Eye>([this](std::string name) {
+    return std::make_unique<Eye>(mouseTracking, lib, undo, std::move(name));
+  });
   saveFactory.reg<Chat>(
-    [this](std::string name) { return std::make_unique<Chat>(lib, uv, std::move(name)); });
+    [this](std::string name) { return std::make_unique<Chat>(lib, undo, uv, std::move(name)); });
 }
 
 auto App::render(float dt) -> void
@@ -91,6 +95,16 @@ auto App::renderUi(float /*dt*/) -> void
         savePrj();
     if (auto editMenu = Ui::Menu{"Edit"})
     {
+      {
+        auto undoDisabled = Ui::Disabled(!undo.hasUndo());
+        if (auto undoMenu = ImGui::MenuItem("Undo", "CTRL+Z"))
+          undo.undo();
+      }
+      {
+        auto redoDisabled = Ui::Disabled(!undo.hasRedo());
+        if (auto redoMenu = ImGui::MenuItem("Redo", "CTRL+Y"))
+          undo.redo();
+      }
       if (auto addMenu = Ui::Menu{"Add"})
       {
         if (ImGui::MenuItem("Mouth..."))
@@ -187,26 +201,31 @@ auto App::processIo() -> void
   {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
-      if (editMode == EditMode::select)
+      if (!selected || selected->editMode() == Node::EditMode::select)
       {
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         const auto projMat = getProjMat();
-        selected = root->nodeUnder(projMat, glm::vec2{1.f * mouseX, 1.f * mouseY});
+        auto newSelected = root->nodeUnder(projMat, glm::vec2{1.f * mouseX, 1.f * mouseY});
+        if (newSelected != selected)
+          undo.record([newSelected, this]() { selected = newSelected; },
+                      [oldSelected = selected, this]() { selected = oldSelected; });
       }
       else
-        editMode = EditMode::select;
+      {
+        if (selected)
+          selected->commit();
+      }
     }
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
       cancel();
   }
   if (!io.WantCaptureKeyboard || !io.WantCaptureMouse)
   {
-    if (selected)
+    if (selected && !io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper)
     {
       if (ImGui::IsKeyPressed(ImGuiKey_G))
       {
-        editMode = EditMode::translate;
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         selected->translateStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
@@ -214,7 +233,6 @@ auto App::processIo() -> void
 
       if (ImGui::IsKeyPressed(ImGuiKey_S))
       {
-        editMode = EditMode::scale;
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         selected->scaleStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
@@ -222,7 +240,6 @@ auto App::processIo() -> void
 
       if (ImGui::IsKeyPressed(ImGuiKey_R))
       {
-        editMode = EditMode::rotate;
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         selected->rotStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
@@ -250,7 +267,6 @@ auto App::processIo() -> void
           auto parent = selected->parent();
           selected = n.get();
           parent->addChild(std::move(n));
-          editMode = EditMode::translate;
           int mouseX, mouseY;
           SDL_GetMouseState(&mouseX, &mouseY);
           selected->translateStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
@@ -259,24 +275,19 @@ auto App::processIo() -> void
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))
         cancel();
     }
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Z))
+      undo.undo();
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Y))
+      undo.redo();
   }
 }
 
 auto App::cancel() -> void
 {
   if (!selected)
-  {
-    editMode = EditMode::select;
     return;
-  }
-  switch (editMode)
-  {
-  case EditMode::select: selected = nullptr; break;
-  case EditMode::translate: selected->translateCancel(); break;
-  case EditMode::scale: selected->scaleCancel(); break;
-  case EditMode::rotate: selected->rotCancel(); break;
-  }
-  editMode = EditMode::select;
+
+  selected->cancel();
 }
 
 auto App::tick(float /*dt*/) -> void
@@ -292,12 +303,12 @@ auto App::tick(float /*dt*/) -> void
   SDL_GetMouseState(&mouseX, &mouseY);
   hovered = nullptr;
   const auto mousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
-  switch (editMode)
+  if (!selected || selected->editMode() == Node::EditMode::select)
+    hovered = root->nodeUnder(projMat, mousePos);
+  else
   {
-  case EditMode::select: hovered = root->nodeUnder(projMat, mousePos); break;
-  case EditMode::translate: selected->translateUpdate(projMat, mousePos); break;
-  case EditMode::scale: selected->scaleUpdate(projMat, mousePos); break;
-  case EditMode::rotate: selected->rotUpdate(projMat, mousePos); break;
+    if (selected)
+      selected->update(projMat, mousePos);
   }
   mouseTracking.tick();
 }
@@ -344,7 +355,7 @@ auto App::loadPrj() -> void
   std::ifstream st("prj.tpp", std::ofstream::binary);
   if (!st)
   {
-    root = std::make_unique<Root>(lib);
+    root = std::make_unique<Root>(lib, undo);
     LOG("Create new project");
     return;
   }
@@ -360,7 +371,7 @@ auto App::loadPrj() -> void
   ::deser(strm, v);
   if (v != ver)
   {
-    root = std::make_unique<Root>(lib);
+    root = std::make_unique<Root>(lib, undo);
     LOG("Version mismatch expected:", ver, ", received:", v);
     return;
   }

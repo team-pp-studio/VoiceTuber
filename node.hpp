@@ -33,10 +33,14 @@ public:
 #undef SER_PROP_LIST
 
   using Nodes = std::vector<std::unique_ptr<Node>>;
-  Node(Lib &, std::string name);
+  enum class EditMode { select, translate, scale, rotate };
+
+  Node(Lib &, class Undo &, std::string name);
   virtual ~Node() = default;
 
   auto addChild(std::unique_ptr<Node>) -> void;
+  auto cancel() -> void;
+  auto commit() -> void;
   auto getName() const -> std::string;
   auto getNodes() const -> const Nodes &;
   auto loadAll(const class SaveFactory &, IStrm &) -> void;
@@ -46,17 +50,13 @@ public:
   auto parent() -> Node *;
   auto parentWithBellow() -> void;
   auto renderAll(float dt, Node *hovered, Node *selected) -> void;
-  auto rotCancel() -> void;
   auto rotStart(glm::vec2 mouse) -> void;
-  auto rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
   auto saveAll(OStrm &) const -> void;
-  auto scaleCancel() -> void;
   auto scaleStart(glm::vec2 mouse) -> void;
-  auto scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
-  auto translateCancel() -> void;
   auto translateStart(glm::vec2 mouse) -> void;
-  auto translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
   auto unparent() -> void;
+  auto update(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
+  auto editMode() const -> EditMode;
   static auto del(Node &) -> void;
   virtual auto h() const -> float;
   virtual auto isTransparent(glm::vec2) const -> bool;
@@ -76,6 +76,12 @@ private:
                          glm::vec2 v,
                          std::vector<std::reference_wrapper<Node>> &) -> void;
   auto getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &) -> void;
+  auto rotCancel() -> void;
+  auto rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
+  auto scaleCancel() -> void;
+  auto scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
+  auto translateCancel() -> void;
+  auto translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
 
 protected:
   glm::vec2 loc = {.0f, .0f};
@@ -84,6 +90,7 @@ protected:
   float animRot = 0.f;
 
 private:
+  std::reference_wrapper<class Undo> undo;
   float rot = 0.f;
   bool uniformScaling = true;
 
@@ -102,6 +109,7 @@ private:
   glm::vec2 initLoc;
   glm::vec2 initScale;
   float initRot;
+  EditMode editMode_ = EditMode::select;
   std::shared_ptr<const Texture> arrowN;
   std::shared_ptr<const Texture> arrowNE;
   std::shared_ptr<const Texture> arrowE;

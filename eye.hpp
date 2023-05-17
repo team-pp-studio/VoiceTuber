@@ -10,7 +10,7 @@ public:
   SER_PROP(followStrength);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
-  Eye(class MouseTracking &, Lib &lib, const std::filesystem::path &);
+  Eye(class MouseTracking &, Lib &, Undo &, const std::filesystem::path &);
   ~Eye() final;
 
   static constexpr const char *className = "Eye";
