@@ -6,8 +6,8 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(Lib &lib, Undo &undo, const std::filesystem::path &path)
-  : Node(lib, undo, [&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
+Sprite::Sprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()), texture(lib.queryTex([&path]() {
       try
       {
         if (!std::filesystem::exists(path.filename()))
@@ -53,19 +53,19 @@ auto Sprite::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Cols");
   ImGui::TableNextColumn();
-  ImGui::InputInt("##Cols", &cols);
+  Ui::inputInt(undo, "##Cols", cols);
   if (cols < 1)
     cols = 1;
   ImGui::TableNextColumn();
   Ui::textRj("Rows");
   ImGui::TableNextColumn();
-  ImGui::InputInt("##Rows", &rows);
+  Ui::inputInt(undo, "##Rows", rows);
   if (rows < 1)
     rows = 1;
   ImGui::TableNextColumn();
   Ui::textRj("NumFrames");
   ImGui::TableNextColumn();
-  ImGui::InputInt("##NumFrames", &numFrames);
+  Ui::inputInt(undo, "##NumFrames", numFrames);
   if (numFrames < 1)
     numFrames = 1;
 }

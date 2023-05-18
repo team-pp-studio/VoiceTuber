@@ -5,8 +5,8 @@
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer::Bouncer(Lib &lib, Undo &undo, class AudioCapture &audioCapture)
-  : Node(lib, undo, "bouncer"), audioCapture(audioCapture)
+Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioCapture &audioCapture)
+  : Node(lib, aUndo, "bouncer"), audioCapture(audioCapture)
 {
   audioCapture.reg(*this);
 }
@@ -43,13 +43,14 @@ auto Bouncer::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Bounce");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##Bounce",
-                   &strength,
-                   1.f,
-                   0.f,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo,
+                "##Bounce",
+                strength,
+                1.f,
+                0.f,
+                std::numeric_limits<float>::max(),
+                "%.1f",
+                ImGuiSliderFlags_AlwaysClamp);
 }
 
 auto Bouncer::save(OStrm &strm) const -> void

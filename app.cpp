@@ -245,10 +245,7 @@ auto App::processIo() -> void
         selected->rotStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
       }
       if (ImGui::IsKeyPressed(ImGuiKey_X) || ImGui::IsKeyPressed(ImGuiKey_Delete))
-      {
-        Node::del(*selected);
-        selected = nullptr;
-      }
+        Node::del(&selected);
       if (ImGui::IsKeyPressed(ImGuiKey_D))
       {
         if (selected)
@@ -262,11 +259,17 @@ auto App::processIo() -> void
           ::deser(is, className);
           ::deser(is, name);
           LOG(className, name);
-          auto n = saveFactory.ctor(className, name);
+          auto n = std::shared_ptr{saveFactory.ctor(className, name)};
           n->loadAll(saveFactory, is);
-          auto parent = selected->parent();
-          selected = n.get();
-          parent->addChild(std::move(n));
+          undo.record(
+            [n, parent = selected->parent(), this]() {
+              selected = n.get();
+              parent->addChild(std::move(n));
+            },
+            [n, oldSelected = selected, this]() {
+              Node::del(*n);
+              selected = oldSelected;
+            });
           int mouseX, mouseY;
           SDL_GetMouseState(&mouseX, &mouseY);
           selected->translateStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
@@ -275,11 +278,11 @@ auto App::processIo() -> void
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))
         cancel();
     }
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Z))
-      undo.undo();
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Y))
-      undo.redo();
   }
+  if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Z))
+    undo.undo();
+  if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Y))
+    undo.redo();
 }
 
 auto App::cancel() -> void
@@ -328,7 +331,8 @@ auto App::renderTree(Node &v) -> void
     nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
     const auto nodeOpen = ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-      selected = &v;
+      undo.record([&v, this]() { selected = &v; },
+                  [oldSelected = selected, this]() { selected = oldSelected; });
     if (nodeOpen)
     {
       for (const auto &n : nodes)
@@ -342,7 +346,8 @@ auto App::renderTree(Node &v) -> void
       ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
     ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-      selected = &v;
+      undo.record([&v, this]() { selected = &v; },
+                  [oldSelected = selected, this]() { selected = oldSelected; });
   }
 }
 
@@ -400,13 +405,17 @@ auto App::addNode(const std::string &class_, const std::string &name) -> void
 {
   try
   {
-    auto node = saveFactory.ctor(class_, name);
+    auto node = std::shared_ptr{saveFactory.ctor(class_, name)};
     auto oldSelected = selected;
-    selected = node.get();
-    if (!oldSelected)
-      root->addChild(std::move(node));
-    else
-      oldSelected->addChild(std::move(node));
+    undo.record(
+      [node, parent = (oldSelected ? oldSelected : root.get()), this]() {
+        selected = node.get();
+        parent->addChild(std::move(node));
+      },
+      [node, oldSelected, this]() {
+        Node::del(*selected);
+        selected = oldSelected;
+      });
   }
   catch (const std::runtime_error &e)
   {

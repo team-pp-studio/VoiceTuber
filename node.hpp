@@ -32,13 +32,13 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  using Nodes = std::vector<std::unique_ptr<Node>>;
+  using Nodes = std::vector<std::shared_ptr<Node>>;
   enum class EditMode { select, translate, scale, rotate };
 
   Node(Lib &, class Undo &, std::string name);
   virtual ~Node() = default;
 
-  auto addChild(std::unique_ptr<Node>) -> void;
+  auto addChild(std::shared_ptr<Node>) -> void;
   auto cancel() -> void;
   auto commit() -> void;
   auto getName() const -> std::string;
@@ -57,6 +57,7 @@ public:
   auto unparent() -> void;
   auto update(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
   auto editMode() const -> EditMode;
+  static auto del(Node **) -> void;
   static auto del(Node &) -> void;
   virtual auto h() const -> float;
   virtual auto isTransparent(glm::vec2) const -> bool;
@@ -88,9 +89,9 @@ protected:
   glm::vec2 scale = {1.f, 1.f};
   glm::vec2 pivot = {.0f, .0f};
   float animRot = 0.f;
+  std::reference_wrapper<class Undo> undo;
 
 private:
-  std::reference_wrapper<class Undo> undo;
   float rot = 0.f;
   bool uniformScaling = true;
 

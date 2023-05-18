@@ -1,11 +1,12 @@
 #include "chat.hpp"
 #include "lib.hpp"
 #include "ui.hpp"
+#include "undo.hpp"
 #include <log/log.hpp>
 #include <sstream>
 
-Chat::Chat(class Lib &aLib, Undo &undo, class Uv &uv, std::string n)
-  : Node(aLib, undo, n),
+Chat::Chat(class Lib &aLib, Undo &aUndo, class Uv &uv, std::string n)
+  : Node(aLib, aUndo, n),
     lib(aLib),
     twitch(aLib.queryTwitch(uv, n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize))
@@ -103,25 +104,37 @@ auto Chat::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Size");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##width",
-                   &size.x,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
-  ImGui::DragFloat("##Height",
-                   &size.y,
-                   1.f,
-                   -std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   "%.1f");
+  Ui::dragFloat(undo,
+                "##width",
+                size.x,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
+  Ui::dragFloat(undo,
+                "##Height",
+                size.y,
+                1.f,
+                -std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                "%.1f");
 
   ImGui::TableNextColumn();
   Ui::textRj("Font Size");
   ImGui::TableNextColumn();
+  const auto oldSize = ptsize;
   if (ImGui::InputInt("##Font Size", &ptsize))
-    font = lib.get().queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"},
-                               ptsize);
+    undo.get().record(
+      [newSize = ptsize, this]() {
+        ptsize = newSize;
+        font = lib.get().queryFont(
+          SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+      },
+      [oldSize, this]() {
+        ptsize = oldSize;
+        font = lib.get().queryFont(
+          SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+      });
 
   if (!twitch->isConnected())
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.7f, 0.7f, 1.0f));

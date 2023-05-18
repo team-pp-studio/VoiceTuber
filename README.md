@@ -139,7 +139,7 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
-- [ ] (feature) undo
+- [x] (feature) undo
 - [ ] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
 - [ ] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
 - [x] Don't expect the placement of stuff (UI UX)

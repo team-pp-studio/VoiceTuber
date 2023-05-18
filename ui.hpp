@@ -111,4 +111,5 @@ namespace Ui
                    float v_max,
                    const char *format = "%.3f",
                    ImGuiSliderFlags flags = 0) -> bool;
+  auto checkbox(Undo &, const char *label, bool &v) -> bool;
 } // namespace Ui

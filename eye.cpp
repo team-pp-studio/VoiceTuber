@@ -3,8 +3,8 @@
 #include "ui.hpp"
 #include <numbers>
 
-Eye::Eye(MouseTracking &mouseTracking, Lib &lib, Undo &undo, const std::filesystem::path &path)
-  : AnimSprite(lib, undo, path), mouseTracking(mouseTracking)
+Eye::Eye(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
+  : AnimSprite(lib, aUndo, path), mouseTracking(mouseTracking)
 {
   mouseTracking.reg(*this);
 }
@@ -67,18 +67,25 @@ auto Eye::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Radius");
   ImGui::TableNextColumn();
-  ImGui::DragFloat(
-    "##Radius", &radius, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo,
+                "##Radius",
+                radius,
+                1,
+                1,
+                std::numeric_limits<float>::max(),
+                "%.1f",
+                ImGuiSliderFlags_AlwaysClamp);
   ImGui::TableNextColumn();
   Ui::textRj("Strength");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##Strength",
-                   &followStrength,
-                   1,
-                   1,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo,
+                "##Strength",
+                followStrength,
+                1,
+                1,
+                std::numeric_limits<float>::max(),
+                "%.1f",
+                ImGuiSliderFlags_AlwaysClamp);
 }
 
 auto Eye::ingest(const glm::mat4 &projMat, glm::vec2 v) -> void

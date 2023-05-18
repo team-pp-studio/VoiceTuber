@@ -1,10 +1,11 @@
 #include "mouth.hpp"
 #include "ui.hpp"
+#include "undo.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
-Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &undo, const std::filesystem::path &path)
-  : Sprite(lib, undo, path), wav2Visemes(wav2Visemes)
+Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
+  : Sprite(lib, aUndo, path), wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -74,11 +75,22 @@ auto Mouth::renderUi() -> void
     ImGui::TableNextColumn();
     Ui::textRj(txt);
     ImGui::TableNextColumn();
+    const auto oldF = f;
     if (ImGui::InputInt(txt2, &f))
     {
-      viseme = vis;
-      using namespace std::chrono_literals;
-      freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+      undo.get().record(
+        [&f, newF = f, this, vis]() {
+          f = newF;
+          viseme = vis;
+          using namespace std::chrono_literals;
+          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+        },
+        [&f, oldF, this, vis]() {
+          f = oldF;
+          viseme = vis;
+          using namespace std::chrono_literals;
+          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+        });
     }
     ImGui::SameLine();
 

@@ -336,7 +336,7 @@ auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
   }
 }
 
-auto Node::addChild(std::unique_ptr<Node> v) -> void
+auto Node::addChild(std::shared_ptr<Node> v) -> void
 {
   v->parent_ = this;
   nodes.emplace_back(std::move(v));
@@ -353,12 +353,23 @@ auto Node::moveUp() -> void
     return;
   if (parent()->nodes.front().get() == this)
     return;
-  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
-    return this == v.get();
-  });
-  assert(it != std::end(parent()->nodes));
-  auto prev = it - 1;
-  std::swap(*it, *prev);
+  undo.get().record(
+    [this]() {
+      auto it = std::find_if(std::begin(parent()->nodes),
+                             std::end(parent()->nodes),
+                             [this](const auto &v) { return this == v.get(); });
+      assert(it != std::end(parent()->nodes));
+      auto prev = it - 1;
+      std::swap(*it, *prev);
+    },
+    [this]() {
+      auto it = std::find_if(std::begin(parent()->nodes),
+                             std::end(parent()->nodes),
+                             [this](const auto &v) { return this == v.get(); });
+      assert(it != std::end(parent()->nodes));
+      auto prev = it + 1;
+      std::swap(*it, *prev);
+    });
 }
 
 auto Node::moveDown() -> void
@@ -369,12 +380,23 @@ auto Node::moveDown() -> void
     return;
   if (parent()->nodes.back().get() == this)
     return;
-  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
-    return this == v.get();
-  });
-  assert(it != std::end(parent()->nodes));
-  auto prev = it + 1;
-  std::swap(*it, *prev);
+  undo.get().record(
+    [this]() {
+      auto it = std::find_if(std::begin(parent()->nodes),
+                             std::end(parent()->nodes),
+                             [this](const auto &v) { return this == v.get(); });
+      assert(it != std::end(parent()->nodes));
+      auto prev = it + 1;
+      std::swap(*it, *prev);
+    },
+    [this]() {
+      auto it = std::find_if(std::begin(parent()->nodes),
+                             std::end(parent()->nodes),
+                             [this](const auto &v) { return this == v.get(); });
+      assert(it != std::end(parent()->nodes));
+      auto prev = it - 1;
+      std::swap(*it, *prev);
+    });
 }
 
 auto Node::unparent() -> void
@@ -383,16 +405,31 @@ auto Node::unparent() -> void
     return;
   if (!parent()->parent())
     return;
-  auto newParent = parent()->parent();
-  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
-    return this == v.get();
-  });
 
-  assert(it != std::end(parent()->nodes));
-  loc += parent()->loc;
-  newParent->nodes.emplace_back(std::move(*it));
-  parent_->nodes.erase(it);
-  parent_ = newParent;
+  auto newParent = parent()->parent();
+  auto oldParent = parent();
+  auto it = std::find_if(std::begin(oldParent->nodes),
+                         std::end(oldParent->nodes),
+                         [this](const auto &v) { return this == v.get(); });
+  assert(it != std::end(oldParent->nodes));
+  auto self = std::move(*it);
+  undo.get().record(
+    [it, newParent, oldParent, this, self]() {
+      loc += oldParent->loc;
+      newParent->nodes.emplace_back(std::move(self));
+      oldParent->nodes.erase(it);
+      parent_ = newParent;
+    },
+    [it, newParent, oldLoc = loc, oldParent, this, self]() {
+      loc = oldLoc;
+      auto it2 = std::find_if(std::begin(newParent->nodes),
+                              std::end(newParent->nodes),
+                              [this](const auto &v) { return this == v.get(); });
+      assert(it2 != std::end(newParent->nodes));
+      newParent->nodes.erase(it2);
+      oldParent->nodes.emplace(it, std::move(self));
+      parent_ = oldParent;
+    });
 }
 
 auto Node::parentWithBellow() -> void
@@ -408,14 +445,52 @@ auto Node::parentWithBellow() -> void
   if (parent()->nodes.back().get() == this)
     return;
 
-  auto nextSibling = (it + 1)->get();
-  glm::mat4 nextSiblingTransform = nextSibling->modelViewMat;
-  modelViewMat = glm::inverse(nextSiblingTransform) * modelViewMat;
-  loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
+  auto newParent = (it + 1)->get();
+  auto self = std::move(*it);
+  auto oldParent = parent();
+  undo.get().record(
+    [newParent, this, it, self]() {
+      glm::mat4 newParentTransform = newParent->modelViewMat;
+      modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
+      loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
 
-  nextSibling->nodes.emplace_back(std::move(*it));
-  parent_->nodes.erase(it);
-  parent_ = nextSibling;
+      newParent->nodes.emplace_back(std::move(self));
+      parent_->nodes.erase(it);
+      parent_ = newParent;
+    },
+    [it, newParent, oldLoc = loc, oldParent, this, self]() {
+      loc = oldLoc;
+      auto it2 = std::find_if(std::begin(newParent->nodes),
+                              std::end(newParent->nodes),
+                              [this](const auto &v) { return this == v.get(); });
+      assert(it2 != std::end(newParent->nodes));
+      newParent->nodes.erase(it2);
+      oldParent->nodes.emplace(it, std::move(self));
+      parent_ = oldParent;
+    });
+}
+
+auto Node::del(Node **ppNode) -> void
+{
+  if (!*ppNode)
+    return;
+  auto pNode = *ppNode;
+  if (!pNode->parent_)
+    return;
+  auto &undo = pNode->undo.get();
+  auto &parentNodes = pNode->parent_->nodes;
+  auto it = std::find_if(
+    parentNodes.begin(), parentNodes.end(), [&pNode](const auto &v) { return pNode == v.get(); });
+  assert(it != parentNodes.end());
+  undo.record(
+    [&parentNodes, it, ppNode]() {
+      parentNodes.erase(it);
+      *ppNode = nullptr;
+    },
+    [&parentNodes, it, ppNode, spNode = std::move(*it)]() mutable {
+      *ppNode = spNode.get();
+      parentNodes.emplace(it, std::move(spNode));
+    });
 }
 
 auto Node::del(Node &node) -> void

@@ -1,10 +1,11 @@
 #include "root.hpp"
 #include "ui.hpp"
+#include "undo.hpp"
 #include <SDL_opengl.h>
 #include <limits>
 #include <log/log.hpp>
 
-Root::Root(Lib &lib, Undo &undo) : Node(lib, undo, "root") {}
+Root::Root(Lib &lib, Undo &aUndo) : Node(lib, aUndo, "root") {}
 
 Root::~Root() {}
 
@@ -22,8 +23,13 @@ auto Root::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("BG color");
   ImGui::TableNextColumn();
-  ImGui::ColorEdit4(
-    "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+  auto oldColor = clearColor;
+  if (ImGui::ColorEdit4(
+        "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
+  {
+    undo.get().record([this, newColor = clearColor]() { clearColor = newColor; },
+                      [this, oldColor]() { clearColor = oldColor; });
+  }
 }
 
 auto Root::save(OStrm &strm) const -> void

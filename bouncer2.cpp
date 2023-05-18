@@ -5,8 +5,8 @@
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer2::Bouncer2(Lib &lib, Undo &undo, class AudioCapture &audioCapture, std::string aName)
-  : Node(lib, undo, std::move(aName)), audioCapture(audioCapture)
+Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioCapture &audioCapture, std::string aName)
+  : Node(lib, aUndo, std::move(aName)), audioCapture(audioCapture)
 {
   audioCapture.reg(*this);
 }
@@ -36,23 +36,25 @@ auto Bouncer2::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Bounce");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##Bounce",
-                   &strength,
-                   1.f,
-                   0.f,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo,
+                "##Bounce",
+                strength,
+                1.f,
+                0.f,
+                std::numeric_limits<float>::max(),
+                "%.1f",
+                ImGuiSliderFlags_AlwaysClamp);
   ImGui::TableNextColumn();
   Ui::textRj("Easing");
   ImGui::TableNextColumn();
-  ImGui::DragFloat("##Easing",
-                   &easing,
-                   1.f,
-                   5.f,
-                   std::numeric_limits<float>::max(),
-                   "%.1f",
-                   ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo,
+                "##Easing",
+                easing,
+                1.f,
+                5.f,
+                std::numeric_limits<float>::max(),
+                "%.1f",
+                ImGuiSliderFlags_AlwaysClamp);
 }
 
 auto Bouncer2::save(OStrm &strm) const -> void

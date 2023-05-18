@@ -69,4 +69,15 @@ namespace Ui
     return false;
   }
 
+  auto checkbox(Undo &undo, const char *label, bool &v) -> bool
+  {
+    const auto oldV = v;
+    if (ImGui::Checkbox(label, &v))
+    {
+      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; });
+      return true;
+    }
+    return false;
+  }
+
 } // namespace Ui

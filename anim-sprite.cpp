@@ -1,10 +1,11 @@
 #include "anim-sprite.hpp"
 #include "ui.hpp"
+#include "undo.hpp"
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-AnimSprite::AnimSprite(Lib &lib, Undo &undo, const std::filesystem::path &path)
-  : Sprite(lib, undo, path),
+AnimSprite::AnimSprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
+  : Sprite(lib, aUndo, path),
     startTime(std::chrono::high_resolution_clock::now()),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -80,102 +81,98 @@ auto AnimSprite::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("FPS");
   ImGui::TableNextColumn();
-  ImGui::DragFloat(
-    "##FPS", &fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(
+    undo, "##FPS", fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
   ImGui::TableNextColumn();
   Ui::textRj("Physics");
   ImGui::TableNextColumn();
-  ImGui::Checkbox("##Physics", &physics);
+  Ui::checkbox(undo, "##Physics", physics);
   ImGui::TableNextColumn();
   {
     auto physicsDisabled = Ui::Disabled{!physics};
     Ui::textRj("End");
     ImGui::TableNextColumn();
-    ImGui::DragFloat("##XEnd",
-                     &end.x,
-                     1.f,
-                     -std::numeric_limits<float>::max(),
-                     std::numeric_limits<float>::max(),
-                     "%.1f");
-    ImGui::DragFloat("##YEnd",
-                     &end.y,
-                     1.f,
-                     -std::numeric_limits<float>::max(),
-                     std::numeric_limits<float>::max(),
-                     "%.1f");
+    Ui::dragFloat(undo,
+                  "##XEnd",
+                  end.x,
+                  1.f,
+                  -std::numeric_limits<float>::max(),
+                  std::numeric_limits<float>::max(),
+                  "%.1f");
+    Ui::dragFloat(undo,
+                  "##YEnd",
+                  end.y,
+                  1.f,
+                  -std::numeric_limits<float>::max(),
+                  std::numeric_limits<float>::max(),
+                  "%.1f");
     const auto sz = 2 * ImGui::GetFontSize();
     if (Ui::btnImg("nw2", *arrowNW, sz, sz))
-    {
-      end = glm::vec2{0, h()};
-    }
+      undo.get().record([newEnd = glm::vec2{0, h()}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("n2", *arrowN, sz, sz))
-    {
-      end = glm::vec2{w() / 2, h()};
-    }
+      undo.get().record([newEnd = glm::vec2{w() / 2, h()}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("ne2", *arrowNE, sz, sz))
-    {
-      end = glm::vec2{w(), h()};
-    }
+      undo.get().record([newEnd = glm::vec2{w(), h()}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     if (Ui::btnImg("w2", *arrowW, sz, sz))
-    {
-      end = glm::vec2{0, h() / 2};
-    }
+      undo.get().record([newEnd = glm::vec2{0, h() / 2}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("c2", *center, sz, sz))
-    {
-      end = glm::vec2{w() / 2, h() / 2};
-    }
+      undo.get().record([newEnd = glm::vec2{w() / 2, h() / 2}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("e2", *arrowE, sz, sz))
-    {
-      end = glm::vec2{w(), h() / 2};
-    }
+      undo.get().record([newEnd = glm::vec2{w(), h() / 2}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     if (Ui::btnImg("sw2", *arrowSW, sz, sz))
-    {
-      end = glm::vec2{0, 0};
-    }
+      undo.get().record([newEnd = glm::vec2{0, 0}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("s2", *arrowS, sz, sz))
-    {
-      end = glm::vec2{w() / 2, 0};
-    }
+      undo.get().record([newEnd = glm::vec2{w() / 2, 0}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::SameLine();
     if (Ui::btnImg("se2", *arrowSE, sz, sz))
-    {
-      end = glm::vec2{w(), 0};
-    }
+      undo.get().record([newEnd = glm::vec2{w(), 0}, this]() { end = newEnd; },
+                        [oldEnd = end, this]() { end = oldEnd; });
     ImGui::TableNextColumn();
     Ui::textRj("Force");
     ImGui::TableNextColumn();
-    ImGui::DragFloat("##Force",
-                     &force,
-                     .1f,
-                     0,
-                     std::numeric_limits<float>::max(),
-                     "%.1f",
-                     ImGuiSliderFlags_AlwaysClamp);
+    Ui::dragFloat(undo,
+                  "##Force",
+                  force,
+                  .1f,
+                  0,
+                  std::numeric_limits<float>::max(),
+                  "%.1f",
+                  ImGuiSliderFlags_AlwaysClamp);
     ImGui::TableNextColumn();
     Ui::textRj("Damping");
     ImGui::TableNextColumn();
-    ImGui::DragFloat("##Damping",
-                     &damping,
-                     .1f,
-                     0,
-                     std::numeric_limits<float>::max(),
-                     "%.1f",
-                     ImGuiSliderFlags_AlwaysClamp);
+    Ui::dragFloat(undo,
+                  "##Damping",
+                  damping,
+                  .1f,
+                  0,
+                  std::numeric_limits<float>::max(),
+                  "%.1f",
+                  ImGuiSliderFlags_AlwaysClamp);
     ImGui::TableNextColumn();
     Ui::textRj("Springness");
     ImGui::TableNextColumn();
-    ImGui::DragFloat("##Springness",
-                     &springness,
-                     .1f,
-                     0,
-                     std::numeric_limits<float>::max(),
-                     "%.1f",
-                     ImGuiSliderFlags_AlwaysClamp);
+    Ui::dragFloat(undo,
+                  "##Springness",
+                  springness,
+                  .1f,
+                  0,
+                  std::numeric_limits<float>::max(),
+                  "%.1f",
+                  ImGuiSliderFlags_AlwaysClamp);
   }
 }
 
