@@ -30,7 +30,7 @@ namespace Ui
     const auto oldV = v;
     if (ImGui::DragFloat(label, &v, v_speed, v_min, v_max, format, flags))
     {
-      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; });
+      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; }, label);
       return true;
     }
     return false;
@@ -46,7 +46,7 @@ namespace Ui
     const auto oldV = v;
     if (ImGui::InputInt(label, &v, step, step_fast, flags))
     {
-      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; });
+      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; }, label);
       return true;
     }
     return false;
@@ -63,7 +63,7 @@ namespace Ui
     const auto oldV = v;
     if (ImGui::SliderFloat(label, &v, v_min, v_max, format, flags))
     {
-      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; });
+      undo.record([newV = v, &v]() { v = newV; }, [oldV, &v]() { v = oldV; }, label);
       return true;
     }
     return false;

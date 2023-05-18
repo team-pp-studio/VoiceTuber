@@ -28,7 +28,8 @@ auto Root::renderUi() -> void
         "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
   {
     undo.get().record([this, newColor = clearColor]() { clearColor = newColor; },
-                      [this, oldColor]() { clearColor = oldColor; });
+                      [this, oldColor]() { clearColor = oldColor; },
+                      "##BG color");
   }
 }
 

@@ -147,7 +147,8 @@ auto Node::renderUi() -> void
                            "%.2f"))
       {
         undo.get().record([avgScale, this]() { scale.x = scale.y = avgScale; },
-                          [oldScale = scale, this]() { scale = oldScale; });
+                          [oldScale = scale, this]() { scale = oldScale; },
+                          "Scale");
       }
     }
     ImGui::SameLine();
