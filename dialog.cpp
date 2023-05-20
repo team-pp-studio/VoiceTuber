@@ -27,4 +27,5 @@ auto Dialog::draw() -> bool
     cb(false);
     return false;
   }
+  return true;
 }

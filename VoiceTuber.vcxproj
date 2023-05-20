@@ -248,6 +248,7 @@
     <ClInclude Include="twitch-sink.hpp" />
     <ClInclude Include="twitch.hpp" />
     <ClInclude Include="ui.hpp" />
+    <ClInclude Include="undo.hpp" />
     <ClInclude Include="uv.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
@@ -296,6 +297,7 @@
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="twitch.cpp" />
     <ClCompile Include="ui.cpp" />
+    <ClCompile Include="undo.cpp" />
     <ClCompile Include="uv.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>

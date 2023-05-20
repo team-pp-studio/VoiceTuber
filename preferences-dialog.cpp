@@ -3,7 +3,7 @@
 #include "audio-output.hpp"
 #include "preferences.hpp"
 #include "ui.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 

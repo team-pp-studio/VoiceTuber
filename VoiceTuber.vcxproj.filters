@@ -211,6 +211,7 @@
     <ClInclude Include="bouncer2.hpp" />
     <ClInclude Include="root.hpp" />
     <ClInclude Include="ui.hpp" />
+    <ClInclude Include="undo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3rd-party\imgui\imgui.cpp">
@@ -278,6 +279,7 @@
     <ClCompile Include="bouncer2.cpp" />
     <ClCompile Include="root.cpp" />
     <ClCompile Include="ui.cpp" />
+    <ClCompile Include="undo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd-party">
