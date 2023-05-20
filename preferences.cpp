@@ -28,6 +28,8 @@ Preferences::Preferences()
     auto config = cpptoml::parse_file(configFilePath);
     twitchUser = config->get_qualified_as<std::string>("twitch.user").value_or("mika314");
     twitchKey = config->get_qualified_as<std::string>("twitch.key").value_or("");
+    outputAudio = config->get_qualified_as<std::string>("audio.output").value_or("Default");
+    inputAudio = config->get_qualified_as<std::string>("audio.input").value_or("Default");
   }
   catch (const cpptoml::parse_exception &e)
   {
@@ -52,10 +54,18 @@ auto Preferences::save() -> void
   {
     auto config = cpptoml::make_table();
 
-    auto twitchTable = cpptoml::make_table();
-    twitchTable->insert("user", twitchUser);
-    twitchTable->insert("key", twitchKey);
-    config->insert("twitch", twitchTable);
+    {
+      auto twitchTable = cpptoml::make_table();
+      twitchTable->insert("user", twitchUser);
+      twitchTable->insert("key", twitchKey);
+      config->insert("twitch", twitchTable);
+    }
+    {
+      auto audioTable = cpptoml::make_table();
+      audioTable->insert("output", outputAudio);
+      audioTable->insert("input", inputAudio);
+      config->insert("audio", audioTable);
+    }
 
     auto configFile = std::ofstream{configFilePath};
     if (!configFile.is_open())

@@ -1,26 +1,13 @@
 #include "bouncer.hpp"
-#include "audio-capture.hpp"
+#include "audio-input.hpp"
 #include "ui.hpp"
 #include <SDL_opengl.h>
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioCapture &audioCapture)
-  : Node(lib, aUndo, "bouncer"), audioCapture(audioCapture)
+Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioInput &audioInput)
+  : Node(lib, aUndo, "bouncer"), audioLevel(audioInput)
 {
-  audioCapture.reg(*this);
-}
-
-Bouncer::~Bouncer()
-{
-  audioCapture.get().unreg(*this);
-}
-
-auto Bouncer::ingest(Wav v) -> void
-{
-  if (v.empty())
-    return;
-  offset = strength * v.back() / 0x8000;
 }
 
 auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
@@ -28,6 +15,7 @@ auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
   zOrder = INT_MIN;
   glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
+  offset += std::min(1000.f * dt / 250.f, 1.f) * (strength * audioLevel.getLevel() - offset);
   loc.y = offset;
   Node::render(dt, hovered, selected);
 }

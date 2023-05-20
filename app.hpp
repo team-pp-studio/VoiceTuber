@@ -1,5 +1,6 @@
 #pragma once
-#include "audio-capture.hpp"
+#include "audio-input.hpp"
+#include "audio-output.hpp"
 #include "dialog.hpp"
 #include "lib.hpp"
 #include "mouse-tracking.hpp"
@@ -31,7 +32,8 @@ private:
   Preferences preferences;
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
-  AudioCapture audioCapture;
+  AudioOutput audioOutput;
+  AudioInput audioInput;
   MouseTracking mouseTracking;
   Lib lib;
   Undo undo;

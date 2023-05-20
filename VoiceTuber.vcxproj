@@ -195,7 +195,9 @@
     <ClInclude Include="3rd-party\ser\ser.hpp" />
     <ClInclude Include="anim-sprite.hpp" />
     <ClInclude Include="app.hpp" />
-    <ClInclude Include="audio-capture.hpp" />
+    <ClInclude Include="audio-input.hpp" />
+    <ClInclude Include="audio-output.hpp" />
+    <ClInclude Include="audio-level.hpp" />
     <ClInclude Include="audio-sink.hpp" />
     <ClInclude Include="azure-tts.hpp" />
     <ClInclude Include="bouncer.hpp" />
@@ -262,7 +264,9 @@
     <ClCompile Include="3rd-party\ser\ser.cpp" />
     <ClCompile Include="anim-sprite.cpp" />
     <ClCompile Include="app.cpp" />
-    <ClCompile Include="audio-capture.cpp" />
+    <ClCompile Include="audio-input.cpp" />
+    <ClCompile Include="audio-level.cpp" />
+    <ClCompile Include="audio-output.cpp" />
     <ClCompile Include="azure-tts.cpp" />
     <ClCompile Include="bouncer.cpp" />
     <ClCompile Include="bouncer2.cpp" />

@@ -1,31 +1,18 @@
 #include "bouncer2.hpp"
-#include "audio-capture.hpp"
+#include "audio-input.hpp"
 #include "ui.hpp"
 #include <SDL_opengl.h>
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioCapture &audioCapture, std::string aName)
-  : Node(lib, aUndo, std::move(aName)), audioCapture(audioCapture)
+Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioInput &audioInput, std::string aName)
+  : Node(lib, aUndo, std::move(aName)), audioLevel(audioInput)
 {
-  audioCapture.reg(*this);
-}
-
-Bouncer2::~Bouncer2()
-{
-  audioCapture.get().unreg(*this);
-}
-
-auto Bouncer2::ingest(Wav v) -> void
-{
-  if (v.empty())
-    return;
-  a = 1.f * v.back() / 0x8000;
 }
 
 auto Bouncer2::render(float dt, Node *hovered, Node *selected) -> void
 {
-  offset += std::min(1000.f * dt / easing, 1.f) * (strength * a - offset);
+  offset += std::min(1000.f * dt / easing, 1.f) * (strength * audioLevel.getLevel() - offset);
   loc.y = offset;
   Node::render(dt, hovered, selected);
 }

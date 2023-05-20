@@ -66,6 +66,7 @@ namespace Ui
   DECLARE_IMGUI_RAII_BOOL(Menu);
   DECLARE_IMGUI_RAII_BOOL(MainMenuBar);
   DECLARE_IMGUI_RAII_BOOL(Table);
+  DECLARE_IMGUI_RAII_BOOL(Combo);
 
   class Window
   {

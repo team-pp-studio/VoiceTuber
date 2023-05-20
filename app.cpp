@@ -23,15 +23,17 @@ static auto getProjMat() -> glm::mat4
   return glm::make_mat4(projMatData);
 }
 
-App::App() : audioCapture(wav2Visemes.sampleRate(), wav2Visemes.frameSize()), lib(preferences)
+App::App()
+  : audioInput(preferences.inputAudio, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
+    lib(preferences)
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
-  audioCapture.reg(wav2Visemes);
+  audioInput.reg(wav2Visemes);
   saveFactory.reg<Bouncer>(
-    [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioCapture); });
+    [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioInput); });
   saveFactory.reg<Bouncer2>([this](std::string name) {
-    return std::make_unique<Bouncer2>(lib, undo, audioCapture, std::move(name));
+    return std::make_unique<Bouncer2>(lib, undo, audioInput, std::move(name));
   });
   saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib, undo); });
   saveFactory.reg<Mouth>([this](std::string name) {
@@ -136,10 +138,11 @@ auto App::renderUi(float /*dt*/) -> void
           addNode(Bouncer2::className, "bouncer");
       }
       if (ImGui::MenuItem("Preferences..."))
-        dialog = std::make_unique<PreferencesDialog>(preferences, [this](bool r) {
-          if (r)
-            lib.flush();
-        });
+        dialog =
+          std::make_unique<PreferencesDialog>(preferences, audioOutput, audioInput, [this](bool r) {
+            if (r)
+              lib.flush();
+          });
     }
   }
 
@@ -295,7 +298,7 @@ auto App::cancel() -> void
 
 auto App::tick(float /*dt*/) -> void
 {
-  audioCapture.tick();
+  audioInput.tick();
   uv.tick();
 
   if (!root)

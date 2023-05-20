@@ -1,8 +1,8 @@
 #pragma once
-#include "audio-sink.hpp"
+#include "audio-level.hpp"
 #include "node.hpp"
 
-class Bouncer2 final : public Node, public AudioSink
+class Bouncer2 final : public Node
 {
 public:
 #define SER_PROP_LIST \
@@ -12,16 +12,14 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Bouncer2";
-  Bouncer2(Lib &, Undo &, class AudioCapture &, std::string name);
-  ~Bouncer2() final;
+  Bouncer2(Lib &, Undo &, class AudioInput &, std::string name);
 
 private:
   float strength = 100.f;
   float easing = 50.f;
   float offset = 0.f;
-  float a = 0.f;
-  std::reference_wrapper<AudioCapture> audioCapture;
-  auto ingest(Wav) -> void final;
+  AudioLevel audioLevel;
+
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
