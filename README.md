@@ -141,7 +141,7 @@ considered to further refine and improve the application.
 Top Priority
 - [x] (feature) undo
 - [ ] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
-- [ ] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
+- [x] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
 - [x] Don't expect the placement of stuff (UI UX)
    - [x] Swap description and value
    - [x] Placement of bouncer options confusing
