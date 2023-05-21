@@ -151,7 +151,7 @@ Top Priority
 General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [ ] Really wants drag and drop files
+- [x] Really wants drag and drop files
 - [ ] Azure TTS 
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter

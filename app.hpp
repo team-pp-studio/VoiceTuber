@@ -19,11 +19,12 @@ class App
 {
 public:
   App();
+  auto droppedFile(std::string) -> void;
+  auto processIo() -> void;
   auto render(float dt) -> void;
   auto renderUi(float dt) -> void;
-  auto processIo() -> void;
-  auto tick(float dt) -> void;
   auto savePrj() -> void;
+  auto tick(float dt) -> void;
 
   bool isMinimized = false;
   bool done = false;

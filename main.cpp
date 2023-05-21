@@ -28,6 +28,7 @@ int main(int, char **)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
+  SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
   std::filesystem::current_path(SDL_GetBasePath());
 
@@ -214,14 +215,14 @@ int main(int, char **)
     while (SDL_PollEvent(&event))
     {
       ImGui_ImplSDL2_ProcessEvent(&event);
-      if (event.type == SDL_QUIT)
-        app.done = true;
-      else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
-               event.window.windowID == SDL_GetWindowID(window.get()))
-        app.done = true;
-      else if (event.type == SDL_WINDOWEVENT)
+      switch (event.type)
       {
-        if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
+      case SDL_QUIT: app.done = true; break;
+      case SDL_WINDOWEVENT:
+        if (event.window.event == SDL_WINDOWEVENT_CLOSE &&
+            event.window.windowID == SDL_GetWindowID(window.get()))
+          app.done = true;
+        else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
         {
           LOG("minimized", app.isMinimized);
           if (!app.isMinimized)
@@ -248,6 +249,14 @@ int main(int, char **)
             window.getSize(&width, &height);
           }
         }
+        break;
+      case SDL_DROPFILE: {
+        auto droppedFile = event.drop.file;
+        LOG("dropped file", droppedFile);
+        app.droppedFile(droppedFile);
+        SDL_free(droppedFile);
+        break;
+      }
       }
     }
 

@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "add-as-dialog.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
 #include "bouncer2.hpp"
@@ -227,6 +228,12 @@ auto App::renderUi(float /*dt*/) -> void
       if (ImGui::MenuItem("Scale", "Shift+R", editMode == EditMode::scale))
         editMode = EditMode::scale;
       ImGui::Separator();
+      if (ImGui::MenuItem("Add Sprite..."))
+        dialog =
+          std::make_unique<FileOpen>(lib, "Add Sprite Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(AnimSprite::className, filePath.string());
+          });
       if (ImGui::MenuItem("Add Mouth..."))
         dialog =
           std::make_unique<FileOpen>(lib, "Add Mouth Dialog", [this](bool r, const auto &filePath) {
@@ -238,14 +245,6 @@ auto App::renderUi(float /*dt*/) -> void
           if (r)
             addNode(Eye::className, filePath.string());
         });
-
-      if (ImGui::MenuItem("Add Sprite..."))
-        dialog =
-          std::make_unique<FileOpen>(lib, "Add Sprite Dialog", [this](bool r, const auto &filePath) {
-            if (r)
-              addNode(AnimSprite::className, filePath.string());
-          });
-
       if (ImGui::MenuItem("Add Twitch Chat..."))
         dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
           if (r)
@@ -253,6 +252,13 @@ auto App::renderUi(float /*dt*/) -> void
         });
       if (ImGui::MenuItem("Add Bouncer"))
         addNode(Bouncer2::className, "bouncer");
+      ImGui::Separator();
+      {
+        auto delDisabled = Ui::Disabled(!selected);
+        if (ImGui::MenuItem("Delete", "Del"))
+          if (selected)
+            Node::del(&selected);
+      }
       ImGui::Separator();
       if (ImGui::MenuItem("Preferences..."))
         dialog =
@@ -674,3 +680,19 @@ auto App::addNode(const std::string &class_, const std::string &name) -> void
     LOG(e.what());
   }
 };
+
+auto App::droppedFile(std::string droppedFile) -> void
+
+{
+  dialog =
+    std::make_unique<AddAsDialog>(droppedFile, [this, droppedFile](bool r, AddAsDialog::NodeType t) {
+      if (!r)
+        return;
+      switch (t)
+      {
+      case AddAsDialog::NodeType::sprite: addNode(AnimSprite::className, droppedFile); break;
+      case AddAsDialog::NodeType::mouth: addNode(Mouth::className, droppedFile); break;
+      case AddAsDialog::NodeType::eye: addNode(Eye::className, droppedFile); break;
+      }
+    });
+}

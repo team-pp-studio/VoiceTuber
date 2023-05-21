@@ -193,11 +193,12 @@
     <ClInclude Include="3rd-party\ser\overloaded.hpp" />
     <ClInclude Include="3rd-party\ser\proto.hpp" />
     <ClInclude Include="3rd-party\ser\ser.hpp" />
+    <ClInclude Include="add-as-dialog.hpp" />
     <ClInclude Include="anim-sprite.hpp" />
     <ClInclude Include="app.hpp" />
     <ClInclude Include="audio-input.hpp" />
-    <ClInclude Include="audio-output.hpp" />
     <ClInclude Include="audio-level.hpp" />
+    <ClInclude Include="audio-output.hpp" />
     <ClInclude Include="audio-sink.hpp" />
     <ClInclude Include="azure-tts.hpp" />
     <ClInclude Include="bouncer.hpp" />
@@ -224,8 +225,8 @@
     <ClInclude Include="root.hpp" />
     <ClInclude Include="save-factory.hpp" />
     <ClInclude Include="sprite.hpp" />
-    <ClInclude Include="stb\stb_connected_components.h" />
     <ClInclude Include="stb\stb_c_lexer.h" />
+    <ClInclude Include="stb\stb_connected_components.h" />
     <ClInclude Include="stb\stb_divide.h" />
     <ClInclude Include="stb\stb_ds.h" />
     <ClInclude Include="stb\stb_dxt.h" />
@@ -263,6 +264,7 @@
     <ClCompile Include="3rd-party\imgui\imgui_widgets.cpp" />
     <ClCompile Include="3rd-party\ser\proto.cpp" />
     <ClCompile Include="3rd-party\ser\ser.cpp" />
+    <ClCompile Include="add-as-dialog.cpp" />
     <ClCompile Include="anim-sprite.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="audio-input.cpp" />

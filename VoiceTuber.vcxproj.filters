@@ -175,14 +175,16 @@
     <ClInclude Include="3rd-party\glm\glm\geometric.hpp">
       <Filter>3rd-party</Filter>
     </ClInclude>
+    <ClInclude Include="add-as-dialog.hpp" />
     <ClInclude Include="anim-sprite.hpp" />
     <ClInclude Include="app.hpp" />
     <ClInclude Include="audio-input.hpp" />
-    <ClInclude Include="audio-output.hpp" />
     <ClInclude Include="audio-level.hpp" />
+    <ClInclude Include="audio-output.hpp" />
     <ClInclude Include="audio-sink.hpp" />
     <ClInclude Include="azure-tts.hpp" />
     <ClInclude Include="bouncer.hpp" />
+    <ClInclude Include="bouncer2.hpp" />
     <ClInclude Include="channel-dialog.hpp" />
     <ClInclude Include="chat.hpp" />
     <ClInclude Include="dialog.hpp" />
@@ -195,23 +197,22 @@
     <ClInclude Include="mouse-tracking.hpp" />
     <ClInclude Include="mouth.hpp" />
     <ClInclude Include="node.hpp" />
-    <ClInclude Include="preferences.hpp" />
     <ClInclude Include="preferences-dialog.hpp" />
+    <ClInclude Include="preferences.hpp" />
     <ClInclude Include="prj-dialog.hpp" />
+    <ClInclude Include="root.hpp" />
     <ClInclude Include="save-factory.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="texture.hpp" />
-    <ClInclude Include="twitch.hpp" />
     <ClInclude Include="twitch-sink.hpp" />
+    <ClInclude Include="twitch.hpp" />
+    <ClInclude Include="ui.hpp" />
+    <ClInclude Include="undo.hpp" />
     <ClInclude Include="uv.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
-    <ClInclude Include="wav.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
-    <ClInclude Include="bouncer2.hpp" />
-    <ClInclude Include="root.hpp" />
-    <ClInclude Include="ui.hpp" />
-    <ClInclude Include="undo.hpp" />
+    <ClInclude Include="wav.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3rd-party\imgui\imgui.cpp">
@@ -247,22 +248,7 @@
     <ClCompile Include="3rd-party\ser\proto.cpp">
       <Filter>3rd-party</Filter>
     </ClCompile>
-    <ClCompile Include="lib.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="message-dialog.cpp" />
-    <ClCompile Include="mouse-tracking.cpp" />
-    <ClCompile Include="mouth.cpp" />
-    <ClCompile Include="node.cpp" />
-    <ClCompile Include="preferences.cpp" />
-    <ClCompile Include="preferences-dialog.cpp" />
-    <ClCompile Include="prj-dialog.cpp" />
-    <ClCompile Include="save-factory.cpp" />
-    <ClCompile Include="sprite.cpp" />
-    <ClCompile Include="stb-image.cpp" />
-    <ClCompile Include="texture.cpp" />
-    <ClCompile Include="twitch.cpp" />
-    <ClCompile Include="uv.cpp" />
-    <ClCompile Include="wav-2-visemes.cpp" />
+    <ClCompile Include="add-as-dialog.cpp" />
     <ClCompile Include="anim-sprite.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="audio-input.cpp" />
@@ -270,16 +256,32 @@
     <ClCompile Include="audio-output.cpp" />
     <ClCompile Include="azure-tts.cpp" />
     <ClCompile Include="bouncer.cpp" />
+    <ClCompile Include="bouncer2.cpp" />
     <ClCompile Include="channel-dialog.cpp" />
     <ClCompile Include="chat.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
     <ClCompile Include="font.cpp" />
-    <ClCompile Include="bouncer2.cpp" />
+    <ClCompile Include="lib.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="message-dialog.cpp" />
+    <ClCompile Include="mouse-tracking.cpp" />
+    <ClCompile Include="mouth.cpp" />
+    <ClCompile Include="node.cpp" />
+    <ClCompile Include="preferences-dialog.cpp" />
+    <ClCompile Include="preferences.cpp" />
+    <ClCompile Include="prj-dialog.cpp" />
     <ClCompile Include="root.cpp" />
+    <ClCompile Include="save-factory.cpp" />
+    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="stb-image.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="twitch.cpp" />
     <ClCompile Include="ui.cpp" />
     <ClCompile Include="undo.cpp" />
+    <ClCompile Include="uv.cpp" />
+    <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd-party">
