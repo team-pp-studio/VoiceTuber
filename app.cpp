@@ -214,13 +214,13 @@ auto App::renderUi(float /*dt*/) -> void
           undo.redo();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("Select", "", editMode == EditMode::select))
+      if (ImGui::MenuItem("Select", "SHIFT+Q", editMode == EditMode::select))
         editMode = EditMode::select;
-      if (ImGui::MenuItem("Translate", "", editMode == EditMode::translate))
+      if (ImGui::MenuItem("Translate", "SHIFT+W", editMode == EditMode::translate))
         editMode = EditMode::translate;
-      if (ImGui::MenuItem("Rotate", "", editMode == EditMode::rotate))
+      if (ImGui::MenuItem("Rotate", "SHIFT+E", editMode == EditMode::rotate))
         editMode = EditMode::rotate;
-      if (ImGui::MenuItem("Scale", "", editMode == EditMode::scale))
+      if (ImGui::MenuItem("Scale", "SHIFT+R", editMode == EditMode::scale))
         editMode = EditMode::scale;
       ImGui::Separator();
       if (ImGui::MenuItem("Add Mouth..."))
