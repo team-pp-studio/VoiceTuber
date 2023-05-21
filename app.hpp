@@ -26,8 +26,11 @@ public:
   auto savePrj() -> void;
 
   bool isMinimized = false;
+  bool done = false;
 
 private:
+  enum class EditMode { select, translate, rotate, scale };
+
   Uv uv;
   Preferences preferences;
   SaveFactory saveFactory;
@@ -39,11 +42,22 @@ private:
   Undo undo;
   Node *hovered = nullptr;
   Node *selected = nullptr;
-  enum class EditMode { select, translate, scale, rotate };
+  bool isNodeDragging = false;
   std::unique_ptr<Dialog> dialog = nullptr;
   std::unique_ptr<Node> root;
   bool showUi = true;
   std::vector<std::function<auto()->void>> postponedActions;
+  EditMode editMode = EditMode::select;
+  std::shared_ptr<const Texture> selectIco;
+  std::shared_ptr<const Texture> translateIco;
+  std::shared_ptr<const Texture> scaleIco;
+  std::shared_ptr<const Texture> rotateIco;
+  std::shared_ptr<const Texture> selectDisabledIco;
+  std::shared_ptr<const Texture> translateDisabledIco;
+  std::shared_ptr<const Texture> scaleDisabledIco;
+  std::shared_ptr<const Texture> rotateDisabledIco;
+  std::shared_ptr<const Texture> hideUiIco;
+  std::shared_ptr<const Texture> showUiIco;
 
   auto addNode(const std::string &class_, const std::string &name) -> void;
   auto cancel() -> void;

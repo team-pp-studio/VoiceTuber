@@ -38,7 +38,7 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
     return;
 
   const auto projMat = getProjectionMatrix();
-  const auto pivot4 = glm::vec4{pivot.x, pivot.y, 0.f, 1.f};
+  const auto pivot4 = glm::vec4{pivot().x, pivot().y, 0.f, 1.f};
   const auto projPivot = projMat * modelViewMat * pivot4;
   const auto v = (glm::vec2{projPivot.x, projPivot.y} - lastProjPivot) / dt;
   const auto gForce = glm::vec2{0.f, .01f};
@@ -53,7 +53,7 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
     return;
   }
 
-  if (glm::length(end - pivot) < 1.f)
+  if (glm::length(end - pivot()) < 1.f)
     return;
 
   const auto end4 = glm::vec4{end.x, end.y, 0.f, 1.f};
@@ -69,7 +69,7 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
     return;
   glColor4f(1.f, .7f, .0f, 1.f);
   glBegin(GL_LINES);
-  glVertex2f(pivot.x, pivot.y);
+  glVertex2f(pivot().x, pivot().y);
   glVertex2f(end.x, end.y);
   glEnd();
 }

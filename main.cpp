@@ -191,7 +191,6 @@ int main(int, char **)
   App app;
 
   // Main loop
-  bool done = false;
   auto lastUpdate = std::chrono::high_resolution_clock::now();
 #ifdef __EMSCRIPTEN__
   // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen()
@@ -200,7 +199,7 @@ int main(int, char **)
   io.IniFilename = NULL;
   EMSCRIPTEN_MAINLOOP_BEGIN
 #else
-  while (!done)
+  while (!app.done)
 #endif
   {
     // Poll and handle events (inputs, window resize, etc.)
@@ -216,10 +215,10 @@ int main(int, char **)
     {
       ImGui_ImplSDL2_ProcessEvent(&event);
       if (event.type == SDL_QUIT)
-        done = true;
+        app.done = true;
       else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
                event.window.windowID == SDL_GetWindowID(window.get()))
-        done = true;
+        app.done = true;
       else if (event.type == SDL_WINDOWEVENT)
       {
         if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)

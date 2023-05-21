@@ -62,7 +62,7 @@ Node::Node(Lib &lib, Undo &undo, std::string name)
 
 auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
 {
-  auto ns = std::vector<std::reference_wrapper<Node>>{};
+  auto ns = Nodes{};
   getAllNodesCalcModelView(ns);
 
   std::stable_sort(std::begin(ns), std::end(ns), [](const auto a, const auto b) {
@@ -78,14 +78,14 @@ auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
   glPopMatrix();
 }
 
-auto Node::getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &out) -> void
+auto Node::getAllNodesCalcModelView(Nodes &out) -> void
 {
   glPushMatrix();
   // Apply transformations
   glTranslatef(loc.x, loc.y, 0.0f);           // Move the sprite
   glRotatef(rot + animRot, 0.0f, 0.0f, 1.0f); // Rotate the sprite
   glScalef(scale.x, scale.y, 1.0f);           // Scale the sprite
-  glTranslatef(-pivot.x, -pivot.y, 0.0f);     // Move the pivot point back
+  glTranslatef(-pivot_.x, -pivot_.y, 0.0f);   // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
   out.push_back(*this);
@@ -196,52 +196,52 @@ auto Node::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::dragFloat(undo,
                 "##XPivot",
-                pivot.x,
+                pivot_.x,
                 1.f,
                 -std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max(),
                 "%.1f");
   Ui::dragFloat(undo,
                 "##YPivot",
-                pivot.y,
+                pivot_.y,
                 1.f,
                 -std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max(),
                 "%.1f");
   const auto sz = 2 * ImGui::GetFontSize();
   if (Ui::btnImg("nw", *arrowNW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, h()}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{0, h()}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("n", *arrowN, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, h()}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w() / 2, h()}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("ne", *arrowNE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), h()}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w(), h()}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   if (Ui::btnImg("w", *arrowW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, h() / 2}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{0, h() / 2}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("c", *center, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, h() / 2}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w() / 2, h() / 2}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("e", *arrowE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), h() / 2}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w(), h() / 2}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, 0}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{0, 0}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("s", *arrowS, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, 0}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w() / 2, 0}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::SameLine();
   if (Ui::btnImg("se", *arrowSE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), 0}, this]() { pivot = newPivot; },
-                      [oldPivot = pivot, this]() { pivot = oldPivot; });
+    undo.get().record([newPivot = glm::vec2{w(), 0}, this]() { pivot_ = newPivot; },
+                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
   ImGui::TableNextColumn();
   Ui::textRj("Rotation");
   ImGui::TableNextColumn();
@@ -283,9 +283,28 @@ auto Node::screenToLocal(const glm::mat4 &projMat, glm::vec2 screen) const -> gl
   return glm::vec2{modelViewCoords.x, modelViewCoords.y};
 }
 
+auto Node::localToScreen(const glm::mat4 &projMat, glm::vec2 local) const -> glm::vec2
+{
+  ImGuiIO &io = ImGui::GetIO();
+  const auto w = io.DisplaySize.x;
+  const auto h = io.DisplaySize.y;
+
+  glm::mat4 mvpMatrix = projMat * modelViewMat;
+
+  glm::vec4 clipSpaceCoords = mvpMatrix * glm::vec4(local, 0.0f, 1.0f);
+  clipSpaceCoords /= clipSpaceCoords.w; // Perspective division
+
+  // Convert from clip space (-1.0 to 1.0) to screen space
+  glm::vec2 screenCoords = glm::vec2(clipSpaceCoords) * 0.5f + 0.5f;
+  screenCoords.x *= w;
+  screenCoords.y *= h;
+
+  return screenCoords;
+}
+
 auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
 {
-  std::vector<std::reference_wrapper<Node>> underNodes;
+  Nodes underNodes;
   collectUnderNodes(projMat, v, underNodes);
 
   std::stable_sort(underNodes.begin(), underNodes.end(), [](const auto a, const auto b) {
@@ -297,9 +316,7 @@ auto Node::nodeUnder(const glm::mat4 &projMat, glm::vec2 v) -> Node *
   return nullptr;
 }
 
-auto Node::collectUnderNodes(const glm::mat4 &projMat,
-                             glm::vec2 v,
-                             std::vector<std::reference_wrapper<Node>> &underNodes) -> void
+auto Node::collectUnderNodes(const glm::mat4 &projMat, glm::vec2 v, Nodes &underNodes) -> void
 {
   for (auto it = nodes.rbegin(); it != nodes.rend(); ++it)
     (*it)->collectUnderNodes(projMat, v, underNodes);
@@ -326,15 +343,14 @@ auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
   glVertex2f(.0f, .0f);
   glEnd();
   const auto d = std::max(w(), h()) * .05f;
-  if (selected == this)
-  {
-    glBegin(GL_LINES);
-    glVertex2f(pivot.x - d, pivot.y - d);
-    glVertex2f(pivot.x + d, pivot.y + d);
-    glVertex2f(pivot.x - d, pivot.y + d);
-    glVertex2f(pivot.x + d, pivot.y - d);
-    glEnd();
-  }
+  if (selected != this)
+    return;
+  glBegin(GL_LINES);
+  glVertex2f(pivot_.x - d, pivot_.y - d);
+  glVertex2f(pivot_.x + d, pivot_.y + d);
+  glVertex2f(pivot_.x - d, pivot_.y + d);
+  glVertex2f(pivot_.x + d, pivot_.y - d);
+  glEnd();
 }
 
 auto Node::addChild(std::shared_ptr<Node> v) -> void
@@ -343,7 +359,7 @@ auto Node::addChild(std::shared_ptr<Node> v) -> void
   nodes.emplace_back(std::move(v));
 }
 
-auto Node::getNodes() const -> const Nodes &
+auto Node::getNodes() const -> const PNodes &
 {
   return nodes;
 }
@@ -494,7 +510,7 @@ auto Node::del(Node **ppNode) -> void
     });
 }
 
-auto Node::del(Node &node) -> void
+auto Node::delNoUndo(Node &node) -> void
 {
   if (!node.parent_)
     return;
@@ -543,9 +559,9 @@ auto Node::rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
 
   // Calculate the angles between the pivot and start/end locations
   const auto startAngle =
-    atan2f(startLoc.y - pivot.y, startLoc.x - pivot.x) * 180.f / std::numbers::pi_v<float>;
+    atan2f(startLoc.y - pivot_.y, startLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
   const auto endAngle =
-    atan2f(endLoc.y - pivot.y, endLoc.x - pivot.x) * 180.f / std::numbers::pi_v<float>;
+    atan2f(endLoc.y - pivot_.y, endLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
 
   // Calculate the rotation difference and update the rotation
   const auto rotDiff = endAngle - startAngle;
@@ -570,7 +586,7 @@ auto Node::scaleUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
   const auto endLoc = screenToLocal(projMat, mouse);
 
   // Calculate the scaling factor based on the distance between start and end locations
-  const auto scaleFactor = glm::length(endLoc - pivot) / glm::length(startLoc - pivot);
+  const auto scaleFactor = glm::length(endLoc - pivot()) / glm::length(startLoc - pivot());
   scale = initScale * scaleFactor;
 }
 
@@ -687,4 +703,9 @@ auto Node::commit() -> void
 auto Node::editMode() const -> EditMode
 {
   return editMode_;
+}
+
+auto Node::pivot() const -> glm::vec2
+{
+  return pivot_;
 }

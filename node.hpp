@@ -25,30 +25,32 @@ public:
 #define SER_PROP_LIST       \
   SER_PROP(loc);            \
   SER_PROP(scale);          \
-  SER_PROP(pivot);          \
+  SER_PROP(pivot_);         \
   SER_PROP(rot);            \
   SER_PROP(uniformScaling); \
   SER_PROP(zOrder);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  using Nodes = std::vector<std::shared_ptr<Node>>;
+  using PNodes = std::vector<std::shared_ptr<Node>>;
+  using Nodes = std::vector<std::reference_wrapper<Node>>;
   enum class EditMode { select, translate, scale, rotate };
 
   Node(Lib &, class Undo &, std::string name);
-  virtual ~Node() = default;
-
   auto addChild(std::shared_ptr<Node>) -> void;
   auto cancel() -> void;
   auto commit() -> void;
+  auto editMode() const -> EditMode;
   auto getName() const -> std::string;
-  auto getNodes() const -> const Nodes &;
+  auto getNodes() const -> const PNodes &;
   auto loadAll(const class SaveFactory &, IStrm &) -> void;
+  auto localToScreen(const glm::mat4 &projMat, glm::vec2 local) const -> glm::vec2;
   auto moveDown() -> void;
   auto moveUp() -> void;
   auto nodeUnder(const glm::mat4 &projMat, glm::vec2) -> Node *;
   auto parent() -> Node *;
   auto parentWithBellow() -> void;
+  auto pivot() const -> glm::vec2;
   auto renderAll(float dt, Node *hovered, Node *selected) -> void;
   auto rotStart(glm::vec2 mouse) -> void;
   auto saveAll(OStrm &) const -> void;
@@ -56,13 +58,13 @@ public:
   auto translateStart(glm::vec2 mouse) -> void;
   auto unparent() -> void;
   auto update(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
-  auto editMode() const -> EditMode;
   static auto del(Node **) -> void;
-  static auto del(Node &) -> void;
+  static auto delNoUndo(Node &) -> void;
   virtual auto h() const -> float;
   virtual auto isTransparent(glm::vec2) const -> bool;
   virtual auto renderUi() -> void;
   virtual auto w() const -> float;
+  virtual ~Node() = default;
 
 protected:
   auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
@@ -73,10 +75,8 @@ protected:
   std::string name;
 
 private:
-  auto collectUnderNodes(const glm::mat4 &projMat,
-                         glm::vec2 v,
-                         std::vector<std::reference_wrapper<Node>> &) -> void;
-  auto getAllNodesCalcModelView(std::vector<std::reference_wrapper<Node>> &) -> void;
+  auto collectUnderNodes(const glm::mat4 &projMat, glm::vec2 v, Nodes &) -> void;
+  auto getAllNodesCalcModelView(Nodes &) -> void;
   auto rotCancel() -> void;
   auto rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
   auto scaleCancel() -> void;
@@ -87,19 +87,19 @@ private:
 protected:
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
-  glm::vec2 pivot = {.0f, .0f};
-  float animRot = 0.f;
-  std::reference_wrapper<class Undo> undo;
 
 private:
+  glm::vec2 pivot_ = {.0f, .0f};
   float rot = 0.f;
   bool uniformScaling = true;
 
 protected:
+  float animRot = 0.f;
+  std::reference_wrapper<class Undo> undo;
   int zOrder = 0;
 
 private:
-  Nodes nodes;
+  PNodes nodes;
 
 protected:
   glm::mat4 modelViewMat;

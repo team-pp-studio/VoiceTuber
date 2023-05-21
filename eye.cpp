@@ -17,7 +17,7 @@ Eye::~Eye()
 auto Eye::render(float dt, Node *hovered, Node *selected) -> void
 {
   auto clampMouse = [&]() {
-    const auto mousePivot = (mouse - pivot) * followStrength / 100.f;
+    const auto mousePivot = (mouse - pivot()) * followStrength / 100.f;
     const auto distance = glm::length(mousePivot);
 
     if (distance > radius)
@@ -39,7 +39,7 @@ auto Eye::render(float dt, Node *hovered, Node *selected) -> void
       const auto theta = 2.0f * std::numbers::pi_v<float> * i / NumSegments;
       const auto dx = radius * cosf(theta);
       const auto dy = radius * sinf(theta);
-      glVertex2f(pivot.x + dx, pivot.y + dy);
+      glVertex2f(pivot().x + dx, pivot().y + dy);
     }
     glEnd();
   }

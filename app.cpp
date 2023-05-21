@@ -25,7 +25,17 @@ static auto getProjMat() -> glm::mat4
 
 App::App()
   : audioInput(preferences.inputAudio, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
-    lib(preferences)
+    lib(preferences),
+    selectIco(lib.queryTex("engine:select.png", true)),
+    translateIco(lib.queryTex("engine:transalte.png", true)),
+    scaleIco(lib.queryTex("engine:scale.png", true)),
+    rotateIco(lib.queryTex("engine:rotate.png", true)),
+    selectDisabledIco(lib.queryTex("engine:select-disabled.png", true)),
+    translateDisabledIco(lib.queryTex("engine:transalte-disabled.png", true)),
+    scaleDisabledIco(lib.queryTex("engine:scale-disabled.png", true)),
+    rotateDisabledIco(lib.queryTex("engine:rotate-disabled.png", true)),
+    hideUiIco(lib.queryTex("engine:eye-sprite.png", true)),
+    showUiIco(lib.queryTex("engine:not-visable.png", true))
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
@@ -58,7 +68,95 @@ auto App::render(float dt) -> void
   }
 
   if (showUi && !isMinimized)
+  {
     root->renderAll(dt, hovered, selected);
+
+    if (selected)
+    {
+      const auto projMat = getProjMat();
+      auto local = selected->localToScreen(projMat, selected->pivot());
+      auto localX = selected->localToScreen(projMat, selected->pivot() + glm::vec2{1.f, 0.f});
+      auto localY = selected->localToScreen(projMat, selected->pivot() + glm::vec2{0.f, 1.f});
+      switch (editMode)
+      {
+      case EditMode::select: break;
+      case EditMode::translate: {
+        auto drawArrow = [&](const glm::vec2 &start, const glm::vec2 &dir, const glm::vec4 &color) {
+          glColor4fv(glm::value_ptr(color));
+          glVertex2fv(glm::value_ptr(start));
+
+          auto end = start + 64.f * dir;
+          glVertex2fv(glm::value_ptr(end));
+
+          glm::vec2 ortho(-dir.y, dir.x);
+          glm::vec2 arrowHeadBase = end - 15.f * dir;
+          glVertex2fv(glm::value_ptr(end));
+          glVertex2fv(glm::value_ptr(arrowHeadBase + 10.f * ortho));
+          glVertex2fv(glm::value_ptr(end));
+          glVertex2fv(glm::value_ptr(arrowHeadBase - 10.f * ortho));
+        };
+
+        glBegin(GL_LINES);
+        drawArrow(local, glm::normalize(localX - local), glm::vec4(1.f, .0f, .0f, 1.f));
+        drawArrow(local, glm::normalize(localY - local), glm::vec4(0.f, 1.f, .0f, 1.f));
+        glEnd();
+        break;
+      }
+      case EditMode::rotate: {
+        auto radius = 64.f;
+        const auto circlePoints = 100.0f;
+        const auto increment = 2.0f * glm::pi<float>() / circlePoints;
+        auto theta = 0.0f;
+        glColor4f(0.f, 0.f, 1.f, 1.f);
+        glBegin(GL_LINE_LOOP);
+        for (int i = 0; i < circlePoints; i++)
+        {
+          auto x = radius * cosf(theta) + local.x;
+          auto y = radius * sinf(theta) + local.y;
+          glVertex2f(x, y);
+          theta += increment;
+        }
+        glEnd();
+        glBegin(GL_LINES);
+        glColor4f(1.f, .0f, .0f, 1.f);
+        glVertex2fv(glm::value_ptr(local));
+        glVertex2fv(glm::value_ptr(local + radius * glm::normalize(localX - local)));
+        glColor4f(0.f, 1.f, .0f, 1.f);
+        glVertex2fv(glm::value_ptr(local));
+        glVertex2fv(glm::value_ptr(local + radius * glm::normalize(localY - local)));
+        glEnd();
+        break;
+      }
+      case EditMode::scale: {
+        auto drawBox = [&](const glm::vec2 &start, const glm::vec2 &dir, const glm::vec4 &color) {
+          glColor4fv(glm::value_ptr(color));
+          glVertex2fv(glm::value_ptr(start));
+
+          auto end = start + 64.f * dir;
+          glVertex2fv(glm::value_ptr(end - 10.f * dir));
+
+          glm::vec2 ortho(-dir.y, dir.x);
+          glm::vec2 boxHeadBase = end - 10.f * dir;
+          glm::vec2 boxHeadEnd = end + 10.f * dir;
+          glVertex2fv(glm::value_ptr(boxHeadBase + 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadBase - 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadEnd + 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadEnd - 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadBase + 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadEnd + 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadBase - 10.f * ortho));
+          glVertex2fv(glm::value_ptr(boxHeadEnd - 10.f * ortho));
+        };
+
+        glBegin(GL_LINES);
+        drawBox(local, glm::normalize(localX - local), glm::vec4(1.f, .0f, .0f, 1.f));
+        drawBox(local, glm::normalize(localY - local), glm::vec4(0.f, 1.f, .0f, 1.f));
+        glEnd();
+        break;
+      }
+      }
+    }
+  }
   else
     root->renderAll(dt, nullptr, nullptr);
 }
@@ -83,8 +181,11 @@ auto App::renderUi(float /*dt*/) -> void
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
       style.Colors[ImGuiCol_WindowBg].w = .2f;
     auto showUiWindow = Ui::Window("##Show UI");
-    if (ImGui::Button("Show UI"))
+    const auto sz = 2 * ImGui::GetFontSize();
+    if (Ui::btnImg("Show UI", *showUiIco, sz, sz))
       showUi = true;
+    if (ImGui::IsItemHovered())
+      ImGui::SetTooltip("Show UI");
     return;
   }
 
@@ -93,8 +194,13 @@ auto App::renderUi(float /*dt*/) -> void
   if (auto mainMenu = Ui::MainMenuBar{})
   {
     if (auto fileMenu = Ui::Menu{"File"})
+    {
       if (ImGui::MenuItem("Save"))
         savePrj();
+      ImGui::Separator();
+      if (ImGui::MenuItem("Quit"))
+        done = true;
+    }
     if (auto editMenu = Ui::Menu{"Edit"})
     {
       {
@@ -107,36 +213,43 @@ auto App::renderUi(float /*dt*/) -> void
         if (auto redoMenu = ImGui::MenuItem("Redo", "CTRL+Y"))
           undo.redo();
       }
-      if (auto addMenu = Ui::Menu{"Add"})
-      {
-        if (ImGui::MenuItem("Mouth..."))
-          dialog =
-            std::make_unique<FileOpen>(lib, "Add Mouth Dialog", [this](bool r, const auto &filePath) {
-              if (r)
-                addNode(Mouth::className, filePath.string());
-            });
-        if (ImGui::MenuItem("Eye..."))
-          dialog =
-            std::make_unique<FileOpen>(lib, "Add Eye Dialog", [this](bool r, const auto &filePath) {
-              if (r)
-                addNode(Eye::className, filePath.string());
-            });
-
-        if (ImGui::MenuItem("Sprite..."))
-          dialog =
-            std::make_unique<FileOpen>(lib, "Add Sprite Dialog", [this](bool r, const auto &filePath) {
-              if (r)
-                addNode(AnimSprite::className, filePath.string());
-            });
-
-        if (ImGui::MenuItem("Twitch Chat..."))
-          dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
+      ImGui::Separator();
+      if (ImGui::MenuItem("Select", "", editMode == EditMode::select))
+        editMode = EditMode::select;
+      if (ImGui::MenuItem("Translate", "", editMode == EditMode::translate))
+        editMode = EditMode::translate;
+      if (ImGui::MenuItem("Rotate", "", editMode == EditMode::rotate))
+        editMode = EditMode::rotate;
+      if (ImGui::MenuItem("Scale", "", editMode == EditMode::scale))
+        editMode = EditMode::scale;
+      ImGui::Separator();
+      if (ImGui::MenuItem("Add Mouth..."))
+        dialog =
+          std::make_unique<FileOpen>(lib, "Add Mouth Dialog", [this](bool r, const auto &filePath) {
             if (r)
-              addNode(Chat::className, channel);
+              addNode(Mouth::className, filePath.string());
           });
-        if (ImGui::MenuItem("Bouncer"))
-          addNode(Bouncer2::className, "bouncer");
-      }
+      if (ImGui::MenuItem("Add Eye..."))
+        dialog = std::make_unique<FileOpen>(lib, "Add Eye Dialog", [this](bool r, const auto &filePath) {
+          if (r)
+            addNode(Eye::className, filePath.string());
+        });
+
+      if (ImGui::MenuItem("Add Sprite..."))
+        dialog =
+          std::make_unique<FileOpen>(lib, "Add Sprite Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(AnimSprite::className, filePath.string());
+          });
+
+      if (ImGui::MenuItem("Add Twitch Chat..."))
+        dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
+          if (r)
+            addNode(Chat::className, channel);
+        });
+      if (ImGui::MenuItem("Add Bouncer"))
+        addNode(Bouncer2::className, "bouncer");
+      ImGui::Separator();
       if (ImGui::MenuItem("Preferences..."))
         dialog =
           std::make_unique<PreferencesDialog>(preferences, audioOutput, audioInput, [this](bool r) {
@@ -152,6 +265,37 @@ auto App::renderUi(float /*dt*/) -> void
   {
     auto outlinerWindow = Ui::Window("Outliner");
     {
+      {
+        const auto sz = 2 * ImGui::GetFontSize();
+        if (Ui::btnImg("Hide UI", *hideUiIco, sz, sz))
+          showUi = false;
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("Hide UI");
+        ImGui::SameLine();
+        if (Ui::btnImg("Select", editMode == EditMode::select ? *selectIco : *selectDisabledIco, sz, sz))
+          editMode = EditMode::select;
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("Select (Shift-Q)");
+        ImGui::SameLine();
+        if (Ui::btnImg("Translate",
+                       editMode == EditMode::translate ? *translateIco : *translateDisabledIco,
+                       sz,
+                       sz))
+          editMode = EditMode::translate;
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("Translate (Shift-W)");
+        ImGui::SameLine();
+        if (Ui::btnImg("Rotate", editMode == EditMode::rotate ? *rotateIco : *rotateDisabledIco, sz, sz))
+          editMode = EditMode::rotate;
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("Rotate (Shift-E)");
+        ImGui::SameLine();
+        if (Ui::btnImg("Scale", editMode == EditMode::scale ? *scaleIco : *scaleDisabledIco, sz, sz))
+          editMode = EditMode::scale;
+        if (ImGui::IsItemHovered())
+          ImGui::SetTooltip("Scale (Shift-R)");
+      }
+
       auto hierarchyButtonsDisabled = Ui::Disabled(!selected);
       if (ImGui::Button("<"))
         selected->unparent();
@@ -175,8 +319,6 @@ auto App::renderUi(float /*dt*/) -> void
     }
     renderTree(*root);
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-    if (ImGui::Button("Hide UI"))
-      showUi = false;
   }
   {
     auto detailsWindpw = Ui::Window("Details");
@@ -217,11 +359,54 @@ auto App::processIo() -> void
       else
       {
         if (selected)
+        {
           selected->commit();
+          isNodeDragging = false;
+        }
       }
     }
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
       cancel();
+
+    if (selected)
+    {
+      if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+      {
+        if (!isNodeDragging)
+        {
+          auto dragDelta = ImGui::GetMouseDragDelta(0);
+          if (std::abs(dragDelta.x) > 5 || std::abs(dragDelta.y) > 5)
+          {
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            switch (editMode)
+            {
+            case EditMode::select: break;
+            case EditMode::translate:
+              isNodeDragging = true;
+              selected->translateStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
+              break;
+            case EditMode::rotate:
+              isNodeDragging = true;
+              selected->rotStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
+              break;
+            case EditMode::scale:
+              isNodeDragging = true;
+              selected->scaleStart(glm::vec2{1.f * mouseX, 1.f * mouseY});
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        if (isNodeDragging)
+        {
+          selected->commit();
+          isNodeDragging = false;
+        }
+      }
+    }
   }
   if (!io.WantCaptureKeyboard || !io.WantCaptureMouse)
   {
@@ -270,7 +455,7 @@ auto App::processIo() -> void
               parent->addChild(std::move(n));
             },
             [n, oldSelected = selected, this]() {
-              Node::del(*n);
+              Node::delNoUndo(*n);
               selected = oldSelected;
             });
           int mouseX, mouseY;
@@ -280,6 +465,17 @@ auto App::processIo() -> void
       }
       if (ImGui::IsKeyPressed(ImGuiKey_Escape))
         cancel();
+    }
+    if (!io.KeyCtrl && io.KeyShift && !io.KeyAlt && !io.KeySuper)
+    {
+      if (ImGui::IsKeyPressed(ImGuiKey_Q))
+        editMode = EditMode::select;
+      if (ImGui::IsKeyPressed(ImGuiKey_W))
+        editMode = EditMode::translate;
+      if (ImGui::IsKeyPressed(ImGuiKey_E))
+        editMode = EditMode::rotate;
+      if (ImGui::IsKeyPressed(ImGuiKey_R))
+        editMode = EditMode::scale;
     }
   }
   if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Z))
@@ -293,6 +489,7 @@ auto App::cancel() -> void
   if (!selected)
     return;
 
+  isNodeDragging = false;
   selected->cancel();
 }
 
@@ -416,7 +613,7 @@ auto App::addNode(const std::string &class_, const std::string &name) -> void
         parent->addChild(std::move(node));
       },
       [node, oldSelected, this]() {
-        Node::del(*selected);
+        Node::delNoUndo(*selected);
         selected = oldSelected;
       });
   }
