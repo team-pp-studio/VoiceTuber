@@ -49,8 +49,10 @@ public:
   auto moveUp() -> void;
   auto nodeUnder(const glm::mat4 &projMat, glm::vec2) -> Node *;
   auto parent() -> Node *;
+  auto parentWith(Node &) -> void;
   auto parentWithBellow() -> void;
   auto pivot() const -> glm::vec2;
+  auto placeBellow(Node &) -> void;
   auto renderAll(float dt, Node *hovered, Node *selected) -> void;
   auto rotStart(glm::vec2 mouse) -> void;
   auto saveAll(OStrm &) const -> void;

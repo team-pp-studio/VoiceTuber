@@ -58,6 +58,10 @@ private:
   std::shared_ptr<const Texture> rotateDisabledIco;
   std::shared_ptr<const Texture> hideUiIco;
   std::shared_ptr<const Texture> showUiIco;
+  std::shared_ptr<const Texture> arrowN;
+  std::shared_ptr<const Texture> arrowE;
+  std::shared_ptr<const Texture> arrowS;
+  std::shared_ptr<const Texture> arrowW;
 
   auto addNode(const std::string &class_, const std::string &name) -> void;
   auto cancel() -> void;

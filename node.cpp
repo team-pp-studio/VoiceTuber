@@ -709,3 +709,66 @@ auto Node::pivot() const -> glm::vec2
 {
   return pivot_;
 }
+
+auto Node::parentWith(Node &newParent) -> void
+{
+  if (!parent())
+    return;
+  auto it = std::find_if(std::begin(parent()->nodes), std::end(parent()->nodes), [this](const auto &v) {
+    return this == v.get();
+  });
+
+  assert(it != std::end(parent()->nodes));
+
+  auto self = std::move(*it);
+  auto oldParent = parent();
+  undo.get().record(
+    [&newParent, this, it, self]() {
+      glm::mat4 newParentTransform = newParent.modelViewMat;
+      modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
+      loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
+
+      newParent.nodes.emplace_back(std::move(self));
+      parent_->nodes.erase(it);
+      parent_ = &newParent;
+    },
+    [it, &newParent, oldLoc = loc, oldParent, this, self]() {
+      loc = oldLoc;
+      auto it2 = std::find_if(std::begin(newParent.nodes),
+                              std::end(newParent.nodes),
+                              [this](const auto &v) { return this == v.get(); });
+      assert(it2 != std::end(newParent.nodes));
+      newParent.nodes.erase(it2);
+      oldParent->nodes.emplace(it, std::move(self));
+      parent_ = oldParent;
+    });
+}
+
+auto Node::placeBellow(Node &newSibling) -> void
+{
+  assert(newSibling.parent());
+  undo.get().record(
+    [this, &newSibling]() {
+      auto selfIt = std::find_if(std::begin(parent()->nodes),
+                                 std::end(parent()->nodes),
+                                 [this](const auto &v) { return this == v.get(); });
+      auto self = std::move(*selfIt);
+      parent()->nodes.erase(selfIt);
+      self->parent_ = newSibling.parent();
+      auto newSiblingIt = std::find_if(std::begin(newSibling.parent()->nodes),
+                                       std::end(newSibling.parent()->nodes),
+                                       [&newSibling](const auto &v) { return &newSibling == v.get(); });
+      assert(newSiblingIt != std::end(newSibling.parent()->nodes));
+      ++newSiblingIt;
+      newSibling.parent()->nodes.insert(newSiblingIt, std::move(self));
+    },
+    [this, nodes = parent()->nodes, oldParent = parent()]() {
+      auto selfIt = std::find_if(std::begin(parent()->nodes),
+                                 std::end(parent()->nodes),
+                                 [this](const auto &v) { return this == v.get(); });
+      assert(selfIt != std::end(parent()->nodes));
+      parent()->nodes.erase(selfIt);
+      oldParent->nodes = nodes;
+      parent_ = oldParent;
+    });
+}

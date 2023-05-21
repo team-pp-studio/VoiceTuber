@@ -35,7 +35,11 @@ App::App()
     scaleDisabledIco(lib.queryTex("engine:scale-disabled.png", true)),
     rotateDisabledIco(lib.queryTex("engine:rotate-disabled.png", true)),
     hideUiIco(lib.queryTex("engine:eye-sprite.png", true)),
-    showUiIco(lib.queryTex("engine:not-visable.png", true))
+    showUiIco(lib.queryTex("engine:not-visable.png", true)),
+    arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
+    arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
+    arrowS(lib.queryTex("engine:arrow-s-circle.png", true)),
+    arrowW(lib.queryTex("engine:arrow-w-circle.png", true))
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
@@ -195,32 +199,32 @@ auto App::renderUi(float /*dt*/) -> void
   {
     if (auto fileMenu = Ui::Menu{"File"})
     {
-      if (ImGui::MenuItem("Save"))
+      if (ImGui::MenuItem("Save", "Ctrl+S"))
         savePrj();
       ImGui::Separator();
-      if (ImGui::MenuItem("Quit"))
+      if (ImGui::MenuItem("Quit", "Alt+F4"))
         done = true;
     }
     if (auto editMenu = Ui::Menu{"Edit"})
     {
       {
         auto undoDisabled = Ui::Disabled(!undo.hasUndo());
-        if (auto undoMenu = ImGui::MenuItem("Undo", "CTRL+Z"))
+        if (auto undoMenu = ImGui::MenuItem("Undo", "Ctrl+Z"))
           undo.undo();
       }
       {
         auto redoDisabled = Ui::Disabled(!undo.hasRedo());
-        if (auto redoMenu = ImGui::MenuItem("Redo", "CTRL+Y"))
+        if (auto redoMenu = ImGui::MenuItem("Redo", "Ctrl+Y"))
           undo.redo();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("Select", "SHIFT+Q", editMode == EditMode::select))
+      if (ImGui::MenuItem("Select", "Shift+Q", editMode == EditMode::select))
         editMode = EditMode::select;
-      if (ImGui::MenuItem("Translate", "SHIFT+W", editMode == EditMode::translate))
+      if (ImGui::MenuItem("Translate", "Shift+W", editMode == EditMode::translate))
         editMode = EditMode::translate;
-      if (ImGui::MenuItem("Rotate", "SHIFT+E", editMode == EditMode::rotate))
+      if (ImGui::MenuItem("Rotate", "Shift+E", editMode == EditMode::rotate))
         editMode = EditMode::rotate;
-      if (ImGui::MenuItem("Scale", "SHIFT+R", editMode == EditMode::scale))
+      if (ImGui::MenuItem("Scale", "Shift+R", editMode == EditMode::scale))
         editMode = EditMode::scale;
       ImGui::Separator();
       if (ImGui::MenuItem("Add Mouth..."))
@@ -275,7 +279,7 @@ auto App::renderUi(float /*dt*/) -> void
         if (Ui::btnImg("Select", editMode == EditMode::select ? *selectIco : *selectDisabledIco, sz, sz))
           editMode = EditMode::select;
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("Select (Shift-Q)");
+          ImGui::SetTooltip("Select (Shift+Q)");
         ImGui::SameLine();
         if (Ui::btnImg("Translate",
                        editMode == EditMode::translate ? *translateIco : *translateDisabledIco,
@@ -283,36 +287,37 @@ auto App::renderUi(float /*dt*/) -> void
                        sz))
           editMode = EditMode::translate;
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("Translate (Shift-W)");
+          ImGui::SetTooltip("Translate (Shift+W)");
         ImGui::SameLine();
         if (Ui::btnImg("Rotate", editMode == EditMode::rotate ? *rotateIco : *rotateDisabledIco, sz, sz))
           editMode = EditMode::rotate;
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("Rotate (Shift-E)");
+          ImGui::SetTooltip("Rotate (Shift+E)");
         ImGui::SameLine();
         if (Ui::btnImg("Scale", editMode == EditMode::scale ? *scaleIco : *scaleDisabledIco, sz, sz))
           editMode = EditMode::scale;
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("Scale (Shift-R)");
+          ImGui::SetTooltip("Scale (Shift+R)");
       }
 
       auto hierarchyButtonsDisabled = Ui::Disabled(!selected);
-      if (ImGui::Button("<"))
+      const auto sz = ImGui::GetFontSize();
+      if (Ui::btnImg("<", *arrowW, sz, sz))
         selected->unparent();
       if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Unparent");
       ImGui::SameLine();
-      if (ImGui::Button("^"))
+      if (Ui::btnImg("^", *arrowN, sz, sz))
         selected->moveUp();
       if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Move up");
       ImGui::SameLine();
-      if (ImGui::Button("V"))
+      if (Ui::btnImg("V", *arrowS, sz, sz))
         selected->moveDown();
       if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Move down");
       ImGui::SameLine();
-      if (ImGui::Button(">"))
+      if (Ui::btnImg(">", *arrowE, sz, sz))
         selected->parentWithBellow();
       if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Parent with below");
@@ -477,6 +482,11 @@ auto App::processIo() -> void
       if (ImGui::IsKeyPressed(ImGuiKey_R))
         editMode = EditMode::scale;
     }
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper)
+    {
+      if (ImGui::IsKeyPressed(ImGuiKey_S))
+        savePrj();
+    }
   }
   if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper && ImGui::IsKeyPressed(ImGuiKey_Z))
     undo.undo();
@@ -525,6 +535,44 @@ auto App::renderTree(Node &v) -> void
   const auto nm = v.getName();
   if (selected == &v)
     nodeFlags |= ImGuiTreeNodeFlags_Selected;
+  auto dragAndDrop = [&]() {
+    if (auto source = Ui::DragDropSource{})
+    {
+      auto pNode = &v;
+      ImGui::SetDragDropPayload("_TREENODE", &pNode, sizeof pNode);
+      ImGui::Text("Hold Ctrl to parent");
+    }
+    auto payload = ImGui::GetDragDropPayload();
+    if (!payload)
+      return;
+    if (!payload->IsDataType("_TREENODE"))
+      return;
+    auto srcNode = *static_cast<Node **>(payload->Data);
+    if (!srcNode)
+      return;
+    ImGuiIO &io = ImGui::GetIO();
+    const auto ctrl = io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper;
+    if (&v == root.get() && !ctrl)
+      return;
+    for (auto p = v.parent(); p != nullptr; p = p->parent())
+      if (p == srcNode)
+        return;
+    if (!Ui::DragDropTarget{})
+      return;
+    if (ImGui::AcceptDragDropPayload("_TREENODE"))
+    {
+      if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper)
+      {
+        LOG(srcNode->getName(), "->", v.getName());
+        postponedActions.emplace_back([srcNode, &v]() { srcNode->placeBellow(v); });
+      }
+      if (ctrl)
+      {
+        LOG("Parent", srcNode->getName(), "->", v.getName());
+        postponedActions.emplace_back([srcNode, &v]() { srcNode->parentWith(v); });
+      }
+    }
+  };
   const auto &nodes = v.getNodes();
   if (!nodes.empty())
   {
@@ -533,6 +581,7 @@ auto App::renderTree(Node &v) -> void
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
       undo.record([&v, this]() { selected = &v; },
                   [oldSelected = selected, this]() { selected = oldSelected; });
+    dragAndDrop();
     if (nodeOpen)
     {
       for (const auto &n : nodes)
@@ -548,6 +597,7 @@ auto App::renderTree(Node &v) -> void
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
       undo.record([&v, this]() { selected = &v; },
                   [oldSelected = selected, this]() { selected = oldSelected; });
+    dragAndDrop();
   }
 }
 

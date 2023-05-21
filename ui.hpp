@@ -62,11 +62,13 @@ namespace Ui
 {
   auto textRj(const std::string &, float offset = 0.f) -> void;
   DECLARE_IMGUI_RAII(Disabled);
-  DECLARE_IMGUI_RAII_BOOL(ListBox);
-  DECLARE_IMGUI_RAII_BOOL(Menu);
-  DECLARE_IMGUI_RAII_BOOL(MainMenuBar);
-  DECLARE_IMGUI_RAII_BOOL(Table);
   DECLARE_IMGUI_RAII_BOOL(Combo);
+  DECLARE_IMGUI_RAII_BOOL(DragDropSource);
+  DECLARE_IMGUI_RAII_BOOL(DragDropTarget);
+  DECLARE_IMGUI_RAII_BOOL(ListBox);
+  DECLARE_IMGUI_RAII_BOOL(MainMenuBar);
+  DECLARE_IMGUI_RAII_BOOL(Menu);
+  DECLARE_IMGUI_RAII_BOOL(Table);
 
   class Window
   {
