@@ -139,19 +139,18 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
-- [x] (feature) undo
-- [x] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
-- [x] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
-- [x] Don't expect the placement of stuff (UI UX)
-   - [x] Swap description and value
-   - [x] Placement of bouncer options confusing
-- [x] (feature) each node can have different amount of bounce
+ - [ ] better compatibility for multiple windows
+ - [ ] rotation slider
+ - [ ] Hotkeys infomation
+ - [ ] Physics breaks
+     - [ ]  Bounce variation: Can you try reducing the easing and see if you get desired results?
 
 
 General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [x] Really wants drag and drop files
+- [ ] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
+- [ ]  Transition to/Add Softbody Phyics
 - [ ] Azure TTS
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
@@ -164,17 +163,14 @@ General Priority
 
 Feedback
 - [X] We don't clear draws - known issue and according to internet it is Windows issue
-- [ ] Vale can't figure out how to open a project
-   - [ ] Have a spalsh dialog simular as Blender one
+   
 - [ ] Vale don't like tha they can select what mic is being used
 - [ ] Don't expect the placement of stuff (UI UX)
    - [ ] Swap description and value
    - [ ] Placement of bouncer options confusing
 - [ ] Really wants drag and drop files
-- [X] They REALLY expected That value bars were able to be clicked and dragged
+- 
 - [ ] Don't like the separation of windows.thinks that should be an option
-- [X] REALLY WANTS CLICK AND DRAG - covered in TODO
-- [X] Drag and drop files into the software - coverd in TODO
 
 - [ ] better compatibility for multiple windows, what I mean by this
       is, if I move the voice tuber application to another window, the
@@ -204,7 +200,7 @@ Feedback
       inflection. my guess the implementation would be when you’re
       done with the stream you could go back and clip sections where
       you’re happy, sad or mad, and then compile them together, and
-      that will train a little thingy,mabobber to understand
+      that will train a little thingymabobber to understand
       inflection, 10 tones, and be able to signal changes
 
 Completed
@@ -220,6 +216,17 @@ Completed
 - [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [x] (bug) changing the disk does not work
 - [x] (bug) .. is confusing
+- [x] (feature) undo
+- [x] drag&drop nodes in the hierarchy (REALLY WANTS CLICK AND DRAG)
+- [x] drag controls for move with gizmos (REALLY WANTS CLICK AND DRAG)
+- [x] Don't expect the placement of stuff (UI UX)
+   - [x] Swap description and value
+   - [x] Placement of bouncer options confusing
+- [x] (feature) each node can have different amount of bounce
+- [X] They REALLY expected That value bars were able to be clicked and dragged
+- [X] REALLY WANTS CLICK AND DRAG - covered in TODO
+- [X] Drag and drop files into the software - coverd in TODO
+- [x] Really wants drag and drop files
       
 9\. Unorgonized Ideas
 ---------------------
