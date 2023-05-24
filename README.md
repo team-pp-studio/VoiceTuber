@@ -162,7 +162,7 @@ General Priority
 - [ ] outdoor streaming from the phone wiht PNGTuber overlay
 - [ ] stream directly from VoiceTuber
 
-Vale's feedback
+Feedback
 - [X] We don't clear draws - known issue and according to internet it is Windows issue
 - [ ] Vale can't figure out how to open a project
    - [ ] Have a spalsh dialog simular as Blender one
@@ -175,6 +175,37 @@ Vale's feedback
 - [ ] Don't like the separation of windows.thinks that should be an option
 - [X] REALLY WANTS CLICK AND DRAG - covered in TODO
 - [X] Drag and drop files into the software - coverd in TODO
+
+- [ ] better compatibility for multiple windows, what I mean by this
+      is, if I move the voice tuber application to another window, the
+      eye tracking still follows the mouth but only around the first
+      window and it ends up just looking to the bottom left if I move
+      it to my second monitor (left monitor) (see screenshots, I know
+      it doesn't capture my mouse so it just highlighted the location
+      box instead to show where my mouse is and the task bar shows
+      what monitor I'm on)
+- [ ] have it so you can enter a value for rotation instead of a
+      slider... or at least a mouse tooltip that says "hold ctrl to
+      enter value"
+- [ ] different variations of bounce, I like the bounce but I really
+      only want the bounce once when I start talking and resetting
+      when I stop talking, hell it'd also be nice if I could customize
+      it so that if I was talking fast or excited or going high
+      pitched then there'd be more bounce frequency and otherwise less
+      bounce frequency again going based off what veadotube does is it
+      just has a minimum microphone range where if the input from the
+      microphone is above that then you're talking about if it's below
+      that then you're not talking
+- [ ] also physics breaks if you go too high with the values, luckily
+      it can be reset by unchecking and re-checking physics but again,
+      tooltip of some sort would be nice
+- [ ] Some sort of micro training, voice data to detect
+      expressions. It’s more than just weak words. It’s a voice
+      inflection. my guess the implementation would be when you’re
+      done with the stream you could go back and clip sections where
+      you’re happy, sad or mad, and then compile them together, and
+      that will train a little thingy,mabobber to understand
+      inflection, 10 tones, and be able to signal changes
 
 Completed
 - [x] (bug) there are some transparency issues
