@@ -152,12 +152,11 @@ General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
 - [x] Really wants drag and drop files
-- [ ] Azure TTS 
+- [ ] Azure TTS
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
       to have overshooting
-- [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model
-)
+- [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model)
 - [ ] twitch extention (triggers for bits)
 - [ ] TikTok companion app
 - [ ] outdoor streaming from the phone wiht PNGTuber overlay

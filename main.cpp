@@ -24,7 +24,7 @@
 #endif
 
 // Main code
-int main(int, char **)
+int main(int argc, char **argv)
 {
   // Setup SDL
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
@@ -189,7 +189,7 @@ int main(int, char **)
   window.getPosition(&originalX, &originalY);
   window.getSize(&width, &height);
 
-  App app;
+  auto app = App{argc, argv};
 
   // Main loop
   auto lastUpdate = std::chrono::high_resolution_clock::now();

@@ -27,6 +27,8 @@ private:
   std::shared_ptr<Twitch> twitch;
   std::shared_ptr<Font> font;
   std::vector<Msg> msgs;
+  Timer timer;
+  bool showChat = false;
 
   auto h() const -> float final;
   auto load(IStrm &) -> void final;

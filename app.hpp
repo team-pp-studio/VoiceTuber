@@ -2,6 +2,7 @@
 #include "audio-input.hpp"
 #include "audio-output.hpp"
 #include "dialog.hpp"
+#include "http-client.hpp"
 #include "lib.hpp"
 #include "mouse-tracking.hpp"
 #include "preferences.hpp"
@@ -18,7 +19,7 @@
 class App
 {
 public:
-  App();
+  App(int argc, char *argv[]);
   auto droppedFile(std::string) -> void;
   auto processIo() -> void;
   auto render(float dt) -> void;
@@ -40,6 +41,7 @@ private:
   AudioInput audioInput;
   MouseTracking mouseTracking;
   Lib lib;
+  HttpClient httpClient;
   Undo undo;
   Node *hovered = nullptr;
   Node *selected = nullptr;

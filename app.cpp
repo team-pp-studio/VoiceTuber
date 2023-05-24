@@ -24,9 +24,10 @@ static auto getProjMat() -> glm::mat4
   return glm::make_mat4(projMatData);
 }
 
-App::App()
+App::App(int argc, char *argv[])
   : audioInput(preferences.inputAudio, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     lib(preferences),
+    httpClient(uv),
     selectIco(lib.queryTex("engine:select.png", true)),
     translateIco(lib.queryTex("engine:transalte.png", true)),
     scaleIco(lib.queryTex("engine:scale.png", true)),
@@ -61,6 +62,12 @@ App::App()
   });
   saveFactory.reg<Chat>(
     [this](std::string name) { return std::make_unique<Chat>(lib, undo, uv, std::move(name)); });
+
+  if (argc == 2)
+  {
+    std::filesystem::current_path(argv[1]);
+    loadPrj();
+  }
 }
 
 auto App::render(float dt) -> void
@@ -329,6 +336,12 @@ auto App::renderUi(float /*dt*/) -> void
         ImGui::SetTooltip("Parent with below");
     }
     renderTree(*root);
+    if (ImGui::Button("Test Download"))
+    {
+      httpClient.get("https://mika.global", [](CURLcode code, int httpStatus, std::string /*playload*/) {
+        LOG("CURLcode", code, "httpStatus", httpStatus);
+      });
+    }
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
   }
   {

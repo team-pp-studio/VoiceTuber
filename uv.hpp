@@ -52,11 +52,12 @@ public:
 
   Uv();
   auto connect(const std::string &domain, const std::string &port, ConnectCb) -> int;
-  auto tick() -> int;
   auto getTimer() -> Timer;
+  auto loop() const -> decltype(uv_default_loop());
+  auto tick() -> int;
 
 private:
-  decltype(uv_default_loop()) loop;
+  decltype(uv_default_loop()) loop_;
 
   auto onConnected(int status, Tcp, ConnectCb) -> void;
   auto onResolved(int status, struct addrinfo *res, ConnectCb) -> void;

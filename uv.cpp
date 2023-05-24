@@ -70,14 +70,14 @@ auto Tcp::onRead(ssize_t nread, const uv_buf_t *aBuf) -> void
   readCb(0, std::string{aBuf->base, aBuf->base + nread});
 }
 
-Uv::Uv() : loop(uv_default_loop())
+Uv::Uv() : loop_(uv_default_loop())
 {
-  loop->data = this;
+  loop_->data = this;
 }
 
 auto Uv::tick() -> int
 {
-  return uv_run(loop, UV_RUN_NOWAIT);
+  return uv_run(loop_, UV_RUN_NOWAIT);
 }
 
 namespace
@@ -110,7 +110,7 @@ auto Uv::connect(const std::string &domain, const std::string &port, ConnectCb c
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_flags = 0;
   return uv_getaddrinfo(
-    loop,
+    loop_,
     resolver,
     [](uv_getaddrinfo_t *req, int status, struct addrinfo *res) -> void {
       auto ctx = static_cast<ConnectCtx *>(req->data);
@@ -141,7 +141,7 @@ auto Uv::onResolved(int status, struct addrinfo *res, ConnectCb cb) -> void
   auto connectCtx = new ConnectCtx2;
   connectReq->data = connectCtx;
   connectCtx->uv = this;
-  connectCtx->tcp = Tcp{loop};
+  connectCtx->tcp = Tcp{loop_};
 
   auto s = uv_tcp_connect(connectReq,
                           connectCtx->tcp.socket.get(),
@@ -171,7 +171,7 @@ auto Uv::onConnected(int status, Tcp tcp, ConnectCb cb) -> void
 
 auto Uv::getTimer() -> Timer
 {
-  return Timer{loop};
+  return Timer{loop_};
 }
 
 Tcp::~Tcp()
@@ -223,4 +223,9 @@ auto Timer::stop() -> int
 Timer::~Timer()
 {
   stop();
+}
+
+auto Uv::loop() const -> decltype(uv_default_loop())
+{
+  return loop_;
 }

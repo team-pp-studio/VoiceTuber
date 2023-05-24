@@ -9,7 +9,8 @@ Chat::Chat(class Lib &aLib, Undo &aUndo, class Uv &uv, std::string n)
   : Node(aLib, aUndo, n),
     lib(aLib),
     twitch(aLib.queryTwitch(uv, n)),
-    font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize))
+    font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize)),
+    timer(uv.getTimer())
 {
   twitch->reg(*this);
 }
@@ -21,6 +22,9 @@ Chat::~Chat()
 
 auto Chat::onMsg(Msg val) -> void
 {
+  showChat = true;
+  timer.stop();
+  timer.start([this]() { showChat = false; }, 30'000, false /*repeat*/);
   msgs.emplace_back(std::move(val));
 }
 
@@ -41,8 +45,12 @@ auto Chat::load(IStrm &strm) -> void
 
 auto Chat::render(float dt, Node *hovered, Node *selected) -> void
 {
+  if (!showChat)
+  {
+    Node::render(dt, hovered, selected);
+    return;
+  }
   auto y = 0.f;
-
   for (auto it = msgs.rbegin(); it != msgs.rend(); ++it)
   {
     const auto displayNameDim = font->getSize(it->displayName);
