@@ -19,7 +19,7 @@ public:
   HttpClient(const HttpClient &) = delete;
   ~HttpClient();
   auto get(const std::string &url, Cb cb, const Headers &headers = Headers{}) -> void;
-  auto post(const std::string &url, Cb cb, const Headers &chunks = Headers{}) -> void;
+  auto post(const std::string &url, std::string post, Cb cb, const Headers &chunks = Headers{}) -> void;
 
 private:
   std::reference_wrapper<Uv> uv;
@@ -34,11 +34,14 @@ private:
   struct CurlContext
   {
     HttpClient *self;
-    std::string payload;
+    std::string payloadIn;
+    std::string payloadOut;
     curl_slist *headers = nullptr;
     Cb cb;
     auto write(char *in, unsigned size, unsigned nmemb) -> size_t;
     static auto write_(char *in, unsigned size, unsigned nmemb, void *ctx) -> size_t;
+    auto read(char *in, unsigned size, unsigned nmemb) -> size_t;
+    static auto read_(char *out, unsigned size, unsigned nmemb, void *ctx) -> size_t;
     auto done() -> void;
   };
   auto checkMultiInfo() -> void;

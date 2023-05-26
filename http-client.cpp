@@ -1,4 +1,5 @@
 #include "http-client.hpp"
+#include <algorithm>
 #include <log/log.hpp>
 
 namespace
@@ -132,12 +133,12 @@ auto HttpClient::checkMultiInfo() -> void
 
       char *doneUrl;
       curl_easy_getinfo(easyHandle, CURLINFO_EFFECTIVE_URL, &doneUrl);
-      LOG("DONE", doneUrl);
       CurlContext *ctx;
       curl_easy_getinfo(easyHandle, CURLINFO_PRIVATE, &ctx);
       long codep;
       curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &codep);
-      ctx->cb(CURLE_OK, codep, std::move(ctx->payload));
+      ctx->cb(CURLE_OK, codep, std::move(ctx->payloadOut));
+      curl_slist_free_all(ctx->headers);
       delete ctx;
       curl_multi_remove_handle(multiHandle, easyHandle);
       curl_easy_cleanup(easyHandle);
@@ -205,18 +206,18 @@ auto HttpClient::get(const std::string &url, Cb cb, const Headers &headers) -> v
   auto ctx = new CurlContext;
   ctx->self = this;
   ctx->cb = std::move(cb);
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
   curl_easy_setopt(handle, CURLOPT_PRIVATE, ctx);
+  curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, CurlContext::write_);
   curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
   if (!headers.empty())
   {
     for (const auto &h : headers)
-      ctx->headers = curl_slist_append(ctx->headers, (h.first + ": " + h.second).c_str());
+      ctx->headers = curl_slist_append(
+        ctx->headers, (h.first + ":" + (!h.second.empty() ? (" " + h.second) : "")).c_str());
     curl_easy_setopt(handle, CURLOPT_HTTPHEADER, ctx->headers);
   }
   curl_multi_add_handle(multiHandle, handle);
-  LOG("Added download:", url);
 }
 
 auto HttpClient::CurlContext::write_(char *in, unsigned size, unsigned nmemb, void *ctx) -> size_t
@@ -226,8 +227,45 @@ auto HttpClient::CurlContext::write_(char *in, unsigned size, unsigned nmemb, vo
 
 auto HttpClient::CurlContext::write(char *in, unsigned size, unsigned nmemb) -> size_t
 {
-  payload += std::string(in, size * nmemb);
+  payloadOut += std::string_view{in, size * nmemb};
   return size * nmemb;
 }
 
-auto HttpClient::post(const std::string &, Cb, const Headers &) -> void {}
+auto HttpClient::CurlContext::read(char *out, unsigned size, unsigned nmemb) -> size_t
+{
+  const auto ret = std::min(static_cast<unsigned>(payloadOut.size()), size * nmemb);
+  std::copy(std::begin(payloadOut), std::begin(payloadOut) + ret, out);
+  payloadOut.erase(0, ret);
+  return ret;
+}
+
+auto HttpClient::CurlContext::read_(char *out, unsigned size, unsigned nmemb, void *ctx) -> size_t
+{
+  return static_cast<CurlContext *>(ctx)->read(out, size, nmemb);
+}
+
+auto HttpClient::post(const std::string &url, std::string post, Cb cb, const Headers &headers) -> void
+{
+  auto handle = curl_easy_init();
+  auto ctx = new CurlContext;
+  ctx->self = this;
+  ctx->cb = std::move(cb);
+  ctx->payloadOut = std::move(post);
+  curl_easy_setopt(handle, CURLOPT_PRIVATE, ctx);
+  curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
+  curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, CurlContext::write_);
+  curl_easy_setopt(handle, CURLOPT_READDATA, ctx);
+  curl_easy_setopt(handle, CURLOPT_READFUNCTION, CurlContext::read_);
+  curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(handle, CURLOPT_POST, 1L);
+  if (!headers.empty())
+  {
+    for (const auto &h : headers)
+
+      ctx->headers = curl_slist_append(
+        ctx->headers, (h.first + ":" + (!h.second.empty() ? (" " + h.second) : "")).c_str());
+    curl_easy_setopt(handle, CURLOPT_HTTPHEADER, ctx->headers);
+  }
+
+  curl_multi_add_handle(multiHandle, handle);
+}

@@ -1,14 +1,14 @@
 #include "audio-level.hpp"
-#include "audio-input.hpp"
+#include "audio-in.hpp"
 
-AudioLevel::AudioLevel(class AudioInput &aAudioInput) : audioInput(aAudioInput)
+AudioLevel::AudioLevel(class AudioIn &aAudioIn) : audioIn(aAudioIn)
 {
-  audioInput.get().reg(*this);
+  audioIn.get().reg(*this);
 }
 
 AudioLevel::~AudioLevel()
 {
-  audioInput.get().unreg(*this);
+  audioIn.get().unreg(*this);
 }
 
 auto AudioLevel::getLevel() const -> float
@@ -25,4 +25,9 @@ auto AudioLevel::ingest(Wav wav) -> void
     auto curLevel = std::max(0.f, 0.14f * log(1.f * v / 0x7fff) + 1.f);
     level += 0.002f * (curLevel - level);
   }
+}
+
+auto AudioLevel::sampleRate() const -> int
+{
+  return audioIn.get().sampleRate();
 }

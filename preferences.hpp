@@ -11,6 +11,7 @@ public:
 
   std::string twitchUser = "mika314";
   std::string twitchKey;
-  std::string outputAudio = DefaultAudio;
-  std::string inputAudio = DefaultAudio;
+  std::string audioOut = DefaultAudio;
+  std::string audioIn = DefaultAudio;
+  std::string azureKey;
 };

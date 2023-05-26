@@ -12,7 +12,7 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Bouncer2";
-  Bouncer2(Lib &, Undo &, class AudioInput &, std::string name);
+  Bouncer2(Lib &, Undo &, class AudioIn &, std::string name);
 
 private:
   float strength = 100.f;

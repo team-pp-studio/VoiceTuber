@@ -1,6 +1,6 @@
 #include "preferences-dialog.hpp"
-#include "audio-input.hpp"
-#include "audio-output.hpp"
+#include "audio-in.hpp"
+#include "audio-out.hpp"
 #include "preferences.hpp"
 #include "ui.hpp"
 #include <SDL.h>
@@ -8,14 +8,14 @@
 #include <log/log.hpp>
 
 PreferencesDialog::PreferencesDialog(class Preferences &preferences,
-                                     class AudioOutput &aAudioOutput,
-                                     class AudioInput &aAudioInput,
+                                     class AudioOut &aAudioOut,
+                                     class AudioIn &aAudioIn,
                                      Cb cb)
   : Dialog("Preferences", std::move(cb)),
     preferences(preferences),
-    audioOutput(aAudioOutput),
-    audioInput(aAudioInput),
-    audioLevel(aAudioInput)
+    audioOut(aAudioOut),
+    audioIn(aAudioIn),
+    audioLevel(aAudioIn)
 {
 }
 
@@ -60,6 +60,18 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
+      ImGui::Text("Azure Key:");
+      ImGui::TableNextColumn();
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 40.f);
+      char buf[1024];
+      strcpy(buf, preferences.get().azureKey.data());
+      if (ImGui::InputText("##Azure TTS Key", buf, sizeof(buf), ImGuiInputTextFlags_Password))
+        preferences.get().azureKey = buf;
+      ImGui::Text("e.g.: 1e3b7527b4e3ec61dee69a83979ef9d6");
+      ImGui::PopItemWidth();
+    }
+    {
+      ImGui::TableNextColumn();
       ImGui::Text("");
       ImGui::TableNextColumn();
     }
@@ -73,19 +85,19 @@ auto PreferencesDialog::internalDraw() -> DialogState
       ImGui::Text("Output Device:");
       ImGui::TableNextColumn();
       {
-        auto combo = Ui::Combo("##Output Device", preferences.get().outputAudio.c_str(), 0);
+        auto combo = Ui::Combo("##Output Device", preferences.get().audioOut.c_str(), 0);
         if (combo)
         {
           if (ImGui::Selectable("Default##Output",
-                                preferences.get().outputAudio == Preferences::DefaultAudio))
-            updateOutputAudio(Preferences::DefaultAudio);
+                                preferences.get().audioOut == Preferences::DefaultAudio))
+            updateAudioOut(Preferences::DefaultAudio);
           const auto n = SDL_GetNumAudioDevices(0 /*output*/);
           for (auto i = 0; i < n; ++i)
           {
             auto dev = SDL_GetAudioDeviceName(i, 0 /*output*/);
             if (ImGui::Selectable((dev + std::string{"##Output"}).c_str(),
-                                  preferences.get().outputAudio == dev))
-              updateOutputAudio(dev);
+                                  preferences.get().audioOut == dev))
+              updateAudioOut(dev);
           }
         }
       }
@@ -95,19 +107,19 @@ auto PreferencesDialog::internalDraw() -> DialogState
       ImGui::Text("Input Device:");
       ImGui::TableNextColumn();
       {
-        auto combo = Ui::Combo("##Input Device", preferences.get().inputAudio.c_str(), 0);
+        auto combo = Ui::Combo("##Input Device", preferences.get().audioIn.c_str(), 0);
         if (combo)
         {
           if (ImGui::Selectable("Default##Input",
-                                preferences.get().inputAudio == Preferences::DefaultAudio))
-            updateInputAudio(Preferences::DefaultAudio);
+                                preferences.get().audioIn == Preferences::DefaultAudio))
+            updateAudioIn(Preferences::DefaultAudio);
           const auto n = SDL_GetNumAudioDevices(1 /*input*/);
           for (auto i = 0; i < n; ++i)
           {
             auto dev = SDL_GetAudioDeviceName(i, 1 /*input*/);
             if (ImGui::Selectable((dev + std::string{"##Input"}).c_str(),
-                                  preferences.get().inputAudio == dev))
-              updateInputAudio(dev);
+                                  preferences.get().audioIn == dev))
+              updateAudioIn(dev);
           }
         }
       }
@@ -126,14 +138,14 @@ auto PreferencesDialog::internalDraw() -> DialogState
   return DialogState::active;
 }
 
-auto PreferencesDialog::updateOutputAudio(std::string v) -> void
+auto PreferencesDialog::updateAudioOut(std::string v) -> void
 {
-  preferences.get().outputAudio = std::move(v);
-  audioOutput.get().updateDevice(preferences.get().outputAudio);
+  preferences.get().audioOut = std::move(v);
+  audioOut.get().updateDevice(preferences.get().audioOut);
 }
 
-auto PreferencesDialog::updateInputAudio(std::string v) -> void
+auto PreferencesDialog::updateAudioIn(std::string v) -> void
 {
-  preferences.get().inputAudio = std::move(v);
-  audioInput.get().updateDevice(preferences.get().inputAudio);
+  preferences.get().audioIn = std::move(v);
+  audioIn.get().updateDevice(preferences.get().audioIn);
 }

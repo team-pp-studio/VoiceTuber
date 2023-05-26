@@ -1,6 +1,7 @@
 #pragma once
-#include "audio-input.hpp"
-#include "audio-output.hpp"
+#include "audio-in.hpp"
+#include "audio-out.hpp"
+#include "azure-tts.hpp"
 #include "dialog.hpp"
 #include "http-client.hpp"
 #include "lib.hpp"
@@ -37,8 +38,8 @@ private:
   Preferences preferences;
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
-  AudioOutput audioOutput;
-  AudioInput audioInput;
+  AudioOut audioOut;
+  AudioIn audioIn;
   MouseTracking mouseTracking;
   Lib lib;
   HttpClient httpClient;

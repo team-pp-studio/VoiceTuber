@@ -12,7 +12,7 @@ public:
   Wav2Visemes();
   ~Wav2Visemes() final;
   auto ingest(Wav) -> void final;
-  auto sampleRate() const -> int;
+  auto sampleRate() const -> int final;
   auto frameSize() const -> int;
   auto reg(VisemesSink &) -> void;
   auto unreg(VisemesSink &) -> void;

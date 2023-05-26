@@ -5,15 +5,15 @@
 class PreferencesDialog final : public Dialog
 {
 public:
-  PreferencesDialog(class Preferences &, class AudioOutput &, class AudioInput &, Cb);
+  PreferencesDialog(class Preferences &, class AudioOut &, class AudioIn &, Cb);
 
 private:
   std::reference_wrapper<Preferences> preferences;
-  std::reference_wrapper<AudioOutput> audioOutput;
-  std::reference_wrapper<AudioInput> audioInput;
+  std::reference_wrapper<AudioOut> audioOut;
+  std::reference_wrapper<AudioIn> audioIn;
   AudioLevel audioLevel;
 
   auto internalDraw() -> DialogState final;
-  auto updateInputAudio(std::string) -> void;
-  auto updateOutputAudio(std::string) -> void;
+  auto updateAudioIn(std::string) -> void;
+  auto updateAudioOut(std::string) -> void;
 };

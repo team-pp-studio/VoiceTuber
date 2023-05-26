@@ -1,12 +1,12 @@
 #include "bouncer.hpp"
-#include "audio-input.hpp"
+#include "audio-in.hpp"
 #include "ui.hpp"
 #include <SDL_opengl.h>
 #include <limits>
 #include <log/log.hpp>
 
-Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioInput &audioInput)
-  : Node(lib, aUndo, "bouncer"), audioLevel(audioInput)
+Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioIn &audioIn)
+  : Node(lib, aUndo, "bouncer"), audioLevel(audioIn)
 {
 }
 

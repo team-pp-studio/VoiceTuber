@@ -25,7 +25,8 @@ static auto getProjMat() -> glm::mat4
 }
 
 App::App(int argc, char *argv[])
-  : audioInput(preferences.inputAudio, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
+  : audioOut(preferences.audioOut),
+    audioIn(preferences.audioIn, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     lib(preferences),
     httpClient(uv),
     selectIco(lib.queryTex("engine:select.png", true)),
@@ -45,11 +46,11 @@ App::App(int argc, char *argv[])
 {
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
-  audioInput.reg(wav2Visemes);
+  audioIn.reg(wav2Visemes);
   saveFactory.reg<Bouncer>(
-    [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioInput); });
+    [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioIn); });
   saveFactory.reg<Bouncer2>([this](std::string name) {
-    return std::make_unique<Bouncer2>(lib, undo, audioInput, std::move(name));
+    return std::make_unique<Bouncer2>(lib, undo, audioIn, std::move(name));
   });
   saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib, undo); });
   saveFactory.reg<Mouth>([this](std::string name) {
@@ -60,8 +61,9 @@ App::App(int argc, char *argv[])
   saveFactory.reg<Eye>([this](std::string name) {
     return std::make_unique<Eye>(mouseTracking, lib, undo, std::move(name));
   });
-  saveFactory.reg<Chat>(
-    [this](std::string name) { return std::make_unique<Chat>(lib, undo, uv, std::move(name)); });
+  saveFactory.reg<Chat>([this](std::string name) {
+    return std::make_unique<Chat>(lib, undo, uv, httpClient, audioOut, std::move(name));
+  });
 
   if (argc == 2)
   {
@@ -268,11 +270,10 @@ auto App::renderUi(float /*dt*/) -> void
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Preferences..."))
-        dialog =
-          std::make_unique<PreferencesDialog>(preferences, audioOutput, audioInput, [this](bool r) {
-            if (r)
-              lib.flush();
-          });
+        dialog = std::make_unique<PreferencesDialog>(preferences, audioOut, audioIn, [this](bool r) {
+          if (r)
+            lib.flush();
+        });
     }
   }
 
@@ -336,12 +337,6 @@ auto App::renderUi(float /*dt*/) -> void
         ImGui::SetTooltip("Parent with below");
     }
     renderTree(*root);
-    if (ImGui::Button("Test Download"))
-    {
-      httpClient.get("https://mika.global", [](CURLcode code, int httpStatus, std::string /*playload*/) {
-        LOG("CURLcode", code, "httpStatus", httpStatus);
-      });
-    }
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
   }
   {
@@ -524,7 +519,7 @@ auto App::cancel() -> void
 
 auto App::tick(float /*dt*/) -> void
 {
-  audioInput.tick();
+  audioIn.tick();
   uv.tick();
 
   if (!root)

@@ -5,9 +5,16 @@
 #include <log/log.hpp>
 #include <sstream>
 
-Chat::Chat(class Lib &aLib, Undo &aUndo, class Uv &uv, std::string n)
+Chat::Chat(class Lib &aLib,
+           Undo &aUndo,
+           class Uv &uv,
+           HttpClient &aHttpClient,
+           AudioSink &aAudioSink,
+           std::string n)
   : Node(aLib, aUndo, n),
     lib(aLib),
+    httpClient(aHttpClient),
+    audioSink(aAudioSink),
     twitch(aLib.queryTwitch(uv, n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize)),
     timer(uv.getTimer())
@@ -25,6 +32,8 @@ auto Chat::onMsg(Msg val) -> void
   showChat = true;
   timer.stop();
   timer.start([this]() { showChat = false; }, 30'000, false /*repeat*/);
+  if (azureTts)
+    azureTts->say("en-GB-MiaNeural", val.displayName + " said " + val.msg);
   msgs.emplace_back(std::move(val));
 }
 
@@ -41,6 +50,8 @@ auto Chat::load(IStrm &strm) -> void
   Node::load(strm);
   font =
     lib.get().queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+  if (tts)
+    azureTts = lib.get().queryAzureTts(httpClient, audioSink);
 }
 
 auto Chat::render(float dt, Node *hovered, Node *selected) -> void
@@ -143,6 +154,29 @@ auto Chat::renderUi() -> void
         font = lib.get().queryFont(
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
       });
+  ImGui::TableNextColumn();
+  Ui::textRj("Azure TTS");
+  ImGui::TableNextColumn();
+  {
+    auto oldTts = tts;
+    tts = static_cast<bool>(azureTts);
+    if (ImGui::Checkbox("##AzureTTS", &tts))
+    {
+      undo.get().record(
+        [this, newTts = tts]() {
+          if (newTts)
+            azureTts = lib.get().queryAzureTts(httpClient, audioSink);
+          else
+            azureTts = nullptr;
+        },
+        [this, oldTts]() {
+          if (oldTts)
+            azureTts = lib.get().queryAzureTts(httpClient, audioSink);
+          else
+            azureTts = nullptr;
+        });
+    }
+  }
 
   if (!twitch->isConnected())
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.7f, 0.7f, 1.0f));

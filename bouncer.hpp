@@ -14,7 +14,7 @@ public:
 #undef SER_PROP_LIST
 
   static constexpr const char *className = "Bouncer";
-  Bouncer(Lib &, Undo &, class AudioInput &);
+  Bouncer(Lib &, Undo &, class AudioIn &);
 
 private:
   float strength = 100.f;
