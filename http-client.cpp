@@ -39,7 +39,7 @@ auto HttpClient::socketFunc_(CURL *easy, curl_socket_t s, int action, void *user
 
 HttpClient::~HttpClient()
 {
-  curl_multi_cleanup(multiHandle);
+  // TODO-Mika cleanup curl_multi_cleanup(multiHandle);
 }
 
 auto HttpClient::socketFunc(CURL *, curl_socket_t s, int action, void *socketp) -> int

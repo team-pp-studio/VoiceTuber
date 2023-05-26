@@ -95,7 +95,6 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
     texturesCache.erase(cacheAge.front());
     cacheAge.erase(std::begin(cacheAge));
   }
-  LOG(cacheAge.size(), texturesCache.size());
   return tmp.first->second.first;
 }
 

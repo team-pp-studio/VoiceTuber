@@ -12,7 +12,8 @@ public:
 #define SER_PROP_LIST \
   SER_PROP(ptsize);   \
   SER_PROP(size);     \
-  SER_PROP(tts);
+  SER_PROP(tts);      \
+  SER_PROP(voicesMap);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
@@ -25,6 +26,7 @@ private:
   int ptsize = 40;
   glm::vec2 size = {400.f, 200.f};
   std::reference_wrapper<Lib> lib;
+  std::reference_wrapper<Uv> uv;
   std::reference_wrapper<HttpClient> httpClient;
   std::reference_wrapper<AudioSink> audioSink;
   std::shared_ptr<Twitch> twitch;
@@ -34,6 +36,11 @@ private:
   bool showChat = false;
   bool tts = false;
   std::shared_ptr<AzureTts> azureTts;
+  std::vector<std::string> voices;
+  std::string lastName;
+  std::unordered_map<std::string, std::string> voicesMap;
+  std::string chatterName;
+  std::string chatterVoice;
 
   auto h() const -> float final;
   auto load(IStrm &) -> void final;
@@ -43,4 +50,5 @@ private:
   auto save(OStrm &) const -> void final;
   auto w() const -> float final;
   auto wrapText(const std::string &text, float initOffset) const -> std::vector<std::string>;
+  auto getVoice(const std::string &name) const -> std::string;
 };

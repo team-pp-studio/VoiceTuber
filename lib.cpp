@@ -67,12 +67,12 @@ auto Lib::flush() -> void
     aTts->updateKey(preferences.get().azureKey);
 }
 
-auto Lib::queryAzureTts(class HttpClient &httpClient, class AudioSink &audioSink)
+auto Lib::queryAzureTts(class Uv &uv, class HttpClient &httpClient, class AudioSink &audioSink)
   -> std::shared_ptr<AzureTts>
 {
   if (auto ret = azureTts.lock())
     return ret;
-  auto ret = std::make_shared<AzureTts>(preferences.get().azureKey, httpClient, audioSink);
+  auto ret = std::make_shared<AzureTts>(uv, preferences.get().azureKey, httpClient, audioSink);
   azureTts = ret;
   return ret;
 }

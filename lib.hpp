@@ -15,7 +15,7 @@ public:
   auto queryFont(const std::string &, int size) -> std::shared_ptr<Font>;
   auto queryTex(const std::string &, bool isUi = false) -> std::shared_ptr<const Texture>;
   auto queryTwitch(class Uv &, const std::string &) -> std::shared_ptr<Twitch>;
-  auto queryAzureTts(class HttpClient &, class AudioSink &) -> std::shared_ptr<AzureTts>;
+  auto queryAzureTts(class Uv &, class HttpClient &, class AudioSink &) -> std::shared_ptr<AzureTts>;
 
 private:
   std::reference_wrapper<Preferences> preferences;
