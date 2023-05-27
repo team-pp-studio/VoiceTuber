@@ -93,14 +93,14 @@ auto AnimSprite::renderUi() -> void
     Ui::textRj("End");
     ImGui::TableNextColumn();
     Ui::dragFloat(undo,
-                  "##XEnd",
+                  "X##End",
                   end.x,
                   1.f,
                   -std::numeric_limits<float>::max(),
                   std::numeric_limits<float>::max(),
                   "%.1f");
     Ui::dragFloat(undo,
-                  "##YEnd",
+                  "Y##End",
                   end.y,
                   1.f,
                   -std::numeric_limits<float>::max(),

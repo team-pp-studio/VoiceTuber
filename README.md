@@ -140,20 +140,18 @@ considered to further refine and improve the application.
 --------
 Top Priority
  - [ ] better compatibility for multiple windows
- - [ ] rotation slider
+ - [x] rotation slider
  - [ ] Hotkeys infomation
  - [ ] Physics breaks
-     - [ ]  Bounce variation: Can you try reducing the easing and see if you get desired results?
-
 
 General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
 - [ ] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
 - [ ]  Transition to/Add Softbody Phyics
-- [ ] Azure TTS
+- [x] Azure TTS
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
-- [ ] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
+- [x] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
       to have overshooting
 - [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model)
 - [ ] twitch extention (triggers for bits)
@@ -180,7 +178,7 @@ Feedback
       it doesn't capture my mouse so it just highlighted the location
       box instead to show where my mouse is and the task bar shows
       what monitor I'm on)
-- [ ] have it so you can enter a value for rotation instead of a
+- [x] have it so you can enter a value for rotation instead of a
       slider... or at least a mouse tooltip that says "hold ctrl to
       enter value"
 - [ ] different variations of bounce, I like the bounce but I really

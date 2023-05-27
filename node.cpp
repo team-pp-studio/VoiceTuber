@@ -105,14 +105,14 @@ auto Node::renderUi() -> void
   ImGui::TableNextColumn();
 
   Ui::dragFloat(undo,
-                "##XLoc",
+                "X##XLoc",
                 loc.x,
                 1.f,
                 -std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max(),
                 "%.1f");
   Ui::dragFloat(undo,
-                "##YLoc",
+                "Y##YLoc",
                 loc.y,
                 1.f,
                 -std::numeric_limits<float>::max(),
@@ -127,8 +127,8 @@ auto Node::renderUi() -> void
       ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
     auto width = w();
     auto height = h();
-    ImGui::InputFloat("##Width", &width, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
-    ImGui::InputFloat("##Height", &height, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputFloat("W##Width", &width, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputFloat("H##Height", &height, 0.f, 0.f, "%.1f", ImGuiInputTextFlags_ReadOnly);
     ImGui::PopStyleColor(); // Restore the original text color
   }
 
@@ -164,7 +164,7 @@ auto Node::renderUi() -> void
   else
   {
     Ui::dragFloat(undo,
-                  "##X",
+                  "X##X",
                   scale.x,
                   0.01f,
                   -std::numeric_limits<float>::max(),
@@ -180,7 +180,7 @@ auto Node::renderUi() -> void
       }
     }
     Ui::dragFloat(undo,
-                  "##Y",
+                  "Y##Y",
                   scale.y,
                   0.01f,
                   -std::numeric_limits<float>::max(),
@@ -195,14 +195,14 @@ auto Node::renderUi() -> void
   Ui::textRj("Pivot");
   ImGui::TableNextColumn();
   Ui::dragFloat(undo,
-                "##XPivot",
+                "X##XPivot",
                 pivot_.x,
                 1.f,
                 -std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max(),
                 "%.1f");
   Ui::dragFloat(undo,
-                "##YPivot",
+                "Y##YPivot",
                 pivot_.y,
                 1.f,
                 -std::numeric_limits<float>::max(),
@@ -245,7 +245,7 @@ auto Node::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Rotation");
   ImGui::TableNextColumn();
-  Ui::sliderFloat(undo, "##Rotation", rot, -360.0f, 360.0f, "%.1f");
+  Ui::dragFloat(undo, "°##Rotation", rot, 1.f, -360.0f, 360.0f, "%.1f");
 }
 
 static glm::vec3 mouseToModelViewCoords(glm::vec2 mouse,

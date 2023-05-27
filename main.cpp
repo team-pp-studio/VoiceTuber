@@ -71,6 +71,10 @@ int main(int argc, char **argv)
 
   auto window =
     sdl::Window{"VoiceTuber", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, window_flags};
+
+  auto appIco = sdl::Surface("assets/app-icon.bmp");
+  window.setIcon(appIco.get());
+
   SDL_GLContext gl_context = SDL_GL_CreateContext(window.get());
   SDL_GL_MakeCurrent(window.get(), gl_context);
 
@@ -224,7 +228,6 @@ int main(int argc, char **argv)
           app.done = true;
         else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
         {
-          LOG("minimized", app.isMinimized);
           if (!app.isMinimized)
           {
             window.restore();

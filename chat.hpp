@@ -6,7 +6,7 @@
 #include "twitch.hpp"
 #include <memory>
 
-class Chat final : public Node, public TwitchSink
+class Chat : public Node, public TwitchSink
 {
 public:
 #define SER_PROP_LIST \
@@ -20,7 +20,7 @@ public:
   static constexpr const char *className = "Chat";
 
   Chat(Lib &, Undo &, class Uv &, class HttpClient &, class AudioSink &, std::string name);
-  ~Chat() final;
+  ~Chat() override;
 
 private:
   int ptsize = 40;
@@ -41,14 +41,17 @@ private:
   std::unordered_map<std::string, std::string> voicesMap;
   std::string chatterName;
   std::string chatterVoice;
-  int hideChatSec = 0;
 
+protected:
+  int hideChatSec = 0;
+  auto load(IStrm &) -> void override;
+  auto save(OStrm &) const -> void override;
+
+private:
   auto h() const -> float final;
-  auto load(IStrm &) -> void final;
   auto onMsg(Msg) -> void final;
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
-  auto save(OStrm &) const -> void final;
   auto w() const -> float final;
   auto wrapText(const std::string &text, float initOffset) const -> std::vector<std::string>;
   auto getVoice(const std::string &name) const -> std::string;

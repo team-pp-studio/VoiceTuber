@@ -233,14 +233,14 @@ auto Chat::renderUi() -> void
   Ui::textRj("Size");
   ImGui::TableNextColumn();
   Ui::dragFloat(undo,
-                "##width",
+                "W##WidthEd",
                 size.x,
                 1.f,
                 -std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max(),
                 "%.1f");
   Ui::dragFloat(undo,
-                "##Height",
+                "H##HeightEd",
                 size.y,
                 1.f,
                 -std::numeric_limits<float>::max(),
@@ -264,9 +264,9 @@ auto Chat::renderUi() -> void
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
       });
   ImGui::TableNextColumn();
-  Ui::textRj("Hide chat in, sec");
+  Ui::textRj("Hide Time");
   ImGui::TableNextColumn();
-  Ui::inputInt(undo, "##Hide chat in, sec", hideChatSec);
+  Ui::inputInt(undo, "s##Hide Chat", hideChatSec);
   ImGui::TableNextColumn();
   Ui::textRj("Azure TTS");
   ImGui::TableNextColumn();

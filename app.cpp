@@ -4,6 +4,7 @@
 #include "bouncer.hpp"
 #include "bouncer2.hpp"
 #include "channel-dialog.hpp"
+#include "chat-v2.hpp"
 #include "chat.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
@@ -63,6 +64,9 @@ App::App(int argc, char *argv[])
   });
   saveFactory.reg<Chat>([this](std::string name) {
     return std::make_unique<Chat>(lib, undo, uv, httpClient, audioOut, std::move(name));
+  });
+  saveFactory.reg<ChatV2>([this](std::string name) {
+    return std::make_unique<ChatV2>(lib, undo, uv, httpClient, audioOut, std::move(name));
   });
 
   if (argc == 2)
@@ -257,7 +261,7 @@ auto App::renderUi(float /*dt*/) -> void
       if (ImGui::MenuItem("Add Twitch Chat..."))
         dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
           if (r)
-            addNode(Chat::className, channel);
+            addNode(ChatV2::className, channel);
         });
       if (ImGui::MenuItem("Add Bouncer"))
         addNode(Bouncer2::className, "bouncer");
