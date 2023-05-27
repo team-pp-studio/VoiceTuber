@@ -1,9 +1,13 @@
 #include "chat.hpp"
+#include "audio-sink.hpp"
 #include "lib.hpp"
+#include "no-voice.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
 #include <log/log.hpp>
 #include <sstream>
+
+static const char *mute = "Mute";
 
 Chat::Chat(class Lib &aLib,
            Undo &aUndo,
@@ -101,24 +105,35 @@ auto Chat::onMsg(Msg val) -> void
 {
   showChat = true;
   timer.stop();
-  timer.start([this]() { showChat = false; }, 30'000, false /*repeat*/);
+  if (hideChatSec > 0)
+    timer.start([this]() { showChat = false; }, hideChatSec * 1000);
   if (azureTts)
   {
     const auto name = val.displayName;
     const auto text = val.msg;
     const auto isMe = false; // val.isMe;
     const auto supressName = (lastName == name) && !isMe;
-    azureTts->say(getVoice(name),
-                  (!supressName ? (escName(name) + " " + getDialogLine(text, isMe) + " ") : "") +
-                    dedup(text));
+    const auto voice = getVoice(name);
+    if (voice != mute)
+      azureTts->say(voice,
+                    (!supressName ? (escName(name) + " " + getDialogLine(text, isMe) + " ") : "") +
+                      dedup(text));
+    else
+      audioSink.get().ingest(noVoice());
     lastName = name;
   }
   msgs.emplace_back(std::move(val));
 }
 
+static auto toLower(std::string v) -> std::string
+{
+  std::transform(v.begin(), v.end(), v.begin(), [](unsigned char c) { return std::tolower(c); });
+  return v;
+}
+
 auto Chat::getVoice(const std::string &n) const -> std::string
 {
-  auto it = voicesMap.find(n);
+  auto it = voicesMap.find(toLower(n));
   if (it != std::end(voicesMap))
     return it->second;
   return voices[(std::hash<std::string>()(n) ^ 1) % voices.size()];
@@ -249,6 +264,10 @@ auto Chat::renderUi() -> void
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
       });
   ImGui::TableNextColumn();
+  Ui::textRj("Hide chat in, sec");
+  ImGui::TableNextColumn();
+  Ui::inputInt(undo, "##Hide chat in, sec", hideChatSec);
+  ImGui::TableNextColumn();
   Ui::textRj("Azure TTS");
   ImGui::TableNextColumn();
   {
@@ -289,12 +308,17 @@ auto Chat::renderUi() -> void
   ImGui::Text("Voices Mapping");
   ImGui::TableNextColumn();
 
-  for (const auto &v : voicesMap)
   {
-    ImGui::TableNextColumn();
-    Ui::textRj(v.first.c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", v.second.c_str());
+    auto lines = std::vector<std::string>{};
+    for (const auto &v : voicesMap)
+      lines.emplace_back(v.first + " <-> " + v.second);
+    std::sort(std::begin(lines), std::end(lines));
+    for (const auto &l : lines)
+    {
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", l.c_str());
+    }
   }
   {
     ImGui::TableNextColumn();
@@ -306,21 +330,26 @@ auto Chat::renderUi() -> void
     {
       auto combo = Ui::Combo("##Chatter Voice", chatterVoice.c_str(), 0);
       if (combo)
+      {
+        if (ImGui::Selectable((std::string{mute} + "##Voice").c_str(), chatterVoice == mute))
+          chatterVoice = mute;
         for (const auto &voice : voices)
           if (ImGui::Selectable((voice + std::string{"##Voice"}).c_str(), chatterVoice == voice))
             chatterVoice = voice;
+      }
     }
     ImGui::SameLine();
+    // TODO-Mika undo/redo
     if (ImGui::Button("Add##AddVoiceMap"))
     {
       if (!chatterVoice.empty())
-        voicesMap[chatterName] = chatterVoice;
+        voicesMap[toLower(chatterName)] = chatterVoice;
       else
         voicesMap.erase(chatterName);
     }
     ImGui::SameLine();
     if (ImGui::Button("Del##AddVoiceMap"))
-      voicesMap.erase(chatterName);
+      voicesMap.erase(toLower(chatterName));
   }
 
   if (!twitch->isConnected())

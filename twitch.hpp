@@ -36,4 +36,6 @@ private:
   auto parseMsg() -> void;
   auto onWelcome() -> void;
   auto onPing(const std::string &) -> void;
+  auto onPong() -> void;
+  auto schedulePing() -> void;
 };

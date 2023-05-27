@@ -333,6 +333,10 @@ auto Twitch::parseMsg() -> void
       }
       onPing(parameters[0]);
     }
+    else if (command == "PONG")
+    {
+      onPong();
+    }
   }
 }
 
@@ -354,6 +358,12 @@ auto Twitch::onPing(const std::string &val) -> void
     initiateRetry();
     return;
   }
+}
+
+auto Twitch::onPong() -> void
+{
+  retry.stop();
+  schedulePing();
 }
 
 auto Twitch::onWelcome() -> void
@@ -379,6 +389,29 @@ auto Twitch::onWelcome() -> void
   LOG("Connected to twitch");
   state = State::connected;
   initRetry = 1000;
+  schedulePing();
+}
+
+auto Twitch::schedulePing() -> void
+{
+  retry.start(
+    [this]() {
+      tcp.write("PING :tmi.twitch.tv\r\n", [this](int status) {
+        if (status < 0)
+        {
+          LOG(__func__, "error:", uv_err_name(status));
+          initiateRetry();
+          return;
+        }
+      });
+      retry.start(
+        [this]() {
+          LOG(__func__, "error: PING timeout");
+          initiateRetry();
+        },
+        2'000);
+    },
+    120'000);
 }
 
 auto Twitch::reg(TwitchSink &v) -> void

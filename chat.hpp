@@ -41,6 +41,7 @@ private:
   std::unordered_map<std::string, std::string> voicesMap;
   std::string chatterName;
   std::string chatterVoice;
+  int hideChatSec = 0;
 
   auto h() const -> float final;
   auto load(IStrm &) -> void final;
