@@ -53,17 +53,19 @@ auto AzureTts::say(std::string voice, std::string msg) -> void
         if (httpStatus >= 400 && httpStatus < 500)
         {
           LOG(code, httpStatus, payload);
+          lastError = payload;
           postTask(true);
           return;
         }
         if (httpStatus != 200)
         {
           LOG(code, httpStatus, payload);
-
+          lastError = payload;
           timer.start([postTask = std::move(postTask)]() { postTask(false); }, 10'000);
           return;
         }
 
+        lastError = "";
         Wav wav;
         const auto inF = 24000;
         const auto outF = audioSink.get().sampleRate();
@@ -119,13 +121,16 @@ auto AzureTts::getToken() -> void
                           if (code != CURLE_OK)
                           {
                             LOG(code, httpStatus, payload);
+                            lastError = payload;
                             return;
                           }
                           if (httpStatus != 200)
                           {
                             LOG(code, httpStatus, payload);
+                            lastError = payload;
                             return;
                           }
+                          lastError = "";
                           token = std::move(payload);
                           process();
                         },
@@ -165,6 +170,7 @@ auto AzureTts::listVoices(ListVoicesCb cb) -> void
         if (httpStatus != 200)
         {
           LOG(code, httpStatus, payload);
+          lastError = payload;
           cb({});
           postTask(false);
           return;
@@ -222,6 +228,7 @@ auto AzureTts::listVoices(ListVoicesCb cb) -> void
             continue;
           voices.emplace_back(obj("ShortName").asStr());
         }
+        lastError = "";
 
         cb(std::move(voices));
         postTask(true);

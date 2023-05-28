@@ -304,6 +304,14 @@ auto Chat::renderUi() -> void
         });
     }
   }
+  if (azureTts && !azureTts->lastError.empty())
+  {
+    ImGui::TableNextColumn();
+    Ui::textRj("Error");
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", azureTts->lastError.c_str());
+  }
+
   ImGui::TableNextColumn();
   ImGui::Text("Voices Mapping");
   ImGui::TableNextColumn();

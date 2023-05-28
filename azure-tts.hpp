@@ -13,6 +13,8 @@ public:
   auto updateKey(std::string key) -> void;
   auto listVoices(ListVoicesCb) -> void;
 
+  std::string lastError;
+
 private:
   enum class State { idle, waiting };
   using PostTask = std::function<auto(bool)->void>;
