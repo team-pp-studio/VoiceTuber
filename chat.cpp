@@ -136,6 +136,8 @@ auto Chat::getVoice(const std::string &n) const -> std::string
   auto it = voicesMap.find(toLower(n));
   if (it != std::end(voicesMap))
     return it->second;
+  if (voices.empty())
+    return mute;
   return voices[(std::hash<std::string>()(n) ^ 1) % voices.size()];
 }
 
