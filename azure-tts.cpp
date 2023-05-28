@@ -121,13 +121,13 @@ auto AzureTts::getToken() -> void
                           if (code != CURLE_OK)
                           {
                             LOG(code, httpStatus, payload);
-                            lastError = payload;
+                            lastError = std::string{"CURL Error: "} + curl_easy_strerror(code);
                             return;
                           }
                           if (httpStatus != 200)
                           {
                             LOG(code, httpStatus, payload);
-                            lastError = payload;
+                            lastError = "HTTP Status: " + std::to_string(httpStatus) + " " + payload;
                             return;
                           }
                           lastError = "";

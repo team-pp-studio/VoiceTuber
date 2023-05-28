@@ -93,28 +93,6 @@ void HttpClient::destroySockContext(SockContext *context)
            [](auto handle) { delete static_cast<SockContext *>(handle->data); });
 }
 
-// static void add_download(const char *url, int num)
-//{
-//   char filename[50];
-//   FILE *file;
-//   CURL *handle;
-//
-//   snprintf(filename, 50, "%d.download", num);
-//
-//   file = fopen(filename, "wb");
-//   if(!file) {
-//     fprintf(stderr, "Error opening %s\n", filename);
-//     return;
-//   }
-//
-//   handle = curl_easy_init();
-//   curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
-//   curl_easy_setopt(handle, CURLOPT_PRIVATE, file);
-//   curl_easy_setopt(handle, CURLOPT_URL, url);
-//   curl_multi_add_handle(multiHandle, handle);
-//   fprintf(stderr, "Added download %s -> %s\n", url, filename);
-// }
-//
 auto HttpClient::checkMultiInfo() -> void
 {
   int pending;
@@ -137,7 +115,7 @@ auto HttpClient::checkMultiInfo() -> void
       curl_easy_getinfo(easyHandle, CURLINFO_PRIVATE, &ctx);
       long codep;
       curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &codep);
-      ctx->cb(CURLE_OK, codep, std::move(ctx->payloadOut));
+      ctx->cb(message->data.result, codep, std::move(ctx->payloadOut));
       curl_slist_free_all(ctx->headers);
       delete ctx;
       curl_multi_remove_handle(multiHandle, easyHandle);
@@ -181,24 +159,6 @@ auto HttpClient::startTimeout(long timeoutMs) -> int
     timeout.start([this]() { onTimeout(); }, timeoutMs == 0 ? 1 : timeoutMs, 0);
   return 0;
 }
-//
-//
-// int main(int argc, char **argv)
-//{
-//   loop = uv_default_loop();
-//
-//   if(argc <= 1)
-//     return 0;
-//
-//
-//
-//   while(argc-- > 1) {
-//     add_download(argv[argc], argc);
-//   }
-//
-//
-//   return 0;
-// }
 
 auto HttpClient::get(const std::string &url, Cb cb, const Headers &headers) -> void
 {
@@ -210,6 +170,9 @@ auto HttpClient::get(const std::string &url, Cb cb, const Headers &headers) -> v
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, CurlContext::write_);
   curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
+#ifdef _WIN32
+  curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
   if (!headers.empty())
   {
     for (const auto &h : headers)
@@ -258,6 +221,9 @@ auto HttpClient::post(const std::string &url, std::string post, Cb cb, const Hea
   curl_easy_setopt(handle, CURLOPT_READFUNCTION, CurlContext::read_);
   curl_easy_setopt(handle, CURLOPT_URL, url.c_str());
   curl_easy_setopt(handle, CURLOPT_POST, 1L);
+#ifdef _WIN32
+  curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
   if (!headers.empty())
   {
     for (const auto &h : headers)

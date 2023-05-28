@@ -8,9 +8,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#define NOMINMAX
-#define CURL_STATICLIB
 #include <curl/curl.h>
 
 class HttpClient
