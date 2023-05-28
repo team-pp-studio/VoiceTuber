@@ -1,5 +1,6 @@
 #include "prj-dialog.hpp"
 #include "ui.hpp"
+#include <algorithm>
 #include <functional>
 #include <log/log.hpp>
 

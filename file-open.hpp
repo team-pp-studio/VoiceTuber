@@ -1,4 +1,7 @@
 #pragma once
+#ifdef _WIN32
+#define NOMINMAX
+#endif
 #include "dialog.hpp"
 #include "lib.hpp"
 #include "texture.hpp"

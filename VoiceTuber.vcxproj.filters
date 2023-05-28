@@ -215,6 +215,10 @@
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
     <ClInclude Include="wav.hpp" />
+    <ClInclude Include="3rd-party\json\json.hpp">
+      <Filter>3rd-party</Filter>
+    </ClInclude>
+    <ClInclude Include="http-client.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3rd-party\imgui\imgui.cpp">
@@ -286,6 +290,10 @@
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="uv.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
+    <ClCompile Include="3rd-party\json\json.cpp">
+      <Filter>3rd-party</Filter>
+    </ClCompile>
+    <ClCompile Include="http-client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd-party">
