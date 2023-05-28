@@ -129,8 +129,10 @@ considered to further refine and improve the application.
 * **GLM** - A C++ mathematics library for graphics software based on the OpenGL Shading Language (GLSL) specification, providing matrix operations and other essential functionality.
 * **Pocketsphinx** - A speech recognition library that converts spoken language into text.
 * **SDL2** - A cross-platform development library that provides low-level access to audio, keyboard, mouse, and display functions, as well as window management.
-* **libuv** - A cross-platform that provides support for asynchronous I/O based on event loops
 * **cpptoml** - A header-only library for parsing [TOML][toml] configuration files.
+* **json** - JSON parser library
+* **libcurl** - HTTP client library
+* **libuv** - A cross-platform that provides support for asynchronous I/O based on event loops
 * **log** - Small logging library to simplify debugging and monitoring of application processes.
 * **sdlpp** - A compact C++ wrapper around SDL2, streamlining its integration and usage in C++ applications.
 * **ser** - A lightweight and efficient serialization/deserialization library for C++

@@ -25,3 +25,6 @@
 [submodule "3rd-party/libuv"]
 	path = 3rd-party/libuv
 	url = https://github.com/libuv/libuv.git
+[submodule "3rd-party/json"]
+	path = 3rd-party/json
+	url = https://github.com/mika314/json.git

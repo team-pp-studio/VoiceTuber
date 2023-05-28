@@ -1,0 +1,129 @@
+commit a0c9efde739193697c1ad432dde0461c5230be49 (HEAD, tag: v0.11.0, origin/main, origin/HEAD, main)
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-26
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-26
+
+    Bump package and library versions
+
+commit aac98025a850c19d39285adad08bb9164dd77fa7
+Merge: 0f15780 71e22f1
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-04-23
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-04-23
+
+    Merge pull request #126 from ngtcp2/fix-uninitialized-warnings
+    
+    Fix uninitialized warnings
+
+commit 71e22f1989f9a36cf64a782a36b30349cc851ca4
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-23
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-23
+
+    Fix uninitialized warnings
+
+commit 0f15780abf126c0b4509b57779d337958b6fdc17
+Merge: 92ac99d 89436de
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-04-23
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-04-23
+
+    Merge pull request #125 from ngtcp2/bool-field-uint8
+    
+    Use uint8_t for bool fields
+
+commit 89436de5da0e621462cc6615253d27f1be0390e0
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-23
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-23
+
+    Use uint8_t for bool fields
+    
+    Use uint8_t for bool fields to potentially reduce space.
+
+commit 92ac99dc84723e69e2cd20af2c145611c443ce72
+Merge: 15b5133 fea9782
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-04-21
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-04-21
+
+    Merge pull request #124 from ngtcp2/msvc-build-check
+    
+    Msvc build check
+
+commit fea9782159eb5f94822aaac2f5f85e5d531a3802
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-21
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-21
+
+    Fix implicit conversion warnings
+
+commit 568e83a84780105d3608df2d58f67a8b769a0304
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-21
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-21
+
+    Remove dependency to libm
+
+commit 2b4876609b38cbb4a15c2eb82c1ec8d214642ce2
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-21
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-21
+
+    Include stdio.h to workaround error due to legacy CUnit snprintf macro
+
+commit 3e78684219e13be7c0c02f6f6672ac1b92ad5ae8
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-04-21
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-04-21
+
+    Run msvc build check
+
+commit 15b5133e1c92af4cd04a5eac537c1de351d43af6
+Merge: a41b26e 5f5ae49
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-03-27
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-03-27
+
+    Merge pull request #123 from ngtcp2/pri-rework
+    
+    Rework priority interface
+
+commit 5f5ae49a764ad5e28b563580d34e1d51c4ac42d0
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-03-27
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-03-27
+
+    Rework priority interface
+    
+    The function that updates stream priority is now split into 2, each
+    for client and server respectively.
+    
+    nghttp3_conn_set_client_stream_priority takes a serialized form of RFC
+    9218 priority field value, so that client application can send
+    extensions which nghttp3 might not understand.
+    
+    nghttp3_pri is now versioned struct.
+    
+    nghttp3_http_parse_priority is now hidden until we see the real needs
+    for it.
+
+commit a41b26ee79ecb8e26b54a2246daf257b978f98d8
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-03-25
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-03-25
+
+    Bump package version
