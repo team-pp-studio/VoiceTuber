@@ -15,6 +15,7 @@
 #include "prj-dialog.hpp"
 #include "root.hpp"
 #include "ui.hpp"
+#include "version.hpp"
 #include <SDL_opengl.h>
 #include <fstream>
 #include <log/log.hpp>
@@ -623,8 +624,6 @@ auto App::renderTree(Node &v) -> void
   }
 }
 
-static const auto ver = uint32_t{2};
-
 auto App::loadPrj() -> void
 {
   ImGui::LoadIniSettingsFromDisk("imgui.ini");
@@ -646,10 +645,10 @@ auto App::loadPrj() -> void
 
   uint32_t v;
   ::deser(strm, v);
-  if (v != ver)
+  if (v != saveVersion())
   {
     root = std::make_unique<Root>(lib, undo);
-    LOG("Version mismatch expected:", ver, ", received:", v);
+    LOG("Version mismatch expected:", saveVersion(), ", received:", v);
     return;
   }
 
@@ -667,7 +666,7 @@ auto App::savePrj() -> void
   if (!root)
     return;
   OStrm strm;
-  ::ser(strm, ver);
+  ::ser(strm, saveVersion());
   root->saveAll(strm);
   std::ofstream st("prj.tpp", std::ofstream::binary);
   st.write(strm.str().data(), strm.str().size());

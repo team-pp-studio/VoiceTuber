@@ -1,5 +1,6 @@
 #include "prj-dialog.hpp"
 #include "ui.hpp"
+#include "version.hpp"
 #include <algorithm>
 #include <functional>
 #include <log/log.hpp>
@@ -11,25 +12,58 @@
 PrjDialog::PrjDialog(Lib &lib, Cb aCb)
   : Dialog("New/Open Project", std::move(aCb)),
     cwd(std::filesystem::current_path()),
-    upDir(lib.queryTex("engine:up-dir.png", true))
+    upDir(lib.queryTex("engine:up-dir.png", true)),
+    bckDir(lib.queryTex("engine:arrow-left.png", true)),
+    fwdDir(lib.queryTex("engine:arrow-right.png", true)),
+    splash(lib.queryTex("engine:splashscreen.png", true)),
+    donate(lib.queryTex("engine:donate.png", true)),
+    github(lib.queryTex("engine:github.png", true))
 {
 }
 
 auto PrjDialog::internalDraw() -> DialogState
 {
-  auto availableSpace = ImGui::GetContentRegionAvail();
-  availableSpace.x = std::max(availableSpace.x, 700.f);
-  availableSpace.y = std::max(availableSpace.y, 250.f + 64 + 30);
-  // Adjust the width of the ListBox
-  ImVec2 listBoxSize(availableSpace.x,
-                     availableSpace.y - 30 - 64); // Adjust the width and height as needed
+  ImGui::Image((void *)(intptr_t)splash->texture(), ImVec2(splash->w(), splash->h()));
+  auto availableSpace =
+    ImVec2{static_cast<float>(splash->w() - 240), static_cast<float>(splash->h() - 180 - 265 + 58)};
 
+  ImVec2 listBoxSize(availableSpace.x, availableSpace.y - 30 - 64);
+
+  ImGui::SetCursorPos(ImVec2{30, 287});
   auto hasSelected = false;
   const auto sz = ImGui::GetFontSize();
+  {
+    auto disable = Ui::Disabled{undoStack.empty()};
+    if (ImGui::ImageButton((void *)(intptr_t)bckDir->texture(), ImVec2(sz, sz)))
+    {
+      auto d = undoStack.back();
+      undoStack.pop_back();
+      redoStack.push_back(cwd);
+      cwd = d;
+      dirs.clear();
+      selectedDir = "";
+    }
+  }
+  ImGui::SameLine();
+  {
+    auto disable = Ui::Disabled{redoStack.empty()};
+    if (ImGui::ImageButton((void *)(intptr_t)fwdDir->texture(), ImVec2(sz, sz)))
+    {
+      auto d = redoStack.back();
+      redoStack.pop_back();
+      undoStack.push_back(cwd);
+      cwd = d;
+      dirs.clear();
+      selectedDir = "";
+    }
+  }
+  ImGui::SameLine();
   if (ImGui::ImageButton((void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
   {
     dirs.clear();
     selectedDir = "";
+    undoStack.push_back(cwd);
+    redoStack.clear();
 #ifdef _WIN32
     if (cwd != cwd.parent_path())
       cwd = cwd.parent_path();
@@ -42,7 +76,11 @@ auto PrjDialog::internalDraw() -> DialogState
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Go Up");
   ImGui::SameLine();
-  ImGui::Text("%s", cwd.string().c_str());
+  {
+    char buf[4096];
+    strcpy(buf, cwd.string().data());
+    ImGui::InputText("##current directory", buf, sizeof(buf), ImGuiInputTextFlags_ReadOnly);
+  }
 
   if (dirs.empty())
   {
@@ -76,6 +114,7 @@ auto PrjDialog::internalDraw() -> DialogState
     }
   }
 
+  ImGui::SetCursorPosX(30);
   if (auto dirsListBox = Ui::ListBox{"##dirs", listBoxSize})
   {
     const auto oldSelectedDir = selectedDir;
@@ -95,6 +134,8 @@ auto PrjDialog::internalDraw() -> DialogState
       {
         if (ImGui::IsMouseDoubleClicked(0))
         {
+          undoStack.push_back(cwd);
+          redoStack.clear();
           cwd = dir;
           dirs.clear();
           selectedDir = "";
@@ -116,6 +157,7 @@ auto PrjDialog::internalDraw() -> DialogState
   ImGui::PushItemWidth(availableSpace.x - BtnSz - 10);
   char buf[1024];
   strcpy(buf, selectedDir.data());
+  ImGui::SetCursorPosX(30);
   if (ImGui::InputText("##dirname", buf, sizeof(buf)))
     selectedDir = buf;
   ImGui::PopItemWidth();
@@ -125,6 +167,8 @@ auto PrjDialog::internalDraw() -> DialogState
   {
     if (ImGui::Button("Open", ImVec2{BtnSz, 0}))
     {
+      undoStack.push_back(cwd);
+      redoStack.clear();
       cwd = cwd / selectedDir;
       dirs.clear();
       selectedDir = "";
@@ -152,5 +196,16 @@ auto PrjDialog::internalDraw() -> DialogState
       }
     }
   }
+
+  ImGui::SetCursorPos(ImVec2{1110 - 160 + 20, 412 - 142 + 30});
+  if (ImGui::ImageButton((void *)(intptr_t)donate->texture(), ImVec2(donate->w(), donate->h())))
+    SDL_OpenURL("https://github.com/sponsors/WichitPritchett");
+  ImGui::SetCursorPosX(1110 - 160 + 20);
+  if (ImGui::ImageButton((void *)(intptr_t)github->texture(), ImVec2(github->w(), github->h())))
+    SDL_OpenURL("https://github.com/team-pp-studio/VoiceTuber");
+
+  ImGui::SetCursorPos(ImVec2{226, 140 + 15});
+  ImGui::Text("v%s", appVersion());
+
   return DialogState::active;
 }

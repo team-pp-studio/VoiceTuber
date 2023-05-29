@@ -149,8 +149,8 @@ Top Priority
 General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
-- [ ] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
-- [ ]  Transition to/Add Softbody Phyics
+- [x] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
+- [ ] Transition to/Add Softbody Phyics
 - [x] Azure TTS
 - [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [x] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
