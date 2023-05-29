@@ -16,6 +16,8 @@ namespace Internal
   auto deserVal(IStrm &strm, glm::vec2 &value) noexcept -> void;
   auto serVal(OStrm &strm, const ImVec4 &value) noexcept -> void;
   auto deserVal(IStrm &strm, ImVec4 &value) noexcept -> void;
+  auto serVal(OStrm &strm, const glm::ivec2 &value) noexcept -> void;
+  auto deserVal(IStrm &strm, glm::ivec2 &value) noexcept -> void;
 } // namespace Internal
 #include <ser/ser.hpp>
 

@@ -6,6 +6,7 @@
 #include "channel-dialog.hpp"
 #include "chat-v2.hpp"
 #include "chat.hpp"
+#include "eye-v2.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
 #include "message-dialog.hpp"
@@ -61,6 +62,9 @@ App::App(int argc, char *argv[])
     [this](std::string name) { return std::make_unique<AnimSprite>(lib, undo, std::move(name)); });
   saveFactory.reg<Eye>([this](std::string name) {
     return std::make_unique<Eye>(mouseTracking, lib, undo, std::move(name));
+  });
+  saveFactory.reg<EyeV2>([this](std::string name) {
+    return std::make_unique<EyeV2>(mouseTracking, lib, undo, std::move(name));
   });
   saveFactory.reg<Chat>([this](std::string name) {
     return std::make_unique<Chat>(lib, undo, uv, httpClient, audioOut, std::move(name));
@@ -256,7 +260,7 @@ auto App::renderUi(float /*dt*/) -> void
       if (ImGui::MenuItem("Add Eye..."))
         dialog = std::make_unique<FileOpen>(lib, "Add Eye Dialog", [this](bool r, const auto &filePath) {
           if (r)
-            addNode(Eye::className, filePath.string());
+            addNode(EyeV2::className, filePath.string());
         });
       if (ImGui::MenuItem("Add Twitch Chat..."))
         dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
@@ -344,11 +348,11 @@ auto App::renderUi(float /*dt*/) -> void
     ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
   }
   {
-    auto detailsWindpw = Ui::Window("Details");
+    auto detailsWindow = Ui::Window("Details");
     if (selected)
       if (auto detailsTable = Ui::Table{"Details", 2, ImGuiTableFlags_SizingStretchProp})
       {
-        ImGui::TableSetupColumn("Property     ", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Property       ", ImGuiTableColumnFlags_WidthFixed);
         ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
         selected->renderUi();
@@ -704,7 +708,7 @@ auto App::droppedFile(std::string droppedFile) -> void
       {
       case AddAsDialog::NodeType::sprite: addNode(AnimSprite::className, droppedFile); break;
       case AddAsDialog::NodeType::mouth: addNode(Mouth::className, droppedFile); break;
-      case AddAsDialog::NodeType::eye: addNode(Eye::className, droppedFile); break;
+      case AddAsDialog::NodeType::eye: addNode(EyeV2::className, droppedFile); break;
       }
     });
 }

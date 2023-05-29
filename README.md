@@ -141,7 +141,7 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
- - [ ] better compatibility for multiple windows
+ - [x] better compatibility for multiple windows
  - [x] rotation slider
  - [ ] Hotkeys infomation
  - [ ] Physics breaks

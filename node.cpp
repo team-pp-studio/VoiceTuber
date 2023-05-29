@@ -21,6 +21,16 @@ namespace Internal
     strm.read(reinterpret_cast<char *>(&value), sizeof(value));
   }
 
+  auto serVal(OStrm &strm, const glm::ivec2 &value) noexcept -> void
+  {
+    strm.write(reinterpret_cast<const char *>(&value), sizeof(value));
+  }
+
+  auto deserVal(IStrm &strm, glm::ivec2 &value) noexcept -> void
+  {
+    strm.read(reinterpret_cast<char *>(&value), sizeof(value));
+  }
+
   auto serVal(OStrm &strm, const ImVec4 &value) noexcept -> void
   {
     strm.write(reinterpret_cast<const char *>(&value), sizeof(value));
