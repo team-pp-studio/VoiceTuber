@@ -341,7 +341,9 @@ auto Node::render(float /*dt*/, Node *hovered, Node *selected) -> void
 {
   if (selected != this && hovered != this)
     return;
-  if (selected == this)
+  if (selected == this && hovered == this)
+    glColor4f(1.f, .9f, .2f, 1.f);
+  else if (selected == this)
     glColor4f(1.f, .7f, .0f, 1.f);
   else if (hovered == this)
     glColor4f(1.f, 1.f, 1.0f, .2f);
