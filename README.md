@@ -141,10 +141,13 @@ considered to further refine and improve the application.
 8\. TODO
 --------
 Top Priority
+ - [ ] the app crashes on Twitch chat with unstable Internet
+ - [x] highlight the chat if it is disconnected from the Internet
+ - [ ] allow limiting of frame rate
  - [x] better compatibility for multiple windows
  - [x] rotation slider
- - [ ] Hotkeys infomation
- - [ ] Physics breaks
+ - [x] Hotkeys infomation
+ - [x] Physics breaks - cannot reproduce
 
 General Priority
 - [ ] remember directory in open/save dialog boxes

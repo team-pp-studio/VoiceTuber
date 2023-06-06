@@ -167,6 +167,16 @@ auto Chat::load(IStrm &strm) -> void
 
 auto Chat::render(float dt, Node *hovered, Node *selected) -> void
 {
+  if (!twitch->isConnected())
+  {
+    glColor4f(.5f, .5f, .5f, 1.f);
+    glBegin(GL_LINES);
+    glVertex2f(.0f, .0f);
+    glVertex2f(w(), h());
+    glVertex2f(w(), .0f);
+    glVertex2f(.0f, h());
+    glEnd();
+  }
   if (!showChat)
   {
     Node::render(dt, hovered, selected);

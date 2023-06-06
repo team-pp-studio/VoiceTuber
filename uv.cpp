@@ -16,12 +16,17 @@ auto Tcp::readStart(ReadCb cb) -> int
   return uv_read_start((uv_stream_t *)socket.get(),
                        [](uv_handle_t *handle, size_t suggestedSize, uv_buf_t *aBuf) {
                          auto self = static_cast<Tcp *>(handle->data);
+                         if (!self)
+                           return;
                          self->buf.resize(suggestedSize);
                          aBuf->base = self->buf.data();
                          aBuf->len = suggestedSize;
                        },
                        [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
-                         static_cast<Tcp *>(stream->data)->onRead(nread, aBuf);
+                         auto self = static_cast<Tcp *>(stream->data);
+                         if (!self)
+                           return;
+                         self->onRead(nread, aBuf);
                        });
 }
 
@@ -179,6 +184,7 @@ Tcp::~Tcp()
   if (socket)
   {
     LOG("Graceful disconnect");
+    socket->data = nullptr;
     auto rawSocket = socket.release();
     uv_read_stop((uv_stream_t *)rawSocket);
     auto req = new uv_shutdown_t;
