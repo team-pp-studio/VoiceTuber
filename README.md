@@ -236,6 +236,7 @@ Completed
 
 - [ ] Puppeteer interface with keyboard and mouse
 - [ ] Puppeteer interfacing with the game controller
+- [ ] AI co-streamer
 
 Channel Point/Bit/Chat Ideas.
 
