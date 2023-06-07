@@ -143,7 +143,7 @@ considered to further refine and improve the application.
 Top Priority
  - [ ] the app crashes on Twitch chat with unstable Internet
  - [x] highlight the chat if it is disconnected from the Internet
- - [ ] allow limiting of frame rate
+ - [x] allow limiting of frame rate
  - [x] better compatibility for multiple windows
  - [x] rotation slider
  - [x] Hotkeys infomation

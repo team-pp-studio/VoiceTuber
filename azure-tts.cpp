@@ -4,8 +4,8 @@
 #include <json/json.hpp>
 #include <log/log.hpp>
 
-AzureTts::AzureTts(Uv &uv, std::string aKey, class HttpClient &aHttpClient, class AudioSink &aAudioSink)
-  : timer(uv.getTimer()), key(aKey), httpClient(aHttpClient), audioSink(aAudioSink)
+AzureTts::AzureTts(uv::Uv &uv, std::string aKey, class HttpClient &aHttpClient, class AudioSink &aAudioSink)
+  : timer(uv.createTimer()), key(aKey), httpClient(aHttpClient), audioSink(aAudioSink)
 {
   process();
 }

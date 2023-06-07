@@ -11,7 +11,7 @@ static const char *mute = "Mute";
 
 Chat::Chat(class Lib &aLib,
            Undo &aUndo,
-           class Uv &aUv,
+           uv::Uv &aUv,
            HttpClient &aHttpClient,
            AudioSink &aAudioSink,
            std::string n)
@@ -22,7 +22,7 @@ Chat::Chat(class Lib &aLib,
     audioSink(aAudioSink),
     twitch(aLib.queryTwitch(aUv, n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize)),
-    timer(aUv.getTimer())
+    timer(aUv.createTimer())
 {
   twitch->reg(*this);
 }

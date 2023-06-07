@@ -12,6 +12,7 @@
 #include "undo.hpp"
 #include "uv.hpp"
 #include "wav-2-visemes.hpp"
+#include <chrono>
 #include <functional>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui/imgui.h>
@@ -20,21 +21,19 @@
 class App
 {
 public:
-  App(int argc, char *argv[]);
-  auto droppedFile(std::string) -> void;
-  auto processIo() -> void;
-  auto render(float dt) -> void;
-  auto renderUi(float dt) -> void;
-  auto savePrj() -> void;
-  auto tick(float dt) -> void;
-
-  bool isMinimized = false;
+  App(sdl::Window &, int argc, char *argv[]);
+  ~App();
+  auto tick() -> void;
   bool done = false;
 
 private:
   enum class EditMode { select, translate, rotate, scale };
 
-  Uv uv;
+  std::reference_wrapper<sdl::Window> window;
+  SDL_GLContext gl_context;
+  decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
+  bool isMinimized = false;
+  uv::Uv uv;
   Preferences preferences;
   SaveFactory saveFactory;
   Wav2Visemes wav2Visemes;
@@ -66,9 +65,20 @@ private:
   std::shared_ptr<const Texture> arrowE;
   std::shared_ptr<const Texture> arrowS;
   std::shared_ptr<const Texture> arrowW;
+  int originalX, originalY;
+  int width, height;
+  uv::Timer renderTimer;
+  uv::Idle renderIdle;
 
   auto addNode(const std::string &class_, const std::string &name) -> void;
   auto cancel() -> void;
+  auto droppedFile(std::string) -> void;
   auto loadPrj() -> void;
+  auto processIo() -> void;
+  auto render(float dt) -> void;
   auto renderTree(Node &) -> void;
+  auto renderUi(float dt) -> void;
+  auto savePrj() -> void;
+  auto sdlEventsAndRender() -> void;
+  auto setupRendering() -> void;
 };

@@ -21,7 +21,7 @@ auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Tex
   return shared;
 }
 
-auto Lib::queryTwitch(class Uv &uv, const std::string &v) -> std::shared_ptr<Twitch>
+auto Lib::queryTwitch(uv::Uv &uv, const std::string &v) -> std::shared_ptr<Twitch>
 {
   auto it = twitchChannels.find(v);
   if (it != std::end(twitchChannels))
@@ -67,7 +67,7 @@ auto Lib::flush() -> void
     aTts->updateKey(preferences.get().azureKey);
 }
 
-auto Lib::queryAzureTts(class Uv &uv, class HttpClient &httpClient, class AudioSink &audioSink)
+auto Lib::queryAzureTts(uv::Uv &uv, class HttpClient &httpClient, class AudioSink &audioSink)
   -> std::shared_ptr<AzureTts>
 {
   if (auto ret = azureTts.lock())

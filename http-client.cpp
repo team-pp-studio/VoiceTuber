@@ -17,7 +17,12 @@ namespace
 
 } // namespace
 
-HttpClient::HttpClient(class Uv &aUv) : uv(aUv), timeout(aUv.getTimer()), multiHandle(curl_multi_init())
+namespace uv
+{
+  class Uv;
+}
+
+HttpClient::HttpClient(uv::Uv &aUv) : uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
 {
   CurlInitializer::init();
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"

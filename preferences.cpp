@@ -31,6 +31,8 @@ Preferences::Preferences()
     audioOut = config->get_qualified_as<std::string>("audio.out").value_or("Default");
     audioIn = config->get_qualified_as<std::string>("audio.in").value_or("Default");
     azureKey = config->get_qualified_as<std::string>("azure.key").value_or("");
+    vsync = config->get_qualified_as<bool>("graphics.vsync").value_or(true);
+    fps = config->get_qualified_as<int>("graphics.fps").value_or(0);
   }
   catch (const cpptoml::parse_exception &e)
   {
@@ -71,6 +73,12 @@ auto Preferences::save() -> void
       auto azureTable = cpptoml::make_table();
       azureTable->insert("key", azureKey);
       config->insert("azure", azureTable);
+    }
+    {
+      auto graphicsTable = cpptoml::make_table();
+      graphicsTable->insert("vsync", vsync);
+      graphicsTable->insert("fps", fps);
+      config->insert("graphics", graphicsTable);
     }
 
     auto configFile = std::ofstream{configFilePath};

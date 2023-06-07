@@ -4,11 +4,16 @@
 #include <queue>
 #include <string>
 
+namespace uv
+{
+  class Uv;
+}
+
 class AzureTts
 {
 public:
   using ListVoicesCb = std::function<auto(std::vector<std::string>)->void>;
-  AzureTts(class Uv &, std::string key, class HttpClient &, class AudioSink &);
+  AzureTts(uv::Uv &, std::string key, class HttpClient &, class AudioSink &);
   auto say(std::string voice, std::string msg) -> void;
   auto updateKey(std::string key) -> void;
   auto listVoices(ListVoicesCb) -> void;
@@ -20,7 +25,7 @@ private:
   using PostTask = std::function<auto(bool)->void>;
   using Task = std::function<auto(PostTask)->void>;
 
-  Timer timer;
+  uv::Timer timer;
   std::string key;
   std::reference_wrapper<HttpClient> httpClient;
   std::reference_wrapper<AudioSink> audioSink;

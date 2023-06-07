@@ -36,7 +36,7 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
-      ImGui::Text("Twitch User:");
+      Ui::textRj("Twitch User:");
       ImGui::TableNextColumn();
       ImGui::PushItemWidth(ImGui::GetFontSize() * 40.f);
       char buf[1024];
@@ -48,7 +48,7 @@ auto PreferencesDialog::internalDraw() -> DialogState
 
     {
       ImGui::TableNextColumn();
-      ImGui::Text("Twitch Key:");
+      Ui::textRj("Twitch Key:");
       ImGui::TableNextColumn();
       ImGui::PushItemWidth(ImGui::GetFontSize() * 40.f);
       char buf[1024];
@@ -60,7 +60,7 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
-      ImGui::Text("Azure Key:");
+      Ui::textRj("Azure Key:");
       ImGui::TableNextColumn();
       ImGui::PushItemWidth(ImGui::GetFontSize() * 40.f);
       char buf[1024];
@@ -82,7 +82,7 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
-      ImGui::Text("Output Device:");
+      Ui::textRj("Output Device:");
       ImGui::TableNextColumn();
       {
         auto combo = Ui::Combo("##Output Device", preferences.get().audioOut.c_str(), 0);
@@ -104,7 +104,7 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
-      ImGui::Text("Input Device:");
+      Ui::textRj("Input Device:");
       ImGui::TableNextColumn();
       {
         auto combo = Ui::Combo("##Input Device", preferences.get().audioIn.c_str(), 0);
@@ -125,8 +125,26 @@ auto PreferencesDialog::internalDraw() -> DialogState
       }
       ImGui::ProgressBar(audioLevel.getLevel(), ImVec2(0.0f, 0.0f));
     }
-  }
 
+    {
+      ImGui::TableNextColumn();
+      ImGui::Text("Graphics Settings");
+      ImGui::TableNextColumn();
+    }
+    {
+      ImGui::TableNextColumn();
+      Ui::textRj("VSync:");
+      ImGui::TableNextColumn();
+      if (ImGui::Checkbox("##VSync", &preferences.get().vsync))
+        SDL_GL_SetSwapInterval(preferences.get().vsync ? 1 : 0);
+    }
+    {
+      ImGui::TableNextColumn();
+      Ui::textRj("FPS:");
+      ImGui::TableNextColumn();
+      ImGui::DragInt("0 = unbounded##fps", &preferences.get().fps, 1, 0, 240);
+    }
+  }
   ImGui::SetCursorPosX(ImGui::GetWindowWidth() - BtnSz - ImGui::GetStyle().WindowPadding.x);
   if (ImGui::Button("OK", ImVec2(BtnSz, 0)))
   {

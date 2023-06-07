@@ -2,7 +2,7 @@
 
 ChatV2::ChatV2(Lib &lib,
                Undo &aUndo,
-               class Uv &uv,
+               uv::Uv &uv,
                class HttpClient &httpClient,
                class AudioSink &audioSink,
                std::string aName)

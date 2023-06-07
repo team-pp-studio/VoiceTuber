@@ -6,10 +6,15 @@
 #include <string>
 #include <vector>
 
+namespace uv
+{
+  class Uv;
+}
+
 class Twitch
 {
 public:
-  Twitch(class Uv &, std::string user, std::string key, std::string channel);
+  Twitch(uv::Uv &, std::string user, std::string key, std::string channel);
   Twitch(const Twitch &) = delete;
   auto isConnected() const -> bool;
   auto reg(TwitchSink &) -> void;
@@ -17,17 +22,17 @@ public:
   auto updateUserKey(const std::string &user, const std::string &key) -> void;
 
 private:
-  std::reference_wrapper<Uv> uv;
+  std::reference_wrapper<uv::Uv> uv;
   std::string user;
   std::string key;
   std::string channel;
-  Tcp tcp;
+  uv::Tcp tcp;
   enum class State { connecting, connected };
   State state = State::connecting;
   std::deque<char> buf;
   std::vector<std::reference_wrapper<TwitchSink>> sinks;
   int initRetry = 1000;
-  Timer retry;
+  uv::Timer retry;
 
   auto init() -> void;
   auto initiateRetry() -> void;

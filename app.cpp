@@ -9,6 +9,8 @@
 #include "eye-v2.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
+#include "imgui-impl-opengl3.h"
+#include "imgui-impl-sdl.h"
 #include "message-dialog.hpp"
 #include "mouth.hpp"
 #include "preferences-dialog.hpp"
@@ -27,9 +29,13 @@ static auto getProjMat() -> glm::mat4
   return glm::make_mat4(projMatData);
 }
 
-App::App(int argc, char *argv[])
-  : audioOut(preferences.audioOut),
-    audioIn(preferences.audioIn, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
+App::App(sdl::Window &aWindow, int argc, char *argv[])
+  : window(aWindow),
+    gl_context(SDL_GL_CreateContext(window.get().get())),
+    lastUpdate(std::chrono::high_resolution_clock::now()),
+    audioOut(preferences.audioOut),
+    audioIn(uv, preferences.audioIn, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
+    mouseTracking(uv),
     lib(preferences),
     httpClient(uv),
     selectIco(lib.queryTex("engine:select.png", true)),
@@ -45,8 +51,69 @@ App::App(int argc, char *argv[])
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
     arrowS(lib.queryTex("engine:arrow-s-circle.png", true)),
-    arrowW(lib.queryTex("engine:arrow-w-circle.png", true))
+    arrowW(lib.queryTex("engine:arrow-w-circle.png", true)),
+    renderTimer(uv.createTimer()),
+    renderIdle(uv.createIdle())
 {
+  SDL_GL_MakeCurrent(window.get().get(), gl_context);
+  SDL_GL_SetSwapInterval(preferences.vsync ? 1 : 0);
+
+  // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+  // GL ES 2.0 + GLSL 100
+  const char *glsl_version = "#version 100";
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#elif defined(__APPLE__)
+  // GL 3.2 Core + GLSL 150
+  const char *glsl_version = "#version 150";
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
+                      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); // Always required on Mac
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#else
+  // GL 3.0 + GLSL 130
+  const char *glsl_version = "#version 130";
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplSDL2_InitForOpenGL(window.get().get(), gl_context);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
+  auto &io = ImGui::GetIO();
+  // Load Fonts
+  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts
+  // and use ImGui::PushFont()/PopFont() to select them.
+  // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font
+  // among multiple.
+  // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your
+  // application (e.g. use an assertion, or display an error and quit).
+  // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when
+  // calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+  // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality
+  // font rendering.
+  // - Read 'docs/FONTS.md' for more instructions and details.
+  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to
+  // write a double backslash \\ !
+  // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the
+  // "fonts/" folder. See Makefile.emscripten for details. io.Fonts->AddFontDefault();
+  // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+  io.Fonts->AddFontFromFileTTF("assets/notepad_font/NotepadFont.ttf", 17.5f);
+  // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
+  // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
+
+  window.get().getPosition(&originalX, &originalY);
+  window.get().getSize(&width, &height);
+
   LOG("sample rate:", wav2Visemes.sampleRate());
   LOG("frame size:", wav2Visemes.frameSize());
   audioIn.reg(wav2Visemes);
@@ -79,6 +146,7 @@ App::App(int argc, char *argv[])
     std::filesystem::current_path(argv[1]);
     loadPrj();
   }
+  setupRendering();
 }
 
 auto App::render(float dt) -> void
@@ -280,8 +348,10 @@ auto App::renderUi(float /*dt*/) -> void
       ImGui::Separator();
       if (ImGui::MenuItem("Preferences..."))
         dialog = std::make_unique<PreferencesDialog>(preferences, audioOut, audioIn, [this](bool r) {
-          if (r)
-            lib.flush();
+          if (!r)
+            return;
+          lib.flush();
+          setupRendering();
         });
     }
   }
@@ -526,29 +596,6 @@ auto App::cancel() -> void
   selected->cancel();
 }
 
-auto App::tick(float /*dt*/) -> void
-{
-  audioIn.tick();
-  uv.tick();
-
-  if (!root)
-    return;
-
-  const auto projMat = getProjMat();
-  int mouseX, mouseY;
-  SDL_GetMouseState(&mouseX, &mouseY);
-  hovered = nullptr;
-  const auto mousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
-  if (!selected || selected->editMode() == Node::EditMode::select)
-    hovered = root->nodeUnder(projMat, mousePos);
-  else
-  {
-    if (selected)
-      selected->update(projMat, mousePos);
-  }
-  mouseTracking.tick();
-}
-
 auto App::renderTree(Node &v) -> void
 {
   ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
@@ -710,4 +757,154 @@ auto App::droppedFile(std::string droppedFile) -> void
       case AddAsDialog::NodeType::eye: addNode(EyeV2::className, droppedFile); break;
       }
     });
+}
+
+auto App::tick() -> void
+{
+  uv.tick();
+}
+
+App::~App()
+{
+  savePrj();
+
+  // Cleanup
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+  SDL_GL_DeleteContext(gl_context);
+}
+
+auto App::sdlEventsAndRender() -> void
+{
+  // Poll and handle events (inputs, window resize, etc.)
+  // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants
+  // to use your inputs.
+  // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application,
+  // or clear/overwrite your copy of the mouse data.
+  // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main
+  // application, or clear/overwrite your copy of the keyboard data. Generally you may always pass
+  // all inputs to dear imgui, and hide them from your application based on those two flags.
+  SDL_Event event;
+  while (SDL_PollEvent(&event))
+  {
+    ImGui_ImplSDL2_ProcessEvent(&event);
+    switch (event.type)
+    {
+    case SDL_QUIT: done = true; break;
+    case SDL_WINDOWEVENT:
+      if (event.window.event == SDL_WINDOWEVENT_CLOSE &&
+          event.window.windowID == SDL_GetWindowID(window.get().get()))
+        done = true;
+      else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
+      {
+        if (!isMinimized)
+        {
+          window.get().restore();
+          window.get().restore();
+          window.get().setPosition(10'000, originalY);
+          window.get().setSize(width, height);
+        }
+        else
+        {
+          window.get().restore();
+          window.get().restore();
+          window.get().setPosition(originalX, originalY);
+          window.get().setSize(width, height);
+        }
+        isMinimized = !isMinimized;
+      }
+      else
+      {
+        if (!isMinimized)
+        {
+          window.get().getPosition(&originalX, &originalY);
+          window.get().getSize(&width, &height);
+        }
+      }
+      break;
+    case SDL_DROPFILE: {
+      auto file = event.drop.file;
+      LOG("dropped file", file);
+      droppedFile(file);
+      SDL_free(file);
+      break;
+    }
+    case SDL_MOUSEMOTION: {
+      if (!root)
+        break;
+      const auto projMat = getProjMat();
+      const auto mouseX = event.motion.x;
+      const auto mouseY = event.motion.y;
+      hovered = nullptr;
+      const auto mousePos = glm::vec2{1.f * mouseX, 1.f * mouseY};
+      if (!selected || selected->editMode() == Node::EditMode::select)
+        hovered = root->nodeUnder(projMat, mousePos);
+      else
+      {
+        if (selected)
+          selected->update(projMat, mousePos);
+      }
+      break;
+    }
+    }
+  }
+
+  auto now = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float> diff = now - lastUpdate;
+  lastUpdate = now;
+  const auto dt = diff.count();
+
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplSDL2_NewFrame();
+  ImGui::NewFrame();
+
+  renderUi(dt);
+
+  ImGui::Render();
+
+  glEnable(GL_BLEND);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.1f); // Change the reference value (0.1f) to your desired threshold
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  ImGuiIO &io = ImGui::GetIO();
+  const auto w = (int)io.DisplaySize.x == 0 ? width : (int)io.DisplaySize.x;
+  const auto h = (int)io.DisplaySize.y == 0 ? height : (int)io.DisplaySize.y;
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  render(dt);
+
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+  // Update and Render additional Platform Windows
+  // (Platform functions may change the current OpenGL context, so we save/restore it to make it
+  // easier to paste this code elsewhere.
+  //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
+  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+  {
+    SDL_Window *backup_current_window = SDL_GL_GetCurrentWindow();
+    SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+  }
+
+  window.get().glSwap();
+  processIo();
+}
+
+auto App::setupRendering() -> void
+{
+  renderTimer.stop();
+  renderIdle.stop();
+  const auto fps = preferences.fps;
+  if (fps == 0)
+    renderIdle.start([this]() { sdlEventsAndRender(); });
+  else
+    renderTimer.start([this]() { sdlEventsAndRender(); }, 0, 1'000 / fps);
 }

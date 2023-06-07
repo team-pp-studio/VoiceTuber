@@ -4,6 +4,7 @@
 #include "node.hpp"
 #include "twitch-sink.hpp"
 #include "twitch.hpp"
+#include "uv.hpp"
 #include <memory>
 
 class Chat : public Node, public TwitchSink
@@ -19,20 +20,20 @@ public:
 
   static constexpr const char *className = "Chat";
 
-  Chat(Lib &, Undo &, class Uv &, class HttpClient &, class AudioSink &, std::string name);
+  Chat(Lib &, Undo &, uv::Uv &, class HttpClient &, class AudioSink &, std::string name);
   ~Chat() override;
 
 private:
   int ptsize = 40;
   glm::vec2 size = {400.f, 200.f};
   std::reference_wrapper<Lib> lib;
-  std::reference_wrapper<Uv> uv;
+  std::reference_wrapper<uv::Uv> uv;
   std::reference_wrapper<HttpClient> httpClient;
   std::reference_wrapper<AudioSink> audioSink;
   std::shared_ptr<Twitch> twitch;
   std::shared_ptr<Font> font;
   std::vector<Msg> msgs;
-  Timer timer;
+  uv::Timer timer;
   bool showChat = false;
   bool tts = false;
   std::shared_ptr<AzureTts> azureTts;

@@ -2,8 +2,9 @@
 #include "preferences.hpp"
 #include <log/log.hpp>
 
-AudioIn::AudioIn(const std::string &device, int sampleRate, int frameSize)
-  : want([sampleRate, frameSize]() {
+AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int frameSize)
+  : prepare(uv.createPrepare()),
+    want([sampleRate, frameSize]() {
       SDL_AudioSpec ret;
       SDL_zero(ret);
       ret.freq = sampleRate;
@@ -14,6 +15,7 @@ AudioIn::AudioIn(const std::string &device, int sampleRate, int frameSize)
     }()),
     audio(makeDevice(device))
 {
+  prepare.start([this]() { tick(); });
 }
 
 auto AudioIn::tick() -> void

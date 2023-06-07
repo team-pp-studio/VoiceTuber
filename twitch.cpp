@@ -139,12 +139,12 @@ namespace
 static const char *server = "irc.chat.twitch.tv";
 static const char *port = "6667";
 
-Twitch::Twitch(class Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
+Twitch::Twitch(uv::Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
   : uv(uv),
     user(std::move(aUser)),
     key(std::move(aKey)),
     channel(std::move(aChannel)),
-    retry(uv.getTimer())
+    retry(uv.createTimer())
 {
   init();
 }
@@ -155,7 +155,7 @@ auto Twitch::init() -> void
   state = State::connecting;
   retry.stop();
 
-  auto s = uv.get().connect(server, port, [this](int status, Tcp aTcp) {
+  auto s = uv.get().connect(server, port, [this](int status, uv::Tcp aTcp) {
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));

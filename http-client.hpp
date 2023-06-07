@@ -4,11 +4,16 @@
 #endif
 
 #include "uv.hpp"
+#include <curl/curl.h>
 #include <functional>
 #include <string>
 #include <utility>
 #include <vector>
-#include <curl/curl.h>
+
+namespace uv
+{
+  class Uv;
+}
 
 class HttpClient
 {
@@ -16,15 +21,15 @@ public:
   using Headers = std::vector<std::pair<std::string, std::string>>;
   using Cb = std::function<auto(CURLcode, long httpStatus, std::string payload)->void>;
 
-  HttpClient(class Uv &);
+  HttpClient(uv::Uv &);
   HttpClient(const HttpClient &) = delete;
   ~HttpClient();
   auto get(const std::string &url, Cb cb, const Headers &headers = Headers{}) -> void;
   auto post(const std::string &url, std::string post, Cb cb, const Headers &chunks = Headers{}) -> void;
 
 private:
-  std::reference_wrapper<Uv> uv;
-  Timer timeout;
+  std::reference_wrapper<uv::Uv> uv;
+  uv::Timer timeout;
   CURLM *multiHandle = nullptr;
   struct SockContext
   {
