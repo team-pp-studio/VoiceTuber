@@ -31,6 +31,7 @@ Preferences::Preferences()
     audioOut = config->get_qualified_as<std::string>("audio.out").value_or("Default");
     audioIn = config->get_qualified_as<std::string>("audio.in").value_or("Default");
     azureKey = config->get_qualified_as<std::string>("azure.key").value_or("");
+    openAiToken = config->get_qualified_as<std::string>("open-ai.token").value_or("");
     vsync = config->get_qualified_as<bool>("graphics.vsync").value_or(true);
     fps = config->get_qualified_as<int>("graphics.fps").value_or(0);
   }
@@ -73,6 +74,11 @@ auto Preferences::save() -> void
       auto azureTable = cpptoml::make_table();
       azureTable->insert("key", azureKey);
       config->insert("azure", azureTable);
+    }
+    {
+      auto openAiTable = cpptoml::make_table();
+      openAiTable->insert("token", openAiToken);
+      config->insert("open-ai", openAiTable);
     }
     {
       auto graphicsTable = cpptoml::make_table();

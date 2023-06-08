@@ -1,5 +1,6 @@
 #include "app.hpp"
 #include "add-as-dialog.hpp"
+#include "ai-mouth.hpp"
 #include "anim-sprite.hpp"
 #include "bouncer.hpp"
 #include "bouncer2.hpp"
@@ -36,8 +37,8 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
     audioOut(preferences.audioOut),
     audioIn(uv, preferences.audioIn, wav2Visemes.sampleRate(), wav2Visemes.frameSize()),
     mouseTracking(uv),
-    lib(preferences),
     httpClient(uv),
+    lib(preferences, uv, httpClient),
     selectIco(lib.queryTex("engine:select.png", true)),
     translateIco(lib.queryTex("engine:transalte.png", true)),
     scaleIco(lib.queryTex("engine:scale.png", true)),
@@ -135,10 +136,13 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
     return std::make_unique<EyeV2>(mouseTracking, lib, undo, std::move(name));
   });
   saveFactory.reg<Chat>([this](std::string name) {
-    return std::make_unique<Chat>(lib, undo, uv, httpClient, audioOut, std::move(name));
+    return std::make_unique<Chat>(lib, undo, uv, audioOut, std::move(name));
   });
   saveFactory.reg<ChatV2>([this](std::string name) {
-    return std::make_unique<ChatV2>(lib, undo, uv, httpClient, audioOut, std::move(name));
+    return std::make_unique<ChatV2>(lib, undo, uv, audioOut, std::move(name));
+  });
+  saveFactory.reg<AiMouth>([this](std::string name) {
+    return std::make_unique<AiMouth>(lib, undo, audioIn, audioOut, wav2Visemes, std::move(name));
   });
 
   if (argc == 2)
@@ -338,6 +342,12 @@ auto App::renderUi(float /*dt*/) -> void
         });
       if (ImGui::MenuItem("Add Bouncer"))
         addNode(Bouncer2::className, "bouncer");
+      if (ImGui::MenuItem("Add AI Mouth..."))
+        dialog =
+          std::make_unique<FileOpen>(lib, "Add AI Mouth Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(AiMouth::className, filePath.string());
+          });
       ImGui::Separator();
       {
         auto delDisabled = Ui::Disabled(!selected);
@@ -755,6 +765,7 @@ auto App::droppedFile(std::string droppedFile) -> void
       case AddAsDialog::NodeType::sprite: addNode(AnimSprite::className, droppedFile); break;
       case AddAsDialog::NodeType::mouth: addNode(Mouth::className, droppedFile); break;
       case AddAsDialog::NodeType::eye: addNode(EyeV2::className, droppedFile); break;
+      case AddAsDialog::NodeType::aiMouth: addNode(AiMouth::className, droppedFile); break;
       }
     });
 }

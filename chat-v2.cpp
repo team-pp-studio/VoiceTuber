@@ -1,12 +1,7 @@
 #include "chat-v2.hpp"
 
-ChatV2::ChatV2(Lib &lib,
-               Undo &aUndo,
-               uv::Uv &uv,
-               class HttpClient &httpClient,
-               class AudioSink &audioSink,
-               std::string aName)
-  : Chat(lib, aUndo, uv, httpClient, audioSink, aName)
+ChatV2::ChatV2(Lib &lib, Undo &aUndo, uv::Uv &uv, class AudioSink &audioSink, std::string aName)
+  : Chat(lib, aUndo, uv, audioSink, aName)
 {
 }
 

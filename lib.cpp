@@ -3,7 +3,20 @@
 #include <cassert>
 #include <log/log.hpp>
 
-Lib::Lib(class Preferences &preferences) : preferences(preferences) {}
+Lib::Lib(class Preferences &aPreferences, uv::Uv &aUv, HttpClient &aHttpClient)
+  : preferences(aPreferences),
+    uv(aUv),
+    httpClient(aHttpClient),
+    azureToken(preferences.get().azureKey, httpClient),
+    gpt_(uv,
+         preferences.get().openAiToken,
+         "You are Clara, an AI co-host for Mika's Twitch stream. Your main role is to entertain the "
+         "audience, keep the energy high, and contribute to the fun atmosphere. Make use of humor, and "
+         "share interesting trivia. Be succinct in your "
+         "responses and remember: brevity is the soul of wit!",
+         httpClient)
+{
+}
 
 auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Texture>
 {
@@ -21,7 +34,7 @@ auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Tex
   return shared;
 }
 
-auto Lib::queryTwitch(uv::Uv &uv, const std::string &v) -> std::shared_ptr<Twitch>
+auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
 {
   auto it = twitchChannels.find(v);
   if (it != std::end(twitchChannels))
@@ -63,16 +76,29 @@ auto Lib::flush() -> void
       continue;
     shared->updateUserKey(preferences.get().twitchUser, preferences.get().twitchKey);
   }
-  if (auto aTts = azureTts.lock())
-    aTts->updateKey(preferences.get().azureKey);
+  azureToken.updateKey(preferences.get().azureKey);
+  gpt_.updateToken(preferences.get().openAiToken);
 }
 
-auto Lib::queryAzureTts(uv::Uv &uv, class HttpClient &httpClient, class AudioSink &audioSink)
-  -> std::shared_ptr<AzureTts>
+auto Lib::queryAzureTts(class AudioSink &audioSink) -> std::shared_ptr<AzureTts>
 {
   if (auto ret = azureTts.lock())
     return ret;
-  auto ret = std::make_shared<AzureTts>(uv, preferences.get().azureKey, httpClient, audioSink);
+  auto ret = std::make_shared<AzureTts>(uv, azureToken, httpClient, audioSink);
   azureTts = ret;
   return ret;
+}
+
+auto Lib::queryAzureStt() -> std::shared_ptr<AzureStt>
+{
+  if (auto ret = azureStt.lock())
+    return ret;
+  auto ret = std::make_shared<AzureStt>(uv, azureToken, httpClient);
+  azureStt = ret;
+  return ret;
+}
+
+auto Lib::gpt() -> Gpt &
+{
+  return gpt_;
 }

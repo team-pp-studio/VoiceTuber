@@ -40,8 +40,8 @@ private:
   AudioOut audioOut;
   AudioIn audioIn;
   MouseTracking mouseTracking;
-  Lib lib;
   HttpClient httpClient;
+  Lib lib;
   Undo undo;
   Node *hovered = nullptr;
   Node *selected = nullptr;

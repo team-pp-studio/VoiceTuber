@@ -16,7 +16,7 @@ auto AudioLevel::getLevel() const -> float
   return level;
 }
 
-auto AudioLevel::ingest(Wav wav) -> void
+auto AudioLevel::ingest(Wav wav, bool overlap) -> void
 {
   for (auto v : wav)
   {

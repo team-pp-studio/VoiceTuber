@@ -10,7 +10,7 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  ChatV2(Lib &, Undo &, uv::Uv &, class HttpClient &, class AudioSink &, std::string name);
+  ChatV2(Lib &, Undo &, uv::Uv &, class AudioSink &, std::string name);
 
   static constexpr const char *className = "Chat-v2";
 

@@ -14,5 +14,5 @@ private:
   std::reference_wrapper<AudioIn> audioIn;
   float level = 0.f;
 
-  auto ingest(Wav) -> void final;
+  auto ingest(Wav, bool overlap) -> void final;
 };

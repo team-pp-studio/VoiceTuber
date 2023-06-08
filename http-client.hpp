@@ -54,9 +54,9 @@ private:
   auto createSockContext(curl_socket_t sockfd) -> SockContext *;
   auto curlPerform(uv_poll_t *req, int status, int events) -> void;
   auto destroySockContext(SockContext *context) -> void;
-  auto onTimeout() -> void;
+  auto onTimeout(CURLM *multi) -> void;
   auto socketFunc(CURL *easy, curl_socket_t s, int action, void *socketp) -> int;
-  auto startTimeout(long timeoutMs) -> int;
+  auto startTimeout(long timeoutMs, CURLM *multi) -> int;
   static auto socketFunc_(CURL *easy, curl_socket_t s, int action, void *userp, void *socketp) -> int;
   static auto startTimeout_(CURLM *, long timeout_ms, void *userp) -> int;
 };

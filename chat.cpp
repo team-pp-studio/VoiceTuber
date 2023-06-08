@@ -9,18 +9,11 @@
 
 static const char *mute = "Mute";
 
-Chat::Chat(class Lib &aLib,
-           Undo &aUndo,
-           uv::Uv &aUv,
-           HttpClient &aHttpClient,
-           AudioSink &aAudioSink,
-           std::string n)
+Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std::string n)
   : Node(aLib, aUndo, n),
     lib(aLib),
-    uv(aUv),
-    httpClient(aHttpClient),
     audioSink(aAudioSink),
-    twitch(aLib.queryTwitch(aUv, n)),
+    twitch(aLib.queryTwitch(n)),
     font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize)),
     timer(aUv.createTimer())
 {
@@ -159,7 +152,7 @@ auto Chat::load(IStrm &strm) -> void
   {
     if (!azureTts)
     {
-      azureTts = lib.get().queryAzureTts(uv, httpClient, audioSink);
+      azureTts = lib.get().queryAzureTts(audioSink);
       azureTts->listVoices([this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
     }
   }
@@ -293,7 +286,7 @@ auto Chat::renderUi() -> void
           {
             if (!azureTts)
             {
-              azureTts = lib.get().queryAzureTts(uv, httpClient, audioSink);
+              azureTts = lib.get().queryAzureTts(audioSink);
               azureTts->listVoices(
                 [this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
             }
@@ -306,7 +299,7 @@ auto Chat::renderUi() -> void
           {
             if (!azureTts)
             {
-              azureTts = lib.get().queryAzureTts(uv, httpClient, audioSink);
+              azureTts = lib.get().queryAzureTts(audioSink);
               azureTts->listVoices(
                 [this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
             }

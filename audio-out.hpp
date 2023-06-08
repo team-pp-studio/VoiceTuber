@@ -10,7 +10,7 @@ class AudioOut final : public AudioSink
 public:
   AudioOut(const std::string &device, int sampleRate = 44100, int frameSize = 1024);
   auto updateDevice(const std::string &) -> void;
-  auto ingest(Wav) -> void final;
+  auto ingest(Wav, bool overlap) -> void final;
   auto sampleRate() const -> int final;
 
 private:

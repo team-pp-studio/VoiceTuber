@@ -72,6 +72,17 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
+      Ui::textRj("Open AI Token:");
+      ImGui::TableNextColumn();
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 40.f);
+      char buf[1024];
+      strcpy(buf, preferences.get().openAiToken.data());
+      if (ImGui::InputText("##Open AI Token", buf, sizeof(buf), ImGuiInputTextFlags_Password))
+        preferences.get().openAiToken = buf;
+      ImGui::PopItemWidth();
+    }
+    {
+      ImGui::TableNextColumn();
       ImGui::Text("");
       ImGui::TableNextColumn();
     }

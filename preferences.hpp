@@ -14,6 +14,7 @@ public:
   std::string audioOut = DefaultAudio;
   std::string audioIn = DefaultAudio;
   std::string azureKey;
+  std::string openAiToken;
   bool vsync = true;
   int fps = 0;
 };

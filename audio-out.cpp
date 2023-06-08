@@ -21,15 +21,19 @@ auto AudioOut::updateDevice(const std::string &device) -> void
   audio = makeDevice(device);
 }
 
-auto AudioOut::ingest(Wav v) -> void
+auto AudioOut::ingest(Wav v, bool overlap) -> void
 {
   audio->lock();
-  for (auto i = 0U; i < v.size(); ++i)
-  {
-    while (i >= buf.size())
-      buf.push_back(0);
-    buf[i] += v[i];
-  }
+  if (overlap)
+    for (auto i = 0U; i < v.size(); ++i)
+    {
+      while (i >= buf.size())
+        buf.push_back(0);
+      buf[i] += v[i];
+    }
+  else
+    for (auto a : v)
+      buf.push_back(a);
   audio->unlock();
 }
 

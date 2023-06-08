@@ -32,9 +32,9 @@ HttpClient::HttpClient(uv::Uv &aUv) : uv(aUv), timeout(aUv.createTimer()), multi
   curl_multi_setopt(multiHandle, CURLMOPT_TIMERFUNCTION, HttpClient::startTimeout_);
 }
 
-auto HttpClient::startTimeout_(CURLM *, long timeout_ms, void *userp) -> int
+auto HttpClient::startTimeout_(CURLM *multi, long timeout_ms, void *userp) -> int
 {
-  return static_cast<HttpClient *>(userp)->startTimeout(timeout_ms);
+  return static_cast<HttpClient *>(userp)->startTimeout(timeout_ms, multi);
 }
 
 auto HttpClient::socketFunc_(CURL *easy, curl_socket_t s, int action, void *userp, void *socketp) -> int
@@ -149,19 +149,19 @@ void HttpClient::curlPerform(uv_poll_t *req, int /*status*/, int events)
   checkMultiInfo();
 }
 
-auto HttpClient::onTimeout() -> void
+auto HttpClient::onTimeout(CURLM *multi) -> void
 {
   int runningHandles;
-  curl_multi_socket_action(multiHandle, CURL_SOCKET_TIMEOUT, 0, &runningHandles);
+  curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &runningHandles);
   checkMultiInfo();
 }
 
-auto HttpClient::startTimeout(long timeoutMs) -> int
+auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
 {
   if (timeoutMs < 0)
     timeout.stop();
   else
-    timeout.start([this]() { onTimeout(); }, timeoutMs == 0 ? 1 : timeoutMs, 0);
+    timeout.start([this, multi]() { onTimeout(multi); }, timeoutMs == 0 ? 1 : timeoutMs, 0);
   return 0;
 }
 

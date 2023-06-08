@@ -6,6 +6,6 @@ class AudioSink
 {
 public:
   virtual ~AudioSink() = default;
-  virtual auto ingest(Wav) -> void = 0;
+  virtual auto ingest(Wav, bool overlap = true) -> void = 0;
   virtual auto sampleRate() const -> int = 0;
 };

@@ -1,21 +1,16 @@
 #pragma once
 #include "uv.hpp"
+#include "wav.hpp"
 #include <functional>
 #include <queue>
 #include <string>
 
-namespace uv
-{
-  class Uv;
-}
-
-class AzureTts
+class AzureStt
 {
 public:
-  using ListVoicesCb = std::function<auto(std::vector<std::string>)->void>;
-  AzureTts(uv::Uv &, class AzureToken &, class HttpClient &, class AudioSink &);
-  auto say(std::string voice, std::string msg, bool overlap = true) -> void;
-  auto listVoices(ListVoicesCb) -> void;
+  using Cb = std::function<auto(std::string)->void>;
+  AzureStt(uv::Uv &, class AzureToken &, class HttpClient &);
+  auto perform(Wav, int sampleRate, Cb) -> void;
 
   std::string lastError;
 
@@ -27,7 +22,6 @@ private:
   uv::Timer timer;
   std::reference_wrapper<AzureToken> token;
   std::reference_wrapper<HttpClient> httpClient;
-  std::reference_wrapper<AudioSink> audioSink;
   std::queue<Task> queue;
   State state = State::idle;
 

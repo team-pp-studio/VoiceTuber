@@ -39,7 +39,7 @@ Wav2Visemes::~Wav2Visemes()
   ps_free(decoder);
   ps_config_free(config);
 }
-auto Wav2Visemes::ingest(Wav wav) -> void
+auto Wav2Visemes::ingest(Wav wav, bool overlap) -> void
 {
   while (!wav.empty())
   {

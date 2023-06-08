@@ -18,6 +18,8 @@ auto AddAsDialog::internalDraw() -> DialogState
   ImGui::SameLine();
   if (ImGui::RadioButton("Eye", nodeType == NodeType::eye))
     nodeType = NodeType::eye;
+  if (ImGui::RadioButton("AiMouth", nodeType == NodeType::mouth))
+    nodeType = NodeType::aiMouth;
 
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);
