@@ -1,5 +1,6 @@
 #pragma once
 #include "uv.hpp"
+#include <deque>
 #include <functional>
 #include <queue>
 #include <string>
@@ -10,6 +11,7 @@ public:
   using Cb = std::function<auto(const std::string &)->void>;
   Gpt(uv::Uv &, std::string token, std::string systemPrompt, class HttpClient &);
   auto prompt(std::string name, std::string msg, Cb) -> void;
+  auto queueSize() const -> int;
   auto updateToken(std::string token) -> void;
 
   std::string lastError;
@@ -30,8 +32,10 @@ private:
   std::string systemPrompt;
   std::reference_wrapper<HttpClient> httpClient;
   std::queue<Task> queue;
-  std::vector<Msg> msgs;
+  std::deque<Msg> msgs;
   State state = State::idle;
 
+  auto countWords() const -> int;
+  auto countWords(const Msg &) const -> int;
   auto process() -> void;
 };

@@ -3,6 +3,7 @@
 #include "uv.hpp"
 #include <json/json.hpp>
 #include <log/log.hpp>
+#include <numeric>
 #include <sstream>
 
 //  {
@@ -127,6 +128,14 @@ auto Gpt::prompt(std::string name, std::string p, Cb cb) -> void
             msg.msg = choices[0]("message")("content").asStr();
             msgs.emplace_back(std::move(msg));
           }
+          const auto MaxTokens = 4097 * 5 / 10;
+          const auto initWords = countWords();
+          LOG("init words", initWords);
+          for (auto words = initWords; words > MaxTokens;)
+          {
+            words -= countWords(msgs.front());
+            msgs.pop_front();
+          }
           postTask(true);
         },
         {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});
@@ -157,4 +166,24 @@ auto Gpt::process() -> void
 auto Gpt::updateToken(std::string aToken) -> void
 {
   token = std::move(aToken);
+}
+
+auto Gpt::queueSize() const -> int
+{
+  return static_cast<int>(queue.size());
+}
+
+auto Gpt::countWords() const -> int
+{
+  return std::accumulate(
+    std::begin(msgs), std::end(msgs), 0, [this](int a, const auto &msg) { return a + countWords(msg); });
+}
+auto Gpt::countWords(const Msg &msg) const -> int
+{
+  std::istringstream ss(msg.msg);
+  std::string word;
+  auto cnt = 0;
+  while (std::getline(ss, word, ' '))
+    ++cnt;
+  return cnt;
 }

@@ -50,15 +50,20 @@ AiMouth::~AiMouth()
 auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
 {
   wavBuf.insert(std::end(wavBuf), std::begin(wav), std::end(wav));
-  if (viseme == Viseme::sil || std::chrono::high_resolution_clock::now() > silStart)
+  using namespace std::chrono_literals;
+  if (std::chrono::high_resolution_clock::now() > silStart + 1000ms)
   {
     const auto sampleRate = audioIn.get().sampleRate();
     if (static_cast<int>(wavBuf.size()) > 1 * sampleRate)
       stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)}, sampleRate, [this](std::string txt) {
-        LOG(txt);
-        broadcasterMsg += txt;
-        if (broadcasterMsg.size() < 75)
+        if (!txt.empty())
+        {
+          broadcasterMsg += "\n" + txt;
+          LOG(broadcasterMsg.size(), txt);
+        }
+        if (broadcasterMsg.size() < 75 || lib.get().gpt().queueSize() > 0)
           return;
+        LOG(broadcasterMsg);
         lib.get().gpt().prompt("broadcaster", std::move(broadcasterMsg), [this](std::string rsp) {
           LOG(rsp);
           tts->say("en-US-AmberNeural", std::move(rsp), false);
@@ -68,13 +73,22 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
     while (static_cast<int>(wavBuf.size()) > sampleRate / 5)
       wavBuf.pop_front();
   }
+  if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && broadcasterMsg.size() > 5)
+  {
+    LOG(broadcasterMsg);
+    lib.get().gpt().prompt("broadcaster", std::move(broadcasterMsg), [this](std::string rsp) {
+      LOG(rsp);
+      tts->say("en-US-AmberNeural", std::move(rsp), false);
+    });
+    broadcasterMsg.clear();
+  }
 }
 
 auto AiMouth::ingest(Viseme v) -> void
 {
   viseme = v;
-  using namespace std::chrono_literals;
-  silStart = std::chrono::high_resolution_clock::now() + 2s;
+  if (v != Viseme::sil)
+    silStart = std::chrono::high_resolution_clock::now();
 }
 
 auto AiMouth::sampleRate() const -> int
