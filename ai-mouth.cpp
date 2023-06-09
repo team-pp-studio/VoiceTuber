@@ -58,29 +58,27 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
       stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)}, sampleRate, [this](std::string txt) {
         if (!txt.empty())
         {
-          broadcasterMsg += "\n" + txt;
-          LOG(broadcasterMsg.size(), txt);
+          hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
+          LOG("host:", hostMsg.size(), txt);
         }
-        if (broadcasterMsg.size() < 75 || lib.get().gpt().queueSize() > 0)
+        if (hostMsg.size() < 75 || lib.get().gpt().queueSize() > 0)
           return;
-        LOG(broadcasterMsg);
-        lib.get().gpt().prompt("broadcaster", std::move(broadcasterMsg), [this](std::string rsp) {
-          LOG(rsp);
+        lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
+          LOG("co-host", rsp);
           tts->say("en-US-AmberNeural", std::move(rsp), false);
         });
-        broadcasterMsg.clear();
+        hostMsg.clear();
       });
     while (static_cast<int>(wavBuf.size()) > sampleRate / 5)
       wavBuf.pop_front();
   }
-  if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && broadcasterMsg.size() > 5)
+  if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    LOG(broadcasterMsg);
-    lib.get().gpt().prompt("broadcaster", std::move(broadcasterMsg), [this](std::string rsp) {
-      LOG(rsp);
+    lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
+      LOG("co-host", rsp);
       tts->say("en-US-AmberNeural", std::move(rsp), false);
     });
-    broadcasterMsg.clear();
+    hostMsg.clear();
   }
 }
 
@@ -205,7 +203,7 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(val.displayName, val.msg, [this](std::string rsp) {
-    LOG(rsp);
+    LOG("co-host", rsp);
     tts->say("en-US-AmberNeural", std::move(rsp), false);
   });
 }

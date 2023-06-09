@@ -37,7 +37,7 @@ private:
   std::string voice;
   std::deque<int16_t> wavBuf;
   decltype(std::chrono::high_resolution_clock::now()) silStart;
-  std::string broadcasterMsg;
+  std::string hostMsg;
 
   auto ingest(Viseme) -> void final;
   auto ingest(Wav, bool overlap) -> void final;

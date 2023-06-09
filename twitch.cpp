@@ -224,7 +224,6 @@ auto Twitch::parseMsg() -> void
       return;
     auto msg = std::string{std::begin(buf), it - 1};
     buf.erase(std::begin(buf), it + 1);
-    LOG("msg", msg);
     auto tags = std::vector<std::pair<std::string, std::string>>{};
     auto source = std::optional<std::string>{};
     auto command = std::string{};

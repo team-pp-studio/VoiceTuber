@@ -19,7 +19,6 @@ public:
 private:
   struct Msg
   {
-    std::string role;
     std::string name;
     std::string msg;
   };
