@@ -9,6 +9,7 @@ class AiMouth final : public AudioSink, public VisemesSink, public TwitchSink, p
 public:
 #define SER_PROP_LIST      \
   SER_PROP(viseme2Sprite); \
+  SER_PROP(systemPrompt);  \
   SER_PROP(voice);
 
   SER_DEF_PROPS()
@@ -38,6 +39,8 @@ private:
   std::deque<int16_t> wavBuf;
   decltype(std::chrono::high_resolution_clock::now()) silStart;
   std::string hostMsg;
+  std::string systemPrompt;
+  decltype(std::chrono::high_resolution_clock::now()) talkStart;
 
   auto ingest(Viseme) -> void final;
   auto ingest(Wav, bool overlap) -> void final;

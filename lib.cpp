@@ -8,13 +8,7 @@ Lib::Lib(class Preferences &aPreferences, uv::Uv &aUv, HttpClient &aHttpClient)
     uv(aUv),
     httpClient(aHttpClient),
     azureToken(preferences.get().azureKey, httpClient),
-    gpt_(
-      uv,
-      preferences.get().openAiToken,
-      R"(Clara is an AI co-host for Mika's Twitch stream. She entertains the audience, keeps the energy
-high, and contributes to the fun atmosphere. She is funny. Here is the transcript of the stream:
-)",
-      httpClient)
+    gpt_(uv, preferences.get().openAiToken, httpClient)
 {
 }
 

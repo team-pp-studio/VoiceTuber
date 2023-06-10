@@ -62,7 +62,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
                             }
                             if (httpStatus == 401)
                             {
-                              LOG(code, httpStatus, payload);
+                              LOG(code, httpStatus);
                               token.get().clear();
                               cb("");
                               postTask(false);

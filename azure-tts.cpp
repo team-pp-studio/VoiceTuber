@@ -51,7 +51,7 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
         }
         if (httpStatus == 401)
         {
-          LOG(code, httpStatus, payload);
+          LOG(code, httpStatus);
           token.get().clear();
           postTask(false);
           return;
@@ -138,7 +138,7 @@ auto AzureTts::listVoices(ListVoicesCb cb) -> void
         }
         if (httpStatus == 401)
         {
-          LOG(code, httpStatus, payload);
+          LOG(code, httpStatus);
           token.get().clear();
           cb({});
           postTask(false);
@@ -154,7 +154,6 @@ auto AzureTts::listVoices(ListVoicesCb cb) -> void
         }
 
         const auto list = json::Root{std::move(payload)};
-        LOG("Voices num", list.size());
         std::vector<std::string> voices;
         for (auto i = 0U; i < list.size(); ++i)
         {

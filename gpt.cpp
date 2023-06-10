@@ -3,22 +3,18 @@
 #include "uv.hpp"
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <functional>
 #include <json/json.hpp>
 #include <log/log.hpp>
 #include <numeric>
 #include <sstream>
 
-//  {
-//    "model": "gpt-3.5-turbo",
-//    "messages": [{"role": "user", "name":"host","content": "Hello!"}]
-//  }
-
-Gpt::Gpt(uv::Uv &uv, std::string aToken, std::string aSystemPrompt, HttpClient &aHttpClient)
+Gpt::Gpt(uv::Uv &uv, std::string aToken, HttpClient &aHttpClient)
   : timer(uv.createTimer()),
     token(std::move(aToken)),
-    systemPrompt(std::move(aSystemPrompt)),
-    httpClient(aHttpClient)
+    httpClient(aHttpClient),
+    lastReply(std::chrono::high_resolution_clock::now())
 {
 }
 
@@ -51,123 +47,25 @@ static auto stripWhiteSpaces(std::string v) -> std::string
 
 static auto stripHangingSentences(std::string v) -> std::string
 {
-  std::size_t posDot = v.rfind('.');
-  std::size_t posExclamation = v.rfind('!');
-  std::size_t posQuestion = v.rfind('?');
+  const auto posDot = v.rfind('.');
+  const auto posExclamation = v.rfind('!');
+  const auto posQuestion = v.rfind('?');
 
-  std::size_t pos = std::string::npos;
-
+  auto pos = std::string::npos;
   for (std::size_t p : {posDot, posExclamation, posQuestion})
     if (p != std::string::npos && (pos == std::string::npos || p > pos))
       pos = p;
 
-  if (pos != std::string::npos)
-    return v.substr(0, pos + 1);
-  else
-    return v;
+  return (pos != std::string::npos) ? v.substr(0, pos + 1) : v;
 }
 
 auto Gpt::prompt(std::string name, std::string p, Cb cb) -> void
 {
   p = stripWhiteSpaces(p);
-  queue.emplace([cb = std::move(cb), name = std::move(name), p = std::move(p), this](
-                  PostTask postTask) mutable {
-    std::ostringstream ss;
-    ss << R"({
-    "model": "text-davinci-003",
-    "prompt": ")";
-    ss << esc(systemPrompt);
-    for (const auto &msg : msgs)
-      ss << esc("\n| ") << esc(msg.name) << ": " << esc(msg.msg);
-    ss << esc("\n| ") << esc(name) << ": " << esc(p);
-    ss
-      << R"(\n| Co-host:", "temperature": 1, "max_tokens": 20, "top_p": 1.0, "frequency_penalty": 0.5, "presence_penalty": 0.6, "stop": ["\n| "]})";
-
-    httpClient.get().post(
-      "https://api.openai.com/v1/completions",
-      ss.str(),
-      [cb = std::move(cb),
-       name = std::move(name),
-       p = std::move(p),
-       postTask = std::move(postTask),
-       this](CURLcode code, long httpStatus, std::string payload) {
-        if (code != CURLE_OK)
-        {
-          cb("");
-          postTask(false);
-          return;
-        }
-        if (httpStatus >= 400 && httpStatus < 500)
-        {
-          LOG(code, httpStatus, payload);
-          lastError = payload;
-          cb("");
-          postTask(true);
-          return;
-        }
-        if (httpStatus != 200)
-        {
-          LOG(code, httpStatus, payload);
-          lastError = payload;
-          cb("");
-          timer.start([postTask = std::move(postTask)]() { postTask(false); }, 10'000);
-          return;
-        }
-        lastError = "";
-        const auto j = json::Root{std::move(payload)};
-        // {
-        //   "id": "cmpl-7PJIyTy1pXJD3OvzekQOQnqOdcUF5",
-        //   "object": "text_completion",
-        //   "created": 1686266764,
-        //   "model": "text-davinci-003",
-        //   "choices": [
-        //     {
-        //       "text": " Is this thing on?\n",
-        //       "index": 0,
-        //       "logprobs": null,
-        //       "finish_reason": "stop"
-        //     }
-        //   ],
-        //   "usage": {
-        //     "prompt_tokens": 58,
-        //     "completion_tokens": 6,
-        //     "total_tokens": 64
-        //   }
-        // }
-        auto choices = j("choices");
-        if (choices.empty())
-        {
-          LOG(code, httpStatus, payload);
-          lastError = "0 Choices";
-          cb("");
-          postTask(true);
-        }
-        const auto cohostMsg = stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
-
-        cb(cohostMsg);
-        {
-          Msg msg;
-          msg.name = name;
-          msg.msg = p;
-          msgs.emplace_back(std::move(msg));
-        }
-        {
-          Msg msg;
-          msg.name = "Co-host";
-          msg.msg = cohostMsg;
-          msgs.emplace_back(std::move(msg));
-        }
-        const auto MaxTokens = 4097 * 5 / 10;
-        const auto initWords = countWords();
-        for (auto words = initWords; words > MaxTokens;)
-        {
-          words -= countWords(msgs.front());
-          msgs.pop_front();
-        }
-        postTask(true);
-      },
-      {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});
-  });
+  queuedMsgs.emplace_back(std::make_pair(Msg{std::move(name), std::move(p)}, std::move(cb)));
+  using namespace std::chrono_literals;
+  if (state == State::waiting || std::chrono::high_resolution_clock::now() < lastReply + 3s)
+    return;
   process();
 }
 
@@ -175,30 +73,144 @@ auto Gpt::process() -> void
 {
   if (state == State::waiting)
     return;
-  if (queue.empty())
-  {
-    state = State::idle;
+  if (queuedMsgs.empty())
     return;
-  }
   state = State::waiting;
-  queue.front()([this](bool r) {
-    timer.start([this, r]() {
-      if (r)
-        queue.pop();
-      state = State::idle;
-      process();
-    });
-  });
+  std::ostringstream ss;
+  const auto embedName = (rand() % 5 == 0) || msgs.empty();
+  ss << R"({
+    "model": "text-davinci-003",
+    "prompt": ")";
+  ss << esc(systemPrompt_);
+  for (const auto &msg : msgs)
+    ss << esc("\n| ") << esc(msg.name) << ": " << esc(msg.msg);
+  for (const auto &msg : queuedMsgs)
+  {
+    ss << esc("\n| ") << esc(msg.first.name) << ": " << esc(msg.first.msg);
+    msgs.emplace_back(std::move(msg.first));
+  }
+
+  static const auto cohost = "Co-host";
+  if (embedName)
+    ss << R"(\n| )" << cohost << R"(:)";
+  else
+    ss << R"(\n|)";
+  ss
+    << R"(", "temperature": 1, "max_tokens": 24, "top_p": 1.0, "frequency_penalty": 0.5, "presence_penalty": 0.6, "stop": ["\n| "]})";
+
+  httpClient.get().post("https://api.openai.com/v1/completions",
+                        ss.str(),
+                        [embedName, qMsgs = std::move(queuedMsgs), jsonPrompt = ss.str(), this](
+                          CURLcode code, long httpStatus, std::string payload) {
+                          if (code != CURLE_OK)
+                          {
+                            for (const auto &msg : qMsgs)
+                              msg.second("");
+                            state = State::idle;
+                            return;
+                          }
+                          if (httpStatus >= 400 && httpStatus < 500)
+                          {
+                            LOG(code, httpStatus, payload);
+                            LOG(jsonPrompt);
+                            lastError = payload;
+                            for (const auto &msg : qMsgs)
+                              msg.second("");
+                            state = State::idle;
+                            return;
+                          }
+                          if (httpStatus != 200)
+                          {
+                            LOG(code, httpStatus, payload);
+                            LOG(jsonPrompt);
+                            lastError = payload;
+                            for (const auto &msg : qMsgs)
+                              msg.second("");
+                            timer.start(
+                              [this]() {
+                                state = State::idle;
+                                process();
+                              },
+                              10'000);
+                            return;
+                          }
+                          lastError = "";
+                          const auto j = json::Root{std::move(payload)};
+                          // {
+                          //   "id": "cmpl-7PJIyTy1pXJD3OvzekQOQnqOdcUF5",
+                          //   "object": "text_completion",
+                          //   "created": 1686266764,
+                          //   "model": "text-davinci-003",
+                          //   "choices": [
+                          //     {
+                          //       "text": " Is this thing on?\n",
+                          //       "index": 0,
+                          //       "logprobs": null,
+                          //       "finish_reason": "stop"
+                          //     }
+                          //   ],
+                          //   "usage": {
+                          //     "prompt_tokens": 58,
+                          //     "completion_tokens": 6,
+                          //     "total_tokens": 64
+                          //   }
+                          // }
+                          auto choices = j("choices");
+                          if (choices.empty())
+                          {
+                            LOG(code, httpStatus, payload);
+                            lastError = "0 Choices";
+                            for (const auto &msg : qMsgs)
+                              msg.second("");
+                            state = State::idle;
+                            process();
+                          }
+                          auto cohostMsg =
+                            stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
+                          if (!embedName)
+                          {
+                            if (cohostMsg.find(cohost + std::string{":"}) != 0)
+                            {
+                              for (const auto &msg : qMsgs)
+                                msg.second("");
+                              state = State::idle;
+                              process();
+                              return;
+                            }
+                            cohostMsg = stripWhiteSpaces(cohostMsg.substr(strlen(cohost) + 1));
+                          }
+
+                          {
+                            Msg msg;
+                            msg.name = cohost;
+                            msg.msg = cohostMsg;
+                            msgs.emplace_back(std::move(msg));
+                          }
+                          const auto MaxTokens = 4097 * 5 / 10;
+                          const auto initWords = countWords();
+                          for (auto words = initWords; words > MaxTokens;)
+                          {
+                            words -= countWords(msgs.front());
+                            msgs.pop_front();
+                          }
+                          for (auto i = 0U; i < qMsgs.size(); ++i)
+                          {
+                            if (i == 0)
+                              qMsgs[i].second(cohostMsg);
+                            else
+                              qMsgs[i].second("");
+                          }
+                          state = State::idle;
+                          lastReply = std::chrono::high_resolution_clock::now();
+                          process();
+                        },
+                        {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});
+  queuedMsgs.clear();
 }
 
 auto Gpt::updateToken(std::string aToken) -> void
 {
   token = std::move(aToken);
-}
-
-auto Gpt::queueSize() const -> int
-{
-  return static_cast<int>(queue.size());
 }
 
 auto Gpt::countWords() const -> int
@@ -214,4 +226,14 @@ auto Gpt::countWords(const Msg &msg) const -> int
   while (std::getline(ss, word, ' '))
     ++cnt;
   return cnt;
+}
+
+auto Gpt::systemPrompt(std::string v) -> void
+{
+  systemPrompt_ = std::move(v);
+}
+
+auto Gpt::systemPrompt() const -> const std::string &
+{
+  return systemPrompt_;
 }

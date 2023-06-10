@@ -316,6 +316,7 @@ auto Twitch::parseMsg() -> void
           continue;
         }
       }
+      LOG(displayName, ":", privMsg);
       for (auto sink : sinks)
         sink.get().onMsg({displayName, privMsg, color, isFirst, isMod, subscriber});
       return;

@@ -18,7 +18,8 @@ AiMouth::AiMouth(Lib &aLib,
     wav2Visemes(aWav2Visemes),
     stt(lib.get().queryAzureStt()),
     tts(lib.get().queryAzureTts(audioOut)),
-    twitch(aLib.queryTwitch("mika314"))
+    twitch(aLib.queryTwitch("mika314")),
+    systemPrompt(lib.get().gpt().systemPrompt())
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -59,13 +60,14 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
         if (!txt.empty())
         {
           hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
-          LOG("host:", hostMsg.size(), txt);
+          LOG("Host:", txt);
         }
-        if (hostMsg.size() < 75 || lib.get().gpt().queueSize() > 0)
+        if (hostMsg.size() < 75)
           return;
         lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
-          LOG("co-host", rsp);
+          LOG("Co-host:", rsp);
           tts->say("en-US-AmberNeural", std::move(rsp), false);
+          talkStart = std::chrono::high_resolution_clock::now();
         });
         hostMsg.clear();
       });
@@ -75,8 +77,11 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
     lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
-      LOG("co-host", rsp);
+      if (rsp.empty())
+        return;
+      LOG("Co-host:", rsp);
       tts->say("en-US-AmberNeural", std::move(rsp), false);
+      talkStart = std::chrono::high_resolution_clock::now();
     });
     hostMsg.clear();
   }
@@ -98,20 +103,40 @@ auto AiMouth::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   Sprite::load(strm);
+  lib.get().gpt().systemPrompt(systemPrompt);
 }
 
 auto AiMouth::render(float dt, Node *hovered, Node *selected) -> void
 {
-  frame = viseme2Sprite[viseme] % numFrames;
+  using namespace std::chrono_literals;
+  if (std::chrono::high_resolution_clock::now() < talkStart + 3s)
+    frame = rand() % numFrames;
+  else
+    frame = 0;
   Sprite::render(dt, hovered, selected);
 }
 
 auto AiMouth::renderUi() -> void
 {
-
   Sprite::renderUi();
   ImGui::TableNextColumn();
-
+  Ui::textRj("System Prompt");
+  ImGui::TableNextColumn();
+  {
+    char text[1024 * 16];
+    std::copy(std::begin(systemPrompt), std::end(systemPrompt), text);
+    text[systemPrompt.size()] = '\0';
+    if (ImGui::InputTextMultiline("##system prompt",
+                                  text,
+                                  IM_ARRAYSIZE(text),
+                                  ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16),
+                                  0))
+    {
+      systemPrompt = text;
+      lib.get().gpt().systemPrompt(systemPrompt);
+    }
+  }
+  ImGui::TableNextColumn();
   {
     ImGui::PushStyleColor(
       ImGuiCol_Text,
@@ -203,7 +228,10 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(val.displayName, val.msg, [this](std::string rsp) {
+    if (rsp.empty())
+      return;
     LOG("co-host", rsp);
     tts->say("en-US-AmberNeural", std::move(rsp), false);
+    talkStart = std::chrono::high_resolution_clock::now();
   });
 }
