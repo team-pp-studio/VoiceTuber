@@ -142,6 +142,8 @@ considered to further refine and improve the application.
 --------
 Top Priority
  - [ ] the app crashes on Twitch chat with unstable Internet
+ - [ ] implement mouth based on individual images instead of the sprite sheet
+ - [ ] implement blink based on individual images
  - [x] highlight the chat if it is disconnected from the Internet
  - [x] allow limiting of frame rate
  - [x] better compatibility for multiple windows
@@ -155,7 +157,6 @@ General Priority
 - [x] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
 - [ ] Transition to/Add Softbody Phyics
 - [x] Azure TTS
-- [ ] (feature) automatically create and export sprite sheets based on 2 images
 - [x] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
       to have overshooting
 - [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model)
