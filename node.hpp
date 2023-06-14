@@ -76,6 +76,7 @@ protected:
   virtual auto render(float dt, Node *hovered, Node *selected) -> void;
   virtual auto save(OStrm &) const -> void;
 
+  std::shared_ptr<int> alive;
   std::string name;
 
 private:

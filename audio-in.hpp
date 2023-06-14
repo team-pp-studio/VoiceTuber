@@ -16,6 +16,7 @@ public:
   auto sampleRate() const -> int;
 
 private:
+  std::shared_ptr<int> alive;
   uv::Prepare prepare;
   std::vector<std::reference_wrapper<AudioSink>> sinks;
   SDL_AudioSpec want;

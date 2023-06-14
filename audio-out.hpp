@@ -14,6 +14,7 @@ public:
   auto sampleRate() const -> int final;
 
 private:
+  std::shared_ptr<int> alive;
   SDL_AudioSpec want;
   std::unique_ptr<sdl::Audio> audio;
   std::deque<int16_t> buf;

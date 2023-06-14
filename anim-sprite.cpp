@@ -108,38 +108,119 @@ auto AnimSprite::renderUi() -> void
                   "%.1f");
     const auto sz = 2 * ImGui::GetFontSize();
     if (Ui::btnImg("nw2", *arrowNW, sz, sz))
-      undo.get().record([newEnd = glm::vec2{0, h()}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("n2", *arrowN, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w() / 2, h()}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("ne2", *arrowNE, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w(), h()}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     if (Ui::btnImg("w2", *arrowW, sz, sz))
-      undo.get().record([newEnd = glm::vec2{0, h() / 2}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("c2", *center, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w() / 2, h() / 2}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("e2", *arrowE, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w(), h() / 2}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     if (Ui::btnImg("sw2", *arrowSW, sz, sz))
-      undo.get().record([newEnd = glm::vec2{0, 0}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("s2", *arrowS, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w() / 2, 0}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::SameLine();
     if (Ui::btnImg("se2", *arrowSE, sz, sz))
-      undo.get().record([newEnd = glm::vec2{w(), 0}, this]() { end = newEnd; },
-                        [oldEnd = end, this]() { end = oldEnd; });
+      undo.get().record(
+        [newEnd = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = newEnd;
+        },
+        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          end = oldEnd;
+        });
     ImGui::TableNextColumn();
     Ui::textRj("Force");
     ImGui::TableNextColumn();

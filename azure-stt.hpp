@@ -19,6 +19,7 @@ private:
   using PostTask = std::function<auto(bool)->void>;
   using Task = std::function<auto(const std::string &t, PostTask)->void>;
 
+  std::shared_ptr<int> alive;
   uv::Timer timer;
   std::reference_wrapper<AzureToken> token;
   std::reference_wrapper<HttpClient> httpClient;

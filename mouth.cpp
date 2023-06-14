@@ -79,13 +79,17 @@ auto Mouth::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, this, vis]() {
+        [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
+                  if (!alive.lock())
+                    return;
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
           freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
-        [&f, oldF, this, vis]() {
+        [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
+                  if (!alive.lock())
+                    return;
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;

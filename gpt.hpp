@@ -27,6 +27,7 @@ private:
   };
   enum class State { idle, waiting };
 
+  std::shared_ptr<int> alive;
   uv::Timer timer;
   std::string token;
   std::string systemPrompt_ =

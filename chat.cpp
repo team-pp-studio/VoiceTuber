@@ -99,7 +99,13 @@ auto Chat::onMsg(Msg val) -> void
   showChat = true;
   timer.stop();
   if (hideChatSec > 0)
-    timer.start([this]() { showChat = false; }, hideChatSec * 1000);
+    timer.start(
+      [alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        showChat = false;
+      },
+      hideChatSec * 1000);
   if (azureTts)
   {
     const auto name = val.displayName;
@@ -153,7 +159,11 @@ auto Chat::load(IStrm &strm) -> void
     if (!azureTts)
     {
       azureTts = lib.get().queryAzureTts(audioSink);
-      azureTts->listVoices([this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
+      azureTts->listVoices([alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
+        if (!alive.lock())
+          return;
+        voices = std::move(aVoices);
+      });
     }
   }
 }
@@ -258,12 +268,16 @@ auto Chat::renderUi() -> void
   const auto oldSize = ptsize;
   if (ImGui::InputInt("##Font Size", &ptsize))
     undo.get().record(
-      [newSize = ptsize, this]() {
+      [newSize = ptsize, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
         ptsize = newSize;
         font = lib.get().queryFont(
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
       },
-      [oldSize, this]() {
+      [oldSize, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
         ptsize = oldSize;
         font = lib.get().queryFont(
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
@@ -281,27 +295,39 @@ auto Chat::renderUi() -> void
     if (ImGui::Checkbox("##AzureTTS", &tts))
     {
       undo.get().record(
-        [this, newTts = tts]() {
+        [alive = std::weak_ptr<int>(alive), this, newTts = tts]() {
+          if (!alive.lock())
+            return;
           if (newTts)
           {
             if (!azureTts)
             {
               azureTts = lib.get().queryAzureTts(audioSink);
               azureTts->listVoices(
-                [this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
+                [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
+                  if (!alive.lock())
+                    return;
+                  voices = std::move(aVoices);
+                });
             }
           }
           else
             azureTts = nullptr;
         },
-        [this, oldTts]() {
+        [alive = std::weak_ptr<int>(alive), this, oldTts]() {
+          if (!alive.lock())
+            return;
           if (oldTts)
           {
             if (!azureTts)
             {
               azureTts = lib.get().queryAzureTts(audioSink);
               azureTts->listVoices(
-                [this](std::vector<std::string> aVoices) { voices = std::move(aVoices); });
+                [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
+                  if (!alive.lock())
+                    return;
+                  voices = std::move(aVoices);
+                });
             }
           }
           else

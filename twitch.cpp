@@ -140,7 +140,8 @@ static const char *server = "irc.chat.twitch.tv";
 static const char *port = "6667";
 
 Twitch::Twitch(uv::Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
-  : uv(uv),
+  : alive(std::make_shared<int>()),
+    uv(uv),
     user(std::move(aUser)),
     key(std::move(aKey)),
     channel(std::move(aChannel)),
@@ -155,16 +156,19 @@ auto Twitch::init() -> void
   state = State::connecting;
   retry.stop();
 
-  auto s = uv.get().connect(server, port, [this](int status, uv::Tcp aTcp) {
-    if (status < 0)
-    {
-      LOG(__func__, "error:", uv_err_name(status));
-      initiateRetry();
-      return;
-    }
-    tcp = std::move(aTcp);
-    sendPassNickUser();
-  });
+  auto s =
+    uv.get().connect(server, port, [alive = std::weak_ptr<int>(alive), this](int status, uv::Tcp aTcp) {
+      if (!alive.lock())
+        return;
+      if (status < 0)
+      {
+        LOG(__func__, "error:", uv_err_name(status));
+        initiateRetry();
+        return;
+      }
+      tcp = std::move(aTcp);
+      sendPassNickUser();
+    });
   if (s < 0)
   {
     LOG(__func__, "error:", uv_err_name(s));
@@ -179,7 +183,9 @@ auto Twitch::sendPassNickUser() -> void
   msg << "PASS " << key << "\r\n";
   msg << "NICK " << user << "\r\n";
   msg << "USER nobody unknown unknown :noname\r\n";
-  auto s = tcp.write(msg.str(), [this](int status) {
+  auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
+    if (!alive.lock())
+      return;
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -198,7 +204,9 @@ auto Twitch::sendPassNickUser() -> void
 
 auto Twitch::readStart() -> void
 {
-  auto s = tcp.readStart([this](int status, std::string msg) {
+  auto s = tcp.readStart([alive = std::weak_ptr<int>(alive), this](int status, std::string msg) {
+    if (!alive.lock())
+      return;
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -344,7 +352,9 @@ auto Twitch::onPing(const std::string &val) -> void
 {
   std::ostringstream sendMsg;
   sendMsg << "PONG " << val << "\r\n";
-  auto s = tcp.write(sendMsg.str(), [this](int status) {
+  auto s = tcp.write(sendMsg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
+    if (!alive.lock())
+      return;
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -372,7 +382,9 @@ auto Twitch::onWelcome() -> void
   msg << "CAP REQ :twitch.tv/tags\r\n"
       << "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n"
       << "JOIN #" << channel << "\r\n";
-  auto s = tcp.write(msg.str(), [this](int status) {
+  auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
+    if (!alive.lock())
+      return;
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -395,8 +407,12 @@ auto Twitch::onWelcome() -> void
 auto Twitch::schedulePing() -> void
 {
   retry.start(
-    [this]() {
-      tcp.write("PING :tmi.twitch.tv\r\n", [this](int status) {
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
+      tcp.write("PING :tmi.twitch.tv\r\n", [alive = std::weak_ptr<int>(alive), this](int status) {
+        if (!alive.lock())
+          return;
         if (status < 0)
         {
           LOG(__func__, "error:", uv_err_name(status));
@@ -405,7 +421,9 @@ auto Twitch::schedulePing() -> void
         }
       });
       retry.start(
-        [this]() {
+        [alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
           LOG(__func__, "error: PING timeout");
           initiateRetry();
         },
@@ -429,7 +447,13 @@ auto Twitch::unreg(TwitchSink &v) -> void
 auto Twitch::initiateRetry() -> void
 {
   state = State::connecting;
-  retry.start([this]() { init(); }, initRetry);
+  retry.start(
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
+      init();
+    },
+    initRetry);
   LOG("Retry in ", initRetry);
   initRetry = std::min(32000, initRetry * 2);
 }

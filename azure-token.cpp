@@ -3,7 +3,7 @@
 #include <log/log.hpp>
 
 AzureToken::AzureToken(std::string aKey, class HttpClient &aHttpClient)
-  : key(std::move(aKey)), httpClient(aHttpClient)
+  : alive(std::make_shared<int>()), key(std::move(aKey)), httpClient(aHttpClient)
 {
 }
 
@@ -17,31 +17,34 @@ auto AzureToken::get(Cb cb) -> void
     cbs.clear();
     return;
   }
-  httpClient.get().post("https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-                        "",
-                        [this](CURLcode code, long httpStatus, std::string payload) {
-                          if (code != CURLE_OK)
-                          {
-                            LOG(code, httpStatus, payload);
-                            for (const auto &lCb : cbs)
-                              lCb("", std::string{"CURL Error: "} + curl_easy_strerror(code));
-                            cbs.clear();
-                            return;
-                          }
-                          if (httpStatus != 200)
-                          {
-                            LOG(code, httpStatus, payload);
-                            for (const auto &lCb : cbs)
-                              lCb("", "HTTP Status: " + std::to_string(httpStatus) + " " + payload);
-                            cbs.clear();
-                            return;
-                          }
-                          token = std::move(payload);
-                          for (const auto &lCb : cbs)
-                            lCb(token, "");
-                          cbs.clear();
-                        },
-                        {{"Ocp-Apim-Subscription-Key", key}, {"Expect", ""}});
+  httpClient.get().post(
+    "https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
+    "",
+    [alive = std::weak_ptr<int>(alive), this](CURLcode code, long httpStatus, std::string payload) {
+      if (!alive.lock())
+        return;
+      if (code != CURLE_OK)
+      {
+        LOG(code, httpStatus, payload);
+        for (const auto &lCb : cbs)
+          lCb("", std::string{"CURL Error: "} + curl_easy_strerror(code));
+        cbs.clear();
+        return;
+      }
+      if (httpStatus != 200)
+      {
+        LOG(code, httpStatus, payload);
+        for (const auto &lCb : cbs)
+          lCb("", "HTTP Status: " + std::to_string(httpStatus) + " " + payload);
+        cbs.clear();
+        return;
+      }
+      token = std::move(payload);
+      for (const auto &lCb : cbs)
+        lCb(token, "");
+      cbs.clear();
+    },
+    {{"Ocp-Apim-Subscription-Key", key}, {"Expect", ""}});
 }
 
 auto AzureToken::clear() -> void

@@ -27,9 +27,18 @@ auto Root::renderUi() -> void
   if (ImGui::ColorEdit4(
         "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
   {
-    undo.get().record([this, newColor = clearColor]() { clearColor = newColor; },
-                      [this, oldColor]() { clearColor = oldColor; },
-                      "##BG color");
+    undo.get().record(
+      [alive = std::weak_ptr<int>(alive), this, newColor = clearColor]() {
+        if (!alive.lock())
+          return;
+        clearColor = newColor;
+      },
+      [alive = std::weak_ptr<int>(alive), this, oldColor]() {
+        if (!alive.lock())
+          return;
+        clearColor = oldColor;
+      },
+      "##BG color");
   }
 }
 

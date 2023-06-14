@@ -22,6 +22,7 @@ public:
   auto updateUserKey(const std::string &user, const std::string &key) -> void;
 
 private:
+  std::shared_ptr<int> alive;
   std::reference_wrapper<uv::Uv> uv;
   std::string user;
   std::string key;

@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,7 @@ public:
   auto updateKey(const std::string &) -> void;
 
 private:
+  std::shared_ptr<int> alive;
   std::string key;
   std::reference_wrapper<HttpClient> httpClient;
   std::vector<Cb> cbs;

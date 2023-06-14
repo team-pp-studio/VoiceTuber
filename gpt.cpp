@@ -11,7 +11,8 @@
 #include <sstream>
 
 Gpt::Gpt(uv::Uv &uv, std::string aToken, HttpClient &aHttpClient)
-  : timer(uv.createTimer()),
+  : alive(std::make_shared<int>()),
+    timer(uv.createTimer()),
     token(std::move(aToken)),
     httpClient(aHttpClient),
     lastReply(std::chrono::high_resolution_clock::now())
@@ -100,8 +101,13 @@ auto Gpt::process() -> void
 
   httpClient.get().post("https://api.openai.com/v1/completions",
                         ss.str(),
-                        [embedName, qMsgs = std::move(queuedMsgs), jsonPrompt = ss.str(), this](
-                          CURLcode code, long httpStatus, std::string payload) {
+                        [embedName,
+                         qMsgs = std::move(queuedMsgs),
+                         jsonPrompt = ss.str(),
+                         alive = std::weak_ptr<int>(alive),
+                         this](CURLcode code, long httpStatus, std::string payload) {
+                          if (!alive.lock())
+                            return;
                           if (code != CURLE_OK)
                           {
                             for (const auto &msg : qMsgs)
@@ -127,7 +133,9 @@ auto Gpt::process() -> void
                             for (const auto &msg : qMsgs)
                               msg.second("");
                             timer.start(
-                              [this]() {
+                              [alive = std::weak_ptr<int>(alive), this]() {
+                                if (!alive.lock())
+                                  return;
                                 state = State::idle;
                                 process();
                               },

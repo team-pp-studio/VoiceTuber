@@ -56,7 +56,8 @@ static auto setModelViewMatrix(glm::mat4 v) -> void
 }
 
 Node::Node(Lib &lib, Undo &undo, std::string name)
-  : name(std::move(name)),
+  : alive(std::make_unique<int>()),
+    name(std::move(name)),
     undo(undo),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -156,9 +157,18 @@ auto Node::renderUi() -> void
                            std::numeric_limits<float>::max(),
                            "%.2f"))
       {
-        undo.get().record([avgScale, this]() { scale.x = scale.y = avgScale; },
-                          [oldScale = scale, this]() { scale = oldScale; },
-                          "Scale");
+        undo.get().record(
+          [avgScale, alive = std::weak_ptr<int>(alive), this]() {
+            if (!alive.lock())
+              return;
+            scale.x = scale.y = avgScale;
+          },
+          [oldScale = scale, alive = std::weak_ptr<int>(alive), this]() {
+            if (!alive.lock())
+              return;
+            scale = oldScale;
+          },
+          "Scale");
       }
     }
     ImGui::SameLine();
@@ -220,38 +230,119 @@ auto Node::renderUi() -> void
                 "%.1f");
   const auto sz = 2 * ImGui::GetFontSize();
   if (Ui::btnImg("nw", *arrowNW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, h()}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("n", *arrowN, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, h()}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("ne", *arrowNE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), h()}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   if (Ui::btnImg("w", *arrowW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, h() / 2}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("c", *center, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, h() / 2}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("e", *arrowE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), h() / 2}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
-    undo.get().record([newPivot = glm::vec2{0, 0}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("s", *arrowS, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w() / 2, 0}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::SameLine();
   if (Ui::btnImg("se", *arrowSE, sz, sz))
-    undo.get().record([newPivot = glm::vec2{w(), 0}, this]() { pivot_ = newPivot; },
-                      [oldPivot = pivot_, this]() { pivot_ = oldPivot; });
+    undo.get().record(
+      [newPivot = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = newPivot;
+      },
+      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        pivot_ = oldPivot;
+      });
   ImGui::TableNextColumn();
   Ui::textRj("Rotation");
   ImGui::TableNextColumn();
@@ -383,7 +474,9 @@ auto Node::moveUp() -> void
   if (parent()->nodes.front().get() == this)
     return;
   undo.get().record(
-    [this]() {
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -391,7 +484,9 @@ auto Node::moveUp() -> void
       auto prev = it - 1;
       std::swap(*it, *prev);
     },
-    [this]() {
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -410,7 +505,9 @@ auto Node::moveDown() -> void
   if (parent()->nodes.back().get() == this)
     return;
   undo.get().record(
-    [this]() {
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -418,7 +515,9 @@ auto Node::moveDown() -> void
       auto prev = it + 1;
       std::swap(*it, *prev);
     },
-    [this]() {
+    [alive = std::weak_ptr<int>(alive), this]() {
+      if (!alive.lock())
+        return;
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -443,13 +542,17 @@ auto Node::unparent() -> void
   assert(it != std::end(oldParent->nodes));
   auto self = std::move(*it);
   undo.get().record(
-    [it, newParent, oldParent, this, self]() {
+    [it, newParent, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
+      if (!alive.lock())
+        return;
       loc += oldParent->loc;
       newParent->nodes.emplace_back(std::move(self));
       oldParent->nodes.erase(it);
       parent_ = newParent;
     },
-    [it, newParent, oldLoc = loc, oldParent, this, self]() {
+    [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
+      if (!alive.lock())
+        return;
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent->nodes),
                               std::end(newParent->nodes),
@@ -478,7 +581,9 @@ auto Node::parentWithBellow() -> void
   auto self = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [newParent, this, it, self]() {
+    [newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
+      if (!alive.lock())
+        return;
       glm::mat4 newParentTransform = newParent->modelViewMat;
       modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
       loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
@@ -487,7 +592,9 @@ auto Node::parentWithBellow() -> void
       parent_->nodes.erase(it);
       parent_ = newParent;
     },
-    [it, newParent, oldLoc = loc, oldParent, this, self]() {
+    [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
+      if (!alive.lock())
+        return;
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent->nodes),
                               std::end(newParent->nodes),
@@ -695,16 +802,43 @@ auto Node::commit() -> void
   switch (editMode_)
   {
   case EditMode::translate:
-    undo.get().record([newLoc = loc, this]() { loc = newLoc; },
-                      [oldLoc = initLoc, this]() { loc = oldLoc; });
+    undo.get().record(
+      [newLoc = loc, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        loc = newLoc;
+      },
+      [oldLoc = initLoc, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        loc = oldLoc;
+      });
     break;
   case EditMode::rotate:
-    undo.get().record([newRot = rot, this]() { rot = newRot; },
-                      [oldRot = initRot, this]() { rot = oldRot; });
+    undo.get().record(
+      [newRot = rot, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        rot = newRot;
+      },
+      [oldRot = initRot, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        rot = oldRot;
+      });
     break;
   case EditMode::scale:
-    undo.get().record([newScale = scale, this]() { scale = newScale; },
-                      [oldScale = initScale, this]() { scale = oldScale; });
+    undo.get().record(
+      [newScale = scale, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        scale = newScale;
+      },
+      [oldScale = initScale, alive = std::weak_ptr<int>(alive), this]() {
+        if (!alive.lock())
+          return;
+        scale = oldScale;
+      });
     break;
   case EditMode::select: break;
   }
@@ -735,7 +869,9 @@ auto Node::parentWith(Node &newParent) -> void
   auto self = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [&newParent, this, it, self]() {
+    [&newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
+      if (!alive.lock())
+        return;
       glm::mat4 newParentTransform = newParent.modelViewMat;
       modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
       loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
@@ -744,7 +880,9 @@ auto Node::parentWith(Node &newParent) -> void
       parent_->nodes.erase(it);
       parent_ = &newParent;
     },
-    [it, &newParent, oldLoc = loc, oldParent, this, self]() {
+    [it, &newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
+      if (!alive.lock())
+        return;
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent.nodes),
                               std::end(newParent.nodes),
@@ -760,7 +898,9 @@ auto Node::placeBellow(Node &newSibling) -> void
 {
   assert(newSibling.parent());
   undo.get().record(
-    [this, &newSibling]() {
+    [alive = std::weak_ptr<int>(alive), this, &newSibling]() {
+      if (!alive.lock())
+        return;
       auto selfIt = std::find_if(std::begin(parent()->nodes),
                                  std::end(parent()->nodes),
                                  [this](const auto &v) { return this == v.get(); });
@@ -774,7 +914,9 @@ auto Node::placeBellow(Node &newSibling) -> void
       ++newSiblingIt;
       newSibling.parent()->nodes.insert(newSiblingIt, std::move(self));
     },
-    [this, nodes = parent()->nodes, oldParent = parent()]() {
+    [alive = std::weak_ptr<int>(alive), this, nodes = parent()->nodes, oldParent = parent()]() {
+      if (!alive.lock())
+        return;
       auto selfIt = std::find_if(std::begin(parent()->nodes),
                                  std::end(parent()->nodes),
                                  [this](const auto &v) { return this == v.get(); });

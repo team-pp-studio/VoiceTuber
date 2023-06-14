@@ -2,7 +2,8 @@
 #include "preferences.hpp"
 
 AudioOut::AudioOut(const std::string &device, int sampleRate, int frameSize)
-  : want([sampleRate, frameSize]() {
+  : alive(std::make_shared<int>()),
+    want([sampleRate, frameSize]() {
       SDL_AudioSpec ret;
       SDL_zero(ret);
       ret.freq = sampleRate;
@@ -46,26 +47,29 @@ auto AudioOut::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Aud
 {
 
   SDL_AudioSpec have;
-  auto ret = std::make_unique<sdl::Audio>(device != Preferences::DefaultAudio ? device.c_str() : nullptr,
-                                          0,
-                                          &want,
-                                          &have,
-                                          0,
-                                          [this](Uint8 *stream, int len) {
-                                            for (auto i = 0U; i < len / sizeof(int16_t); ++i)
-                                            {
-                                              if (buf.empty())
-                                                reinterpret_cast<int16_t *>(stream)[i] = 0;
-                                              else
-                                              {
-                                                reinterpret_cast<int16_t *>(stream)[i] = buf.front();
-                                                buf.pop_front();
-                                              }
-                                              // static int t = 0;
-                                              // reinterpret_cast<int16_t *>(stream)[i] =
-                                              //   0x1000 * sinf(2 * 3.14f * t++ * 440.f / 44100.f);
-                                            }
-                                          });
+  auto ret =
+    std::make_unique<sdl::Audio>(device != Preferences::DefaultAudio ? device.c_str() : nullptr,
+                                 0,
+                                 &want,
+                                 &have,
+                                 0,
+                                 [alive = std::weak_ptr<int>(alive), this](Uint8 *stream, int len) {
+                                   if (!alive.lock())
+                                     return;
+                                   for (auto i = 0U; i < len / sizeof(int16_t); ++i)
+                                   {
+                                     if (buf.empty())
+                                       reinterpret_cast<int16_t *>(stream)[i] = 0;
+                                     else
+                                     {
+                                       reinterpret_cast<int16_t *>(stream)[i] = buf.front();
+                                       buf.pop_front();
+                                     }
+                                     // static int t = 0;
+                                     // reinterpret_cast<int16_t *>(stream)[i] =
+                                     //   0x1000 * sinf(2 * 3.14f * t++ * 440.f / 44100.f);
+                                   }
+                                 });
   if (have.format != want.format)
     throw std::runtime_error("Failed to get the desired AudioSpec");
   ret->pause(0);

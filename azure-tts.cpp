@@ -9,7 +9,11 @@ AzureTts::AzureTts(uv::Uv &uv,
                    AzureToken &azureToken,
                    class HttpClient &aHttpClient,
                    class AudioSink &aAudioSink)
-  : timer(uv.createTimer()), token(azureToken), httpClient(aHttpClient), audioSink(aAudioSink)
+  : alive(std::make_shared<int>()),
+    timer(uv.createTimer()),
+    token(azureToken),
+    httpClient(aHttpClient),
+    audioSink(aAudioSink)
 {
   process();
 }
@@ -35,60 +39,65 @@ static std::string escape(std::string data)
 
 auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
 {
-  queue.emplace([msg = std::move(msg), this, voice = std::move(voice), overlap](const std::string &t,
-                                                                                PostTask postTask) {
-    auto xml = R"(<speak version="1.0" xml:lang="en-us"><voice xml:lang="en-US" name=")" + voice +
-               R"("><prosody rate="0.00%">)" + escape(msg) + R"(</prosody></voice></speak>)";
-    httpClient.get().post(
-      "https://eastus.tts.speech.microsoft.com/cognitiveservices/v1",
-      std::move(xml),
-      [overlap, postTask = std::move(postTask), this](
-        CURLcode code, long httpStatus, std::string payload) {
-        if (code != CURLE_OK)
-        {
-          postTask(false);
-          return;
-        }
-        if (httpStatus == 401)
-        {
-          LOG(code, httpStatus);
-          token.get().clear();
-          postTask(false);
-          return;
-        }
-        if (httpStatus >= 400 && httpStatus < 500)
-        {
-          LOG(code, httpStatus, payload);
-          lastError = payload;
-          postTask(true);
-          return;
-        }
-        if (httpStatus != 200)
-        {
-          LOG(code, httpStatus, payload);
-          lastError = payload;
-          timer.start([postTask = std::move(postTask)]() { postTask(false); }, 10'000);
-          return;
-        }
+  queue.emplace(
+    [msg = std::move(msg), alive = std::weak_ptr<int>(alive), this, voice = std::move(voice), overlap](
+      const std::string &t, PostTask postTask) {
+      if (!alive.lock())
+        return;
+      auto xml = R"(<speak version="1.0" xml:lang="en-us"><voice xml:lang="en-US" name=")" + voice +
+                 R"("><prosody rate="0.00%">)" + escape(msg) + R"(</prosody></voice></speak>)";
+      httpClient.get().post(
+        "https://eastus.tts.speech.microsoft.com/cognitiveservices/v1",
+        std::move(xml),
+        [overlap, postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
+          CURLcode code, long httpStatus, std::string payload) {
+          if (!alive.lock())
+            return;
+          if (code != CURLE_OK)
+          {
+            postTask(false);
+            return;
+          }
+          if (httpStatus == 401)
+          {
+            LOG(code, httpStatus);
+            token.get().clear();
+            postTask(false);
+            return;
+          }
+          if (httpStatus >= 400 && httpStatus < 500)
+          {
+            LOG(code, httpStatus, payload);
+            lastError = payload;
+            postTask(true);
+            return;
+          }
+          if (httpStatus != 200)
+          {
+            LOG(code, httpStatus, payload);
+            lastError = payload;
+            timer.start([postTask = std::move(postTask)]() { postTask(false); }, 10'000);
+            return;
+          }
 
-        lastError = "";
-        Wav wav;
-        const auto inF = 24000;
-        const auto outF = audioSink.get().sampleRate();
-        const auto inSz = static_cast<int>(payload.size() / sizeof(int16_t));
-        const auto outSz = static_cast<int>(static_cast<int64_t>(inSz) * outF / inF);
-        wav.resize(outSz);
-        for (auto i = 0; i < outSz; ++i)
-          wav[i] = reinterpret_cast<int16_t *>(payload.data())[static_cast<int64_t>(i) * inF / outF];
-        audioSink.get().ingest(std::move(wav), overlap);
-        postTask(true);
-      },
-      {{"Accept", ""},
-       {"User-Agent", "curl/7.68.0"},
-       {"Authorization", "Bearer " + t},
-       {"Content-Type", "application/ssml+xml"},
-       {"X-Microsoft-OutputFormat", "raw-24khz-16bit-mono-pcm"}});
-  });
+          lastError = "";
+          Wav wav;
+          const auto inF = 24000;
+          const auto outF = audioSink.get().sampleRate();
+          const auto inSz = static_cast<int>(payload.size() / sizeof(int16_t));
+          const auto outSz = static_cast<int>(static_cast<int64_t>(inSz) * outF / inF);
+          wav.resize(outSz);
+          for (auto i = 0; i < outSz; ++i)
+            wav[i] = reinterpret_cast<int16_t *>(payload.data())[static_cast<int64_t>(i) * inF / outF];
+          audioSink.get().ingest(std::move(wav), overlap);
+          postTask(true);
+        },
+        {{"Accept", ""},
+         {"User-Agent", "curl/7.68.0"},
+         {"Authorization", "Bearer " + t},
+         {"Content-Type", "application/ssml+xml"},
+         {"X-Microsoft-OutputFormat", "raw-24khz-16bit-mono-pcm"}});
+    });
   process();
 }
 
@@ -102,34 +111,48 @@ auto AzureTts::process() -> void
     return;
   }
   state = State::waiting;
-  token.get().get([this](const std::string &t, const std::string &err) {
-    if (t.empty())
-    {
-      lastError = err;
-      timer.start([this]() {
-        state = State::idle;
-        process();
-      });
-      return;
-    }
-    queue.front()(t, [this](bool r) {
-      timer.start([this, r]() {
-        if (r)
-          queue.pop();
-        state = State::idle;
-        process();
+  token.get().get(
+    [alive = std::weak_ptr<int>(alive), this](const std::string &t, const std::string &err) {
+      if (!alive.lock())
+        return;
+      if (t.empty())
+      {
+        lastError = err;
+        timer.start([alive = std::weak_ptr<int>(alive), this]() {
+          if (!alive.lock())
+            return;
+          state = State::idle;
+          process();
+        });
+        return;
+      }
+      queue.front()(t, [alive = std::weak_ptr<int>(alive), this](bool r) {
+        if (!alive.lock())
+          return;
+        timer.start([alive = std::weak_ptr<int>(alive), this, r]() {
+          if (!alive.lock())
+            return;
+          if (r)
+            queue.pop();
+          state = State::idle;
+          process();
+        });
       });
     });
-  });
 }
 
 auto AzureTts::listVoices(ListVoicesCb cb) -> void
 {
-  queue.emplace([cb = std::move(cb), this](const std::string &t, PostTask postTask) {
+  queue.emplace([cb = std::move(cb), alive = std::weak_ptr<int>(alive), this](const std::string &t,
+                                                                              PostTask postTask) {
+    if (!alive.lock())
+      return;
     httpClient.get().get(
       "https://eastus.tts.speech.microsoft.com/cognitiveservices/voices/list",
-      [cb = std::move(cb), postTask = std::move(postTask), this](
+      [cb = std::move(cb), postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
         CURLcode code, long httpStatus, std::string payload) {
+        if (!alive.lock())
+          return;
         if (code != CURLE_OK)
         {
           cb({});

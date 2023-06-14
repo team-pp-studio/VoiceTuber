@@ -28,6 +28,7 @@ public:
   auto post(const std::string &url, std::string post, Cb cb, const Headers &chunks = Headers{}) -> void;
 
 private:
+  std::shared_ptr<int> alive;
   std::reference_wrapper<uv::Uv> uv;
   uv::Timer timeout;
   CURLM *multiHandle = nullptr;

@@ -102,8 +102,17 @@ auto EyeV2::renderUi() -> void
     if (combo)
     {
       if (ImGui::Selectable("Custom", "Custom" == selectedDisplay))
-        undo.get().record([this]() { selectedDisplay = "Custom"; },
-                          [this, oldDisplay = selectedDisplay]() { selectedDisplay = oldDisplay; });
+        undo.get().record(
+          [alive = std::weak_ptr<int>(alive), this]() {
+            if (!alive.lock())
+              return;
+            selectedDisplay = "Custom";
+          },
+          [alive = std::weak_ptr<int>(alive), this, oldDisplay = selectedDisplay]() {
+            if (!alive.lock())
+              return;
+            selectedDisplay = oldDisplay;
+          });
       const auto displayCnt = SDL_GetNumVideoDisplays();
       for (auto i = 0; i < displayCnt; ++i)
       {
@@ -111,7 +120,9 @@ auto EyeV2::renderUi() -> void
         if (ImGui::Selectable(name, name == selectedDisplay))
         {
           undo.get().record(
-            [this, newDisplay = std::string{name}, i]() {
+            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{name}, i]() {
+              if (!alive.lock())
+                return;
               selectedDisplay = newDisplay;
               SDL_Rect rect;
               SDL_GetDisplayBounds(i, &rect);

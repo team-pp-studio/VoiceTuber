@@ -56,33 +56,44 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   {
     const auto sampleRate = audioIn.get().sampleRate();
     if (static_cast<int>(wavBuf.size()) > 1 * sampleRate)
-      stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)}, sampleRate, [this](std::string txt) {
-        if (!txt.empty())
-        {
-          hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
-          LOG("Host:", txt);
-        }
-        if (hostMsg.size() < 75)
-          return;
-        lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
-          LOG("Co-host:", rsp);
-          tts->say("en-US-AmberNeural", std::move(rsp), false);
-          talkStart = std::chrono::high_resolution_clock::now();
-        });
-        hostMsg.clear();
-      });
+      stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
+                   sampleRate,
+                   [alive = std::weak_ptr<int>(alive), this](std::string txt) {
+                     if (!alive.lock())
+                       return;
+                     if (!txt.empty())
+                     {
+                       hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
+                       LOG("Host:", txt);
+                     }
+                     if (hostMsg.size() < 75)
+                       return;
+                     lib.get().gpt().prompt("Host",
+                                            std::move(hostMsg),
+                                            [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+                                              if (!alive.lock())
+                                                return;
+                                              LOG("Co-host:", rsp);
+                                              tts->say("en-US-AmberNeural", std::move(rsp), false);
+                                              talkStart = std::chrono::high_resolution_clock::now();
+                                            });
+                     hostMsg.clear();
+                   });
     while (static_cast<int>(wavBuf.size()) > sampleRate / 5)
       wavBuf.pop_front();
   }
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    lib.get().gpt().prompt("Host", std::move(hostMsg), [this](std::string rsp) {
-      if (rsp.empty())
-        return;
-      LOG("Co-host:", rsp);
-      tts->say("en-US-AmberNeural", std::move(rsp), false);
-      talkStart = std::chrono::high_resolution_clock::now();
-    });
+    lib.get().gpt().prompt(
+      "Host", std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+        if (!alive.lock())
+          return;
+        if (rsp.empty())
+          return;
+        LOG("Co-host:", rsp);
+        tts->say("en-US-AmberNeural", std::move(rsp), false);
+        talkStart = std::chrono::high_resolution_clock::now();
+      });
     hostMsg.clear();
   }
 }
@@ -175,13 +186,17 @@ auto AiMouth::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, this, vis]() {
+        [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
+          if (!alive.lock())
+            return;
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
           freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
-        [&f, oldF, this, vis]() {
+        [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
+          if (!alive.lock())
+            return;
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -227,11 +242,14 @@ auto AiMouth::save(OStrm &strm) const -> void
 
 auto AiMouth::onMsg(Msg val) -> void
 {
-  lib.get().gpt().prompt(val.displayName, val.msg, [this](std::string rsp) {
-    if (rsp.empty())
-      return;
-    LOG("co-host", rsp);
-    tts->say("en-US-AmberNeural", std::move(rsp), false);
-    talkStart = std::chrono::high_resolution_clock::now();
-  });
+  lib.get().gpt().prompt(
+    val.displayName, val.msg, [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+      if (!alive.lock())
+        return;
+      if (rsp.empty())
+        return;
+      LOG("co-host", rsp);
+      tts->say("en-US-AmberNeural", std::move(rsp), false);
+      talkStart = std::chrono::high_resolution_clock::now();
+    });
 }
