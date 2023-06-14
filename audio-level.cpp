@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "audio-level.hpp"
 #include "audio-in.hpp"
 
