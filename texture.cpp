@@ -11,8 +11,9 @@
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
 
-Texture::Texture(const std::string &path, bool isUi)
-  : imageData_([&]() {
+Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
+  : path(std::move(aPath)),
+    imageData_([&]() {
       stbi_set_flip_vertically_on_load(!isUi ? 1 : 0);
       if (path.find("engine:") != 0)
       {
@@ -71,8 +72,37 @@ Texture::Texture(const std::string &path, bool isUi)
       else
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData_);
       return ret;
-    }())
+    }()),
+    event(std::make_unique<uv::FsEvent>(uv.createFsEvent()))
 {
+  event->start(
+    [this](std::string file, int /*events*/, int status) {
+      if (status != 0)
+        return;
+      path = std::move(file);
+      try
+      {
+        auto ret = stbi_load(path.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+        if (!ret)
+        {
+          std::ostringstream ss;
+          ss << "Error loading image: " << path;
+          throw std::runtime_error(ss.str());
+        }
+        imageData_ = ret;
+        glBindTexture(GL_TEXTURE_2D, texture_);
+        if (ch_ == 4)
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData_);
+        else
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_, h_, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData_);
+      }
+      catch (std::runtime_error &e)
+      {
+        LOG(e.what());
+      }
+    },
+    path,
+    0);
 }
 
 Texture::Texture(SDL_Surface *surface)
@@ -104,6 +134,8 @@ Texture::Texture(SDL_Surface *surface)
 }
 Texture::~Texture()
 {
+  if (event)
+    event->stop();
   glDeleteTextures(1, &texture_);
   if (imageData_)
     stbi_image_free(imageData_);

@@ -62,8 +62,6 @@ and equipment.
 - [ ] Addition of gadgets and a toolbar for more traditional editing
     options
 
-
-
 5\. Dependencies
 ----------------
 

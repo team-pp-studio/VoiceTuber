@@ -34,43 +34,68 @@ namespace uv
 
   class Timer
   {
+    friend class Uv;
+
   public:
     using Cb = std::function<auto()->void>;
 
-    Timer(uv_loop_t *);
     ~Timer();
     auto start(Cb, uint64_t timeout = 0, uint64_t repeat = 0) -> int;
     auto stop() -> int;
 
   private:
+    Timer(uv_loop_t *);
     std::unique_ptr<uv_timer_t> timer;
     Cb cb = nullptr;
   };
 
   class Idle
   {
+    friend class Uv;
+
   public:
     using Cb = std::function<auto()->void>;
-    Idle(uv_loop_t *);
     ~Idle();
     auto start(Cb) -> int;
     auto stop() -> int;
 
   private:
+    Idle(uv_loop_t *);
+
     std::unique_ptr<uv_idle_t> idle;
+    Cb cb = nullptr;
+  };
+
+  class FsEvent
+  {
+    friend class Uv;
+
+  public:
+    using Cb = std::function<auto(std::string filename, int events, int status)->void>;
+
+    FsEvent(FsEvent &&) = default;
+    ~FsEvent();
+    auto start(Cb, const std::string &path, unsigned flags) -> int;
+    auto stop() -> int;
+
+  private:
+    FsEvent(uv_loop_t *);
+    std::unique_ptr<uv_fs_event_t> event;
     Cb cb = nullptr;
   };
 
   class Prepare
   {
+    friend class Uv;
+
   public:
     using Cb = std::function<auto()->void>;
-    Prepare(uv_loop_t *);
     ~Prepare();
     auto start(Cb) -> int;
     auto stop() -> int;
 
   private:
+    Prepare(uv_loop_t *);
     std::unique_ptr<uv_prepare_t> prepare;
     Cb cb = nullptr;
   };
@@ -82,6 +107,7 @@ namespace uv
 
     Uv();
     auto connect(const std::string &domain, const std::string &port, ConnectCb) -> int;
+    auto createFsEvent() -> FsEvent;
     auto createIdle() -> Idle;
     auto createPrepare() -> Prepare;
     auto createTimer() -> Timer;
