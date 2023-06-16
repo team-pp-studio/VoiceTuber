@@ -5,7 +5,7 @@
 #include <imgui/imgui.h>
 
 Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Sprite(lib, aUndo, path), wav2Visemes(wav2Visemes)
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()), sprite(lib, aUndo, path), wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -32,13 +32,15 @@ Mouth::~Mouth()
 
 auto Mouth::render(float dt, Node *hovered, Node *selected) -> void
 {
-  frame = viseme2Sprite[viseme] % numFrames;
-  Sprite::render(dt, hovered, selected);
+  sprite.frame(viseme2Sprite[viseme] % sprite.numFrames());
+  sprite.render();
+  Node::render(dt, hovered, selected);
 }
 
 auto Mouth::renderUi() -> void
 {
-  Sprite::renderUi();
+  Node::renderUi();
+  sprite.renderUi();
   ImGui::TableNextColumn();
 
   {
@@ -80,16 +82,16 @@ auto Mouth::renderUi() -> void
     {
       undo.get().record(
         [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
-                  if (!alive.lock())
-                    return;
+          if (!alive.lock())
+            return;
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
           freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
         [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
-                  if (!alive.lock())
-                    return;
+          if (!alive.lock())
+            return;
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -137,11 +139,28 @@ auto Mouth::save(OStrm &strm) const -> void
   ::ser(strm, className);
   ::ser(strm, name);
   ::ser(strm, *this);
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
 auto Mouth::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
+}
+
+auto Mouth::h() const -> float
+{
+  return sprite.h();
+}
+
+auto Mouth::isTransparent(glm::vec2 v) const -> bool
+{
+  return sprite.isTransparent(v);
+}
+
+auto Mouth::w() const -> float
+{
+  return sprite.w();
 }

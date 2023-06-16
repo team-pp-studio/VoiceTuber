@@ -12,7 +12,8 @@ AiMouth::AiMouth(Lib &aLib,
                  AudioOut &audioOut,
                  Wav2Visemes &aWav2Visemes,
                  const std::filesystem::path &path)
-  : Sprite(aLib, aUndo, path),
+  : Node(aLib, aUndo, [&path]() { return path.filename().string(); }()),
+    sprite(aLib, aUndo, path),
     lib(aLib),
     audioIn(aAudioIn),
     wav2Visemes(aWav2Visemes),
@@ -113,7 +114,8 @@ auto AiMouth::sampleRate() const -> int
 auto AiMouth::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
   lib.get().gpt().systemPrompt(systemPrompt);
 }
 
@@ -121,15 +123,17 @@ auto AiMouth::render(float dt, Node *hovered, Node *selected) -> void
 {
   using namespace std::chrono_literals;
   if (std::chrono::high_resolution_clock::now() < talkStart + 3s)
-    frame = rand() % numFrames;
+    sprite.frame(rand() % sprite.numFrames());
   else
-    frame = 0;
-  Sprite::render(dt, hovered, selected);
+    sprite.frame(0);
+  sprite.render();
+  Node::render(dt, hovered, selected);
 }
 
 auto AiMouth::renderUi() -> void
 {
-  Sprite::renderUi();
+  Node::renderUi();
+  sprite.renderUi();
   ImGui::TableNextColumn();
   Ui::textRj("System Prompt");
   ImGui::TableNextColumn();
@@ -237,7 +241,8 @@ auto AiMouth::save(OStrm &strm) const -> void
   ::ser(strm, className);
   ::ser(strm, name);
   ::ser(strm, *this);
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
 auto AiMouth::onMsg(Msg val) -> void
@@ -252,4 +257,19 @@ auto AiMouth::onMsg(Msg val) -> void
       tts->say("en-US-AmberNeural", std::move(rsp), false);
       talkStart = std::chrono::high_resolution_clock::now();
     });
+}
+
+auto AiMouth::h() const -> float
+{
+  return sprite.h();
+}
+
+auto AiMouth::isTransparent(glm::vec2 v) const -> bool
+{
+  return sprite.isTransparent(v);
+}
+
+auto AiMouth::w() const -> float
+{
+  return sprite.w();
 }

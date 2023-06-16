@@ -8,33 +8,34 @@
 #include <string>
 #include <unordered_map>
 
-class Sprite : public Node
+class Sprite
 {
 public:
 #define SER_PROP_LIST \
   SER_PROP(cols);     \
   SER_PROP(rows);     \
-  SER_PROP(frame);    \
-  SER_PROP(numFrames);
+  SER_PROP(frame_);   \
+  SER_PROP(numFrames_);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
   Sprite(Lib &, Undo &, const std::filesystem::path &path);
-  auto w() const -> float final;
-  auto h() const -> float final;
-  auto isTransparent(glm::vec2) const -> bool final;
-
-protected:
-  auto render(float dt, Node *hovered, Node *selected) -> void override;
-  auto renderUi() -> void override;
-  auto save(OStrm &) const -> void override;
-  auto load(IStrm &) -> void override;
-
-  int cols = 1;
-  int rows = 1;
-  int frame = 0;
-  int numFrames = 1;
+  auto h() const -> float;
+  auto isTransparent(glm::vec2) const -> bool;
+  auto load(IStrm &) -> void;
+  auto render() -> void;
+  auto renderUi() -> void;
+  auto save(OStrm &) const -> void;
+  auto w() const -> float;
+  auto frame(int) -> void;
+  auto frame() const -> int;
+  auto numFrames() const -> int;
 
 private:
+  std::reference_wrapper<Undo> undo;
+  int cols = 1;
+  int rows = 1;
+  int frame_ = 0;
+  int numFrames_ = 1;
   std::shared_ptr<const Texture> texture;
 };

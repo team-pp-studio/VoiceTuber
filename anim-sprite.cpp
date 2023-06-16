@@ -5,7 +5,8 @@
 #include <log/log.hpp>
 
 AnimSprite::AnimSprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Sprite(lib, aUndo, path),
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
+    sprite(lib, aUndo, path),
     startTime(std::chrono::high_resolution_clock::now()),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -28,12 +29,13 @@ static auto getProjectionMatrix() -> glm::mat4
 
 auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 {
-  frame = static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
-                             std::chrono::high_resolution_clock::now() - startTime)
-                             .count() *
-                           fps / 1'000'000) %
-          numFrames;
-  Sprite::render(dt, hovered, selected);
+  sprite.frame(static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
+                                  std::chrono::high_resolution_clock::now() - startTime)
+                                  .count() *
+                                fps / 1'000'000) %
+               sprite.numFrames());
+  sprite.render();
+  Node::render(dt, hovered, selected);
   if (dt <= 0.f)
     return;
 
@@ -76,7 +78,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 
 auto AnimSprite::renderUi() -> void
 {
-  Sprite::renderUi();
+  Node::renderUi();
+  sprite.renderUi();
 
   ImGui::TableNextColumn();
   Ui::textRj("FPS");
@@ -262,11 +265,28 @@ auto AnimSprite::save(OStrm &strm) const -> void
   ::ser(strm, className);
   ::ser(strm, name);
   ::ser(strm, *this);
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
 auto AnimSprite::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
+}
+
+auto AnimSprite::h() const -> float
+{
+  return sprite.h();
+}
+
+auto AnimSprite::isTransparent(glm::vec2 v) const -> bool
+{
+  return sprite.isTransparent(v);
+}
+
+auto AnimSprite::w() const -> float
+{
+  return sprite.w();
 }

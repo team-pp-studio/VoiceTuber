@@ -1,8 +1,9 @@
 #pragma once
+#include "node.hpp"
 #include "sprite.hpp"
 #include <chrono>
 
-class AnimSprite : public Sprite
+class AnimSprite : public Node
 {
 public:
 #define SER_PROP_LIST \
@@ -18,6 +19,15 @@ public:
 
   AnimSprite(Lib &, Undo &, const std::filesystem::path &);
   static constexpr const char *className = "AnimSprite";
+
+protected:
+  auto render(float dt, Node *hovered, Node *selected) -> void override;
+  auto save(OStrm &) const -> void override;
+  auto load(IStrm &) -> void override;
+  auto renderUi() -> void override;
+
+protected:
+  Sprite sprite;
 
 private:
   float fps = 30.f;
@@ -40,8 +50,7 @@ private:
   std::shared_ptr<const Texture> arrowNW;
   std::shared_ptr<const Texture> center;
 
-  auto load(IStrm &) -> void override;
-  auto render(float dt, Node *hovered, Node *selected) -> void override;
-  auto renderUi() -> void override;
-  auto save(OStrm &) const -> void override;
+  auto h() const -> float final;
+  auto isTransparent(glm::vec2) const -> bool final;
+  auto w() const -> float final;
 };
