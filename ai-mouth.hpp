@@ -1,10 +1,11 @@
 #pragma once
 #include "audio-sink.hpp"
 #include "gpt.hpp"
-#include "sprite.hpp"
+#include "node.hpp"
+#include "sprite-sheet.hpp"
 #include "visemes-sink.hpp"
 
-class AiMouth final : public AudioSink, public VisemesSink, public TwitchSink, public Sprite
+class AiMouth final : public AudioSink, public VisemesSink, public TwitchSink, public Node
 {
 public:
 #define SER_PROP_LIST      \
@@ -26,6 +27,7 @@ public:
   static constexpr const char *className = "AiMouth";
 
 private:
+  SpriteSheet sprite;
   std::reference_wrapper<Lib> lib;
   std::reference_wrapper<AudioIn> audioIn;
   std::reference_wrapper<Wav2Visemes> wav2Visemes;
@@ -34,7 +36,7 @@ private:
   std::shared_ptr<Twitch> twitch;
   Viseme viseme;
   decltype(std::chrono::high_resolution_clock::now()) freezeTime;
-  std::unordered_map<Viseme, int> viseme2Sprite;
+  std::map<Viseme, int> viseme2Sprite;
   std::string voice;
   std::deque<int16_t> wavBuf;
   decltype(std::chrono::high_resolution_clock::now()) silStart;
@@ -42,12 +44,15 @@ private:
   std::string systemPrompt;
   decltype(std::chrono::high_resolution_clock::now()) talkStart;
 
+  auto h() const -> float final;
   auto ingest(Viseme) -> void final;
   auto ingest(Wav, bool overlap) -> void final;
+  auto isTransparent(glm::vec2) const -> bool final;
   auto load(IStrm &) -> void final;
   auto onMsg(Msg) -> void final;
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto sampleRate() const -> int final;
   auto save(OStrm &) const -> void final;
+  auto w() const -> float final;
 };

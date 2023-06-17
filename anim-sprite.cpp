@@ -5,7 +5,8 @@
 #include <log/log.hpp>
 
 AnimSprite::AnimSprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Sprite(lib, aUndo, path),
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
+    sprite(lib, aUndo, path),
     startTime(std::chrono::high_resolution_clock::now()),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -28,12 +29,14 @@ static auto getProjectionMatrix() -> glm::mat4
 
 auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 {
-  frame = static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
-                             std::chrono::high_resolution_clock::now() - startTime)
-                             .count() *
-                           fps / 1'000'000) %
-          numFrames;
-  Sprite::render(dt, hovered, selected);
+  if (sprite.numFrames() > 0)
+    sprite.frame(static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
+                                    std::chrono::high_resolution_clock::now() - startTime)
+                                    .count() *
+                                  fps / 1'000'000) %
+                 sprite.numFrames());
+  sprite.render();
+  Node::render(dt, hovered, selected);
   if (dt <= 0.f)
     return;
 
@@ -45,13 +48,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto a = (v - lastProjPivotV + gForce) / dt;
   lastProjPivot = glm::vec2{projPivot.x, projPivot.y};
   lastProjPivotV = v;
-
   if (!physics)
-  {
-    animRotV = {};
-    animRot = {};
     return;
-  }
 
   if (glm::length(end - pivot()) < 1.f)
     return;
@@ -62,8 +60,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto orthogonalVec = glm::vec2{-pivotToEnd.y, pivotToEnd.x};
   const auto normalizedOrthogonalVec = glm::normalize(orthogonalVec);
   float projection = glm::dot(a, normalizedOrthogonalVec);
-  animRotV += (-force * projection - animRot * springness - animRotV * damping) * dt;
-  animRot += animRotV * dt;
+  animRotV += (-force * projection - dRot * springness - animRotV * damping) * dt;
+  dRot += animRotV * dt;
 
   if (selected != this)
     return;
@@ -76,7 +74,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 
 auto AnimSprite::renderUi() -> void
 {
-  Sprite::renderUi();
+  Node::renderUi();
+  sprite.renderUi();
 
   ImGui::TableNextColumn();
   Ui::textRj("FPS");
@@ -86,7 +85,14 @@ auto AnimSprite::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Physics");
   ImGui::TableNextColumn();
-  Ui::checkbox(undo, "##Physics", physics);
+  if (Ui::checkbox(undo, "##Physics", physics))
+  {
+    animRotV = {};
+    dRot = {};
+    dLoc = {};
+    dScale = {};
+  }
+
   ImGui::TableNextColumn();
   {
     auto physicsDisabled = Ui::Disabled{!physics};
@@ -262,11 +268,28 @@ auto AnimSprite::save(OStrm &strm) const -> void
   ::ser(strm, className);
   ::ser(strm, name);
   ::ser(strm, *this);
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
 auto AnimSprite::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
+}
+
+auto AnimSprite::h() const -> float
+{
+  return sprite.h();
+}
+
+auto AnimSprite::isTransparent(glm::vec2 v) const -> bool
+{
+  return sprite.isTransparent(v);
+}
+
+auto AnimSprite::w() const -> float
+{
+  return sprite.w();
 }

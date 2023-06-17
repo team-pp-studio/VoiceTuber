@@ -93,10 +93,10 @@ auto Node::getAllNodesCalcModelView(Nodes &out) -> void
 {
   glPushMatrix();
   // Apply transformations
-  glTranslatef(loc.x, loc.y, 0.0f);           // Move the sprite
-  glRotatef(rot + animRot, 0.0f, 0.0f, 1.0f); // Rotate the sprite
-  glScalef(scale.x, scale.y, 1.0f);           // Scale the sprite
-  glTranslatef(-pivot_.x, -pivot_.y, 0.0f);   // Move the pivot point back
+  glTranslatef(loc.x + dLoc.x, loc.y + dLoc.y, 0.0f);     // Move the sprite
+  glRotatef(rot + dRot, 0.0f, 0.0f, 1.0f);                // Rotate the sprite
+  glScalef(scale.x + dScale.x, scale.y + dScale.y, 1.0f); // Scale the sprite
+  glTranslatef(-pivot_.x, -pivot_.y, 0.0f);               // Move the pivot point back
   modelViewMat = getModelViewMatrix();
 
   out.push_back(*this);

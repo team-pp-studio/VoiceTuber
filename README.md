@@ -62,8 +62,6 @@ and equipment.
 - [ ] Addition of gadgets and a toolbar for more traditional editing
     options
 
-
-
 5\. Dependencies
 ----------------
 
@@ -109,6 +107,9 @@ $ cmake --build build                       # add `-j <n>` with cmake >= 3.12
 * Build the rest of the project
     * Open `VoiceTuber.sln` in Visual Studio 2022
     * Use the menu option `Build/Build Solution`
+* If you want to run the app in the Visual Studio debugger, the
+  easiest way is to copy the whole `Assets` directory into the
+  `Release` directory.
 ### Linux
 * Install dependencies
 ```

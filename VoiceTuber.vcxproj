@@ -146,6 +146,7 @@
       <AdditionalIncludeDirectories>3rd-party\pocketsphinx\build\include;3rd-party;3rd-party\SDL2\include;3rd-party\cpptoml\include;3rd-party\glm;3rd-party\curl\include;3rd-party\SDL2_ttf\include;3rd-party\libuv\include;3rd-party\pocketsphinx\include</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -195,27 +196,34 @@
     <ClInclude Include="3rd-party\ser\proto.hpp" />
     <ClInclude Include="3rd-party\ser\ser.hpp" />
     <ClInclude Include="add-as-dialog.hpp" />
+    <ClInclude Include="ai-mouth.hpp" />
     <ClInclude Include="anim-sprite.hpp" />
     <ClInclude Include="app.hpp" />
     <ClInclude Include="audio-in.hpp" />
     <ClInclude Include="audio-level.hpp" />
     <ClInclude Include="audio-out.hpp" />
     <ClInclude Include="audio-sink.hpp" />
+    <ClInclude Include="azure-stt.hpp" />
+    <ClInclude Include="azure-token.hpp" />
     <ClInclude Include="azure-tts.hpp" />
+    <ClInclude Include="blink.hpp" />
     <ClInclude Include="bouncer.hpp" />
     <ClInclude Include="bouncer2.hpp" />
-    <ClInclude Include="channel-dialog.hpp" />
     <ClInclude Include="chat-v2.hpp" />
     <ClInclude Include="chat.hpp" />
     <ClInclude Include="dialog.hpp" />
+    <ClInclude Include="eye-v2.hpp" />
     <ClInclude Include="eye.hpp" />
     <ClInclude Include="file-open.hpp" />
     <ClInclude Include="font.hpp" />
+    <ClInclude Include="gpt.hpp" />
     <ClInclude Include="http-client.hpp" />
+    <ClInclude Include="image-list.hpp" />
     <ClInclude Include="imgui-impl-opengl3-loader.h" />
     <ClInclude Include="imgui-impl-opengl3.h" />
     <ClInclude Include="imgui-impl-sdl.h" />
     <ClInclude Include="imgui-impl-sdlrenderer.h" />
+    <ClInclude Include="input-dialog.hpp" />
     <ClInclude Include="lib.hpp" />
     <ClInclude Include="message-dialog.hpp" />
     <ClInclude Include="mouse-sink.hpp" />
@@ -228,6 +236,8 @@
     <ClInclude Include="prj-dialog.hpp" />
     <ClInclude Include="root.hpp" />
     <ClInclude Include="save-factory.hpp" />
+    <ClInclude Include="save-wav.hpp" />
+    <ClInclude Include="sprite-sheet.hpp" />
     <ClInclude Include="sprite.hpp" />
     <ClInclude Include="stb\stb_c_lexer.h" />
     <ClInclude Include="stb\stb_connected_components.h" />
@@ -255,6 +265,7 @@
     <ClInclude Include="ui.hpp" />
     <ClInclude Include="undo.hpp" />
     <ClInclude Include="uv.hpp" />
+    <ClInclude Include="version.hpp" />
     <ClInclude Include="viseme.hpp" />
     <ClInclude Include="visemes-sink.hpp" />
     <ClInclude Include="wav-2-visemes.hpp" />
@@ -270,25 +281,32 @@
     <ClCompile Include="3rd-party\ser\proto.cpp" />
     <ClCompile Include="3rd-party\ser\ser.cpp" />
     <ClCompile Include="add-as-dialog.cpp" />
+    <ClCompile Include="ai-mouth.cpp" />
     <ClCompile Include="anim-sprite.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="audio-in.cpp" />
     <ClCompile Include="audio-level.cpp" />
     <ClCompile Include="audio-out.cpp" />
+    <ClCompile Include="azure-stt.cpp" />
+    <ClCompile Include="azure-token.cpp" />
     <ClCompile Include="azure-tts.cpp" />
+    <ClCompile Include="blink.cpp" />
     <ClCompile Include="bouncer.cpp" />
     <ClCompile Include="bouncer2.cpp" />
-    <ClCompile Include="channel-dialog.cpp" />
     <ClCompile Include="chat-v2.cpp" />
     <ClCompile Include="chat.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="eye-v2.cpp" />
     <ClCompile Include="eye.cpp" />
     <ClCompile Include="file-open.cpp" />
     <ClCompile Include="font.cpp" />
+    <ClCompile Include="gpt.cpp" />
     <ClCompile Include="http-client.cpp" />
+    <ClCompile Include="image-list.cpp" />
     <ClCompile Include="imgui-impl-opengl3.cpp" />
     <ClCompile Include="imgui-impl-sdl.cpp" />
     <ClCompile Include="imgui-impl-sdlrenderer.cpp" />
+    <ClCompile Include="input-dialog.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="message-dialog.cpp" />
@@ -301,7 +319,8 @@
     <ClCompile Include="prj-dialog.cpp" />
     <ClCompile Include="root.cpp" />
     <ClCompile Include="save-factory.cpp" />
-    <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="save-wav.cpp" />
+    <ClCompile Include="sprite-sheet.cpp" />
     <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="stb\stb_vorbis.c" />
     <ClCompile Include="texture.cpp" />
@@ -309,6 +328,7 @@
     <ClCompile Include="ui.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="uv.cpp" />
+    <ClCompile Include="version.cpp" />
     <ClCompile Include="wav-2-visemes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

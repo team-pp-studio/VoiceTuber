@@ -17,7 +17,6 @@ public:
 private:
   float strength = 100.f;
   float easing = 50.f;
-  float offset = 0.f;
   AudioLevel audioLevel;
 
   auto render(float dt, Node *hovered, Node *selected) -> void final;

@@ -1,12 +1,14 @@
 #pragma once
+#include "uv.hpp"
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <memory>
 #include <string>
 
 class Texture
 {
 public:
-  Texture(const std::string &path, bool isUi = false);
+  Texture(uv::Uv &, std::string path, bool isUi = false);
   Texture(SDL_Surface *);
   ~Texture();
   Texture(const Texture &) = delete;
@@ -15,11 +17,14 @@ public:
   auto h() const -> int { return h_; }
   auto imageData() const -> const unsigned char * { return imageData_; }
   auto texture() const -> GLuint { return texture_; }
+  auto path() const -> std::string;
 
 private:
+  std::string path_;
   int ch_ = 4;
   int w_ = 0;
   int h_ = 0;
   unsigned char *imageData_ = nullptr;
   GLuint texture_;
+  std::unique_ptr<uv::FsEvent> event;
 };

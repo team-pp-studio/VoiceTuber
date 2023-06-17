@@ -89,17 +89,17 @@ private:
   auto translateCancel() -> void;
   auto translateUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
 
-protected:
+private:
   glm::vec2 loc = {.0f, .0f};
   glm::vec2 scale = {1.f, 1.f};
-
-private:
   glm::vec2 pivot_ = {.0f, .0f};
   float rot = 0.f;
   bool uniformScaling = true;
 
 protected:
-  float animRot = 0.f;
+  float dRot = 0.f;
+  glm::vec2 dLoc = {.0f, .0f};
+  glm::vec2 dScale = {0.f, 0.f};
   std::reference_wrapper<class Undo> undo;
   int zOrder = 0;
 

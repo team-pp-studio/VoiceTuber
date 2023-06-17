@@ -108,18 +108,18 @@ auto Chat::onMsg(Msg val) -> void
       hideChatSec * 1000);
   if (azureTts)
   {
-    const auto name = val.displayName;
+    const auto displayName = val.displayName;
     const auto text = val.msg;
     const auto isMe = false; // val.isMe;
-    const auto supressName = (lastName == name) && !isMe;
-    const auto voice = getVoice(name);
+    const auto supressName = (lastName == displayName) && !isMe;
+    const auto voice = getVoice(displayName);
     if (voice != mute)
       azureTts->say(voice,
-                    (!supressName ? (escName(name) + " " + getDialogLine(text, isMe) + " ") : "") +
+                    (!supressName ? (escName(displayName) + " " + getDialogLine(text, isMe) + " ") : "") +
                       dedup(text));
     else
       audioSink.get().ingest(noVoice());
-    lastName = name;
+    lastName = displayName;
   }
   msgs.emplace_back(std::move(val));
 }
@@ -353,11 +353,7 @@ auto Chat::renderUi() -> void
       lines.emplace_back(v.first + " <-> " + v.second);
     std::sort(std::begin(lines), std::end(lines));
     for (const auto &l : lines)
-    {
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
       ImGui::Text("%s", l.c_str());
-    }
   }
   {
     ImGui::TableNextColumn();

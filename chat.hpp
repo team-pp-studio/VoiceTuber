@@ -37,7 +37,7 @@ private:
   std::shared_ptr<AzureTts> azureTts;
   std::vector<std::string> voices;
   std::string lastName;
-  std::unordered_map<std::string, std::string> voicesMap;
+  std::map<std::string, std::string> voicesMap;
   std::string chatterName;
   std::string chatterVoice;
 

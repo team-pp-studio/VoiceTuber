@@ -9,8 +9,8 @@ EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::fil
 {
   mouseTracking.reg(*this);
 
-  auto name = SDL_GetDisplayName(0);
-  selectedDisplay = name;
+  auto displayName = SDL_GetDisplayName(0);
+  selectedDisplay = displayName;
   SDL_Rect rect;
   SDL_GetDisplayBounds(0, &rect);
   screenTopLeft = glm::vec2{rect.x, rect.y};
@@ -37,7 +37,7 @@ auto EyeV2::render(float dt, Node *hovered, Node *selected) -> void
   }();
 
   glTranslatef(clampMouse.x, clampMouse.y, .0f);
-  Sprite::render(dt, hovered, selected);
+  AnimSprite::render(dt, hovered, selected);
   if (selected == this)
   {
     glBegin(GL_LINE_LOOP);
@@ -59,19 +59,21 @@ auto EyeV2::save(OStrm &strm) const -> void
   ::ser(strm, name);
   ::ser(strm, *this);
   ::ser(strm, static_cast<const AnimSprite &>(*this));
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
 auto EyeV2::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   ::deser(strm, static_cast<AnimSprite &>(*this));
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
 }
 
 auto EyeV2::renderUi() -> void
 {
-  Sprite::renderUi();
+  AnimSprite::renderUi();
   ImGui::TableNextColumn();
   Ui::textRj("Radius");
   ImGui::TableNextColumn();
@@ -116,11 +118,11 @@ auto EyeV2::renderUi() -> void
       const auto displayCnt = SDL_GetNumVideoDisplays();
       for (auto i = 0; i < displayCnt; ++i)
       {
-        auto name = SDL_GetDisplayName(i);
-        if (ImGui::Selectable(name, name == selectedDisplay))
+        auto displayName = SDL_GetDisplayName(i);
+        if (ImGui::Selectable(displayName, displayName == selectedDisplay))
         {
           undo.get().record(
-            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{name}, i]() {
+            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{displayName}, i]() {
               if (!alive.lock())
                 return;
               selectedDisplay = newDisplay;

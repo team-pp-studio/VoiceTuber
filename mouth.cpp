@@ -1,11 +1,19 @@
 #include "mouth.hpp"
+#include "image-list.hpp"
+#include "sprite-sheet.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
-Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Sprite(lib, aUndo, path), wav2Visemes(wav2Visemes)
+template <typename S, typename ClassName>
+Mouth<S, ClassName>::Mouth(Wav2Visemes &wav2Visemes,
+                           Lib &lib,
+                           Undo &aUndo,
+                           const std::filesystem::path &path)
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
+    sprite(lib, aUndo, path),
+    wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -25,20 +33,26 @@ Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesys
   wav2Visemes.reg(*this);
 }
 
-Mouth::~Mouth()
+template <typename S, typename ClassName>
+Mouth<S, ClassName>::~Mouth()
 {
   wav2Visemes.get().unreg(*this);
 }
 
-auto Mouth::render(float dt, Node *hovered, Node *selected) -> void
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) -> void
 {
-  frame = viseme2Sprite[viseme] % numFrames;
-  Sprite::render(dt, hovered, selected);
+  if (sprite.numFrames() > 0)
+    sprite.frame(viseme2Sprite[viseme] % sprite.numFrames());
+  sprite.render();
+  Node::render(dt, hovered, selected);
 }
 
-auto Mouth::renderUi() -> void
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::renderUi() -> void
 {
-  Sprite::renderUi();
+  Node::renderUi();
+  sprite.renderUi();
   ImGui::TableNextColumn();
 
   {
@@ -80,16 +94,16 @@ auto Mouth::renderUi() -> void
     {
       undo.get().record(
         [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
-                  if (!alive.lock())
-                    return;
+          if (!alive.lock())
+            return;
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
           freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
         [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
-                  if (!alive.lock())
-                    return;
+          if (!alive.lock())
+            return;
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -125,23 +139,49 @@ auto Mouth::renderUi() -> void
   visUi(Viseme::U, "U", "##U");
 }
 
-auto Mouth::ingest(Viseme v) -> void
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::ingest(Viseme v) -> void
 {
   if (std::chrono::high_resolution_clock::now() < freezeTime)
     return;
   viseme = v;
 }
 
-auto Mouth::save(OStrm &strm) const -> void
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::save(OStrm &strm) const -> void
 {
   ::ser(strm, className);
   ::ser(strm, name);
   ::ser(strm, *this);
-  Sprite::save(strm);
+  sprite.save(strm);
+  Node::save(strm);
 }
 
-auto Mouth::load(IStrm &strm) -> void
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
-  Sprite::load(strm);
+  sprite.load(strm);
+  Node::load(strm);
 }
+
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::h() const -> float
+{
+  return sprite.h();
+}
+
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::isTransparent(glm::vec2 v) const -> bool
+{
+  return sprite.isTransparent(v);
+}
+
+template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::w() const -> float
+{
+  return sprite.w();
+}
+
+template class Mouth<SpriteSheet, SpriteSheetMouthClassName>;
+template class Mouth<ImageList, ImageListMouthClassName>;

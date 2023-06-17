@@ -21,7 +21,7 @@ namespace uv
                              return;
                            self->buf.resize(suggestedSize);
                            aBuf->base = self->buf.data();
-                           aBuf->len = suggestedSize;
+                           aBuf->len = static_cast<ULONG>(suggestedSize);
                          },
                          [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
                            auto self = static_cast<Tcp *>(stream->data);
@@ -301,5 +301,44 @@ namespace uv
   auto Prepare::stop() -> int
   {
     return uv_prepare_stop(prepare.get());
+  }
+
+  FsEvent::FsEvent(uv_loop_t *loop) : event(std::make_unique<uv_fs_event_t>())
+  {
+    uv_fs_event_init(loop, event.get());
+    event->data = this;
+  }
+
+  FsEvent::~FsEvent()
+  {
+    stop();
+  }
+
+  auto FsEvent::start(Cb aCb, const std::string &path, unsigned flags) -> int
+  {
+    cb = std::move(aCb);
+    event->data = this;
+    return uv_fs_event_start(
+      event.get(),
+      [](uv_fs_event_t *handle, const char *filename, int events, int status) {
+        auto self = static_cast<FsEvent *>(handle->data);
+        if (!self->cb)
+          return;
+        self->cb(filename, events, status);
+      },
+      path.c_str(),
+      flags);
+  }
+
+  auto FsEvent::stop() -> int
+  {
+    if (!event)
+      return 0;
+    return uv_fs_event_stop(event.get());
+  }
+
+  auto Uv::createFsEvent() -> FsEvent
+  {
+    return FsEvent{loop_};
   }
 } // namespace uv

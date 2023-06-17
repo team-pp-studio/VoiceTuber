@@ -22,7 +22,7 @@ auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Tex
       return shared;
     textures.erase(it);
   }
-  auto shared = std::make_shared<Texture>(v, isUi);
+  auto shared = std::make_shared<Texture>(uv, v, isUi);
   auto tmp = textures.emplace(std::pair{v, isUi}, shared);
   assert(tmp.second);
   return shared;
