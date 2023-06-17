@@ -12,18 +12,18 @@
 #pragma GCC diagnostic pop
 
 Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
-  : path(std::move(aPath)),
+  : path_(std::move(aPath)),
     imageData_([&]() {
       stbi_set_flip_vertically_on_load(!isUi ? 1 : 0);
-      if (path.find("engine:") != 0)
+      if (path_.find("engine:") != 0)
       {
         try
         {
-          auto ret = stbi_load(path.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+          auto ret = stbi_load(path_.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
           if (!ret)
           {
             std::ostringstream ss;
-            ss << "Error loading image: " << path;
+            ss << "Error loading image: " << path_;
             throw std::runtime_error(ss.str());
           }
           return ret;
@@ -44,7 +44,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
       }
       else
       {
-        auto engineImgPath = SDL_GetBasePath() + std::string{"assets/"} + path.substr(7);
+        auto engineImgPath = SDL_GetBasePath() + std::string{"assets/"} + path_.substr(7);
         auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
         {
@@ -79,14 +79,14 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
     [this](std::string file, int /*events*/, int status) {
       if (status != 0)
         return;
-      path = std::move(file);
+      path_ = std::move(file);
       try
       {
-        auto ret = stbi_load(path.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
+        auto ret = stbi_load(path_.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
         {
           std::ostringstream ss;
-          ss << "Error loading image: " << path;
+          ss << "Error loading image: " << path_;
           throw std::runtime_error(ss.str());
         }
         imageData_ = ret;
@@ -101,7 +101,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
         LOG(e.what());
       }
     },
-    path,
+    path_,
     0);
 }
 
@@ -132,6 +132,7 @@ Texture::Texture(SDL_Surface *surface)
     }())
 {
 }
+
 Texture::~Texture()
 {
   if (event)
@@ -139,4 +140,9 @@ Texture::~Texture()
   glDeleteTextures(1, &texture_);
   if (imageData_)
     stbi_image_free(imageData_);
+}
+
+auto Texture::path() const -> std::string
+{
+  return path_;
 }

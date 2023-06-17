@@ -1,6 +1,6 @@
 #pragma once
 #include "node.hpp"
-#include "sprite.hpp"
+#include "sprite-sheet.hpp"
 #include <chrono>
 
 class AnimSprite : public Node
@@ -27,7 +27,7 @@ protected:
   auto renderUi() -> void override;
 
 protected:
-  Sprite sprite;
+  SpriteSheet sprite;
 
 private:
   float fps = 30.f;

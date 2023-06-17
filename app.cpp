@@ -2,9 +2,9 @@
 #include "add-as-dialog.hpp"
 #include "ai-mouth.hpp"
 #include "anim-sprite.hpp"
+#include "base-mouth.hpp"
 #include "bouncer.hpp"
 #include "bouncer2.hpp"
-#include "channel-dialog.hpp"
 #include "chat-v2.hpp"
 #include "chat.hpp"
 #include "eye-v2.hpp"
@@ -12,8 +12,8 @@
 #include "file-open.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
+#include "input-dialog.hpp"
 #include "message-dialog.hpp"
-#include "mouth.hpp"
 #include "preferences-dialog.hpp"
 #include "prj-dialog.hpp"
 #include "root.hpp"
@@ -124,8 +124,11 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
     return std::make_unique<Bouncer2>(lib, undo, audioIn, std::move(name));
   });
   saveFactory.reg<Root>([this](std::string) { return std::make_unique<Root>(lib, undo); });
-  saveFactory.reg<Mouth>([this](std::string name) {
-    return std::make_unique<Mouth>(wav2Visemes, lib, undo, std::move(name));
+  saveFactory.reg<SpriteSheetMouth>([this](std::string name) {
+    return std::make_unique<SpriteSheetMouth>(wav2Visemes, lib, undo, std::move(name));
+  });
+  saveFactory.reg<ImageListMouth>([this](std::string name) {
+    return std::make_unique<ImageListMouth>(wav2Visemes, lib, undo, std::move(name));
   });
   saveFactory.reg<AnimSprite>(
     [this](std::string name) { return std::make_unique<AnimSprite>(lib, undo, std::move(name)); });
@@ -324,11 +327,17 @@ auto App::renderUi(float /*dt*/) -> void
             if (r)
               addNode(AnimSprite::className, filePath.string());
           });
-      if (ImGui::MenuItem("Add Mouth..."))
-        dialog =
-          std::make_unique<FileOpen>(lib, "Add Mouth Dialog", [this](bool r, const auto &filePath) {
+      if (ImGui::MenuItem("Add Sprite Sheet Mouth..."))
+        dialog = std::make_unique<FileOpen>(
+          lib, "Add Sprite Sheet Mouth Dialog", [this](bool r, const auto &filePath) {
             if (r)
-              addNode(Mouth::className, filePath.string());
+              addNode(SpriteSheetMouth::className, filePath.string());
+          });
+      if (ImGui::MenuItem("Add Image List Mouth..."))
+        dialog =
+          std::make_unique<InputDialog>("Enter Node Name", "Mouth", [this](bool r, const auto &input) {
+            if (r)
+              addNode(ImageListMouth::className, input);
           });
       if (ImGui::MenuItem("Add Eye..."))
         dialog = std::make_unique<FileOpen>(lib, "Add Eye Dialog", [this](bool r, const auto &filePath) {
@@ -336,10 +345,11 @@ auto App::renderUi(float /*dt*/) -> void
             addNode(EyeV2::className, filePath.string());
         });
       if (ImGui::MenuItem("Add Twitch Chat..."))
-        dialog = std::make_unique<ChannelDialog>("mika314", [this](bool r, const auto &channel) {
-          if (r)
-            addNode(ChatV2::className, channel);
-        });
+        dialog = std::make_unique<InputDialog>(
+          "Enter Twitch Channel Name", "mika314", [this](bool r, const auto &channel) {
+            if (r)
+              addNode(ChatV2::className, channel);
+          });
       if (ImGui::MenuItem("Add Bouncer"))
         addNode(Bouncer2::className, "bouncer");
       if (ImGui::MenuItem("Add AI Mouth..."))
@@ -763,7 +773,7 @@ auto App::droppedFile(std::string droppedFile) -> void
       switch (t)
       {
       case AddAsDialog::NodeType::sprite: addNode(AnimSprite::className, droppedFile); break;
-      case AddAsDialog::NodeType::mouth: addNode(Mouth::className, droppedFile); break;
+      case AddAsDialog::NodeType::mouth: addNode(SpriteSheetMouth::className, droppedFile); break;
       case AddAsDialog::NodeType::eye: addNode(EyeV2::className, droppedFile); break;
       case AddAsDialog::NodeType::aiMouth: addNode(AiMouth::className, droppedFile); break;
       }

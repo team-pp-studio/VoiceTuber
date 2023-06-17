@@ -45,7 +45,6 @@ auto AudioOut::sampleRate() const -> int
 
 auto AudioOut::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audio>
 {
-
   SDL_AudioSpec have;
   auto ret =
     std::make_unique<sdl::Audio>(device != Preferences::DefaultAudio ? device.c_str() : nullptr,

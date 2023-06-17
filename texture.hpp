@@ -17,9 +17,10 @@ public:
   auto h() const -> int { return h_; }
   auto imageData() const -> const unsigned char * { return imageData_; }
   auto texture() const -> GLuint { return texture_; }
+  auto path() const -> std::string;
 
 private:
-  std::string path;
+  std::string path_;
   int ch_ = 4;
   int w_ = 0;
   int h_ = 0;

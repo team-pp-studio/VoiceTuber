@@ -4,6 +4,7 @@
 #include "azure-stt.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
+#include "wav-2-visemes.hpp"
 #include <log/log.hpp>
 
 AiMouth::AiMouth(Lib &aLib,
@@ -122,7 +123,7 @@ auto AiMouth::load(IStrm &strm) -> void
 auto AiMouth::render(float dt, Node *hovered, Node *selected) -> void
 {
   using namespace std::chrono_literals;
-  if (std::chrono::high_resolution_clock::now() < talkStart + 3s)
+  if (std::chrono::high_resolution_clock::now() < talkStart + 3s && sprite.numFrames() > 0)
     sprite.frame(rand() % sprite.numFrames());
   else
     sprite.frame(0);

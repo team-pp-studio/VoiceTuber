@@ -353,11 +353,7 @@ auto Chat::renderUi() -> void
       lines.emplace_back(v.first + " <-> " + v.second);
     std::sort(std::begin(lines), std::end(lines));
     for (const auto &l : lines)
-    {
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
       ImGui::Text("%s", l.c_str());
-    }
   }
   {
     ImGui::TableNextColumn();

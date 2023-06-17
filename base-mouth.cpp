@@ -1,11 +1,19 @@
-#include "mouth.hpp"
+#include "base-mouth.hpp"
+#include "image-list.hpp"
+#include "sprite-sheet.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui/imgui.h>
 
-Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()), sprite(lib, aUndo, path), wav2Visemes(wav2Visemes)
+template <typename S, typename ClassName>
+BaseMouth<S, ClassName>::BaseMouth(Wav2Visemes &wav2Visemes,
+                                   Lib &lib,
+                                   Undo &aUndo,
+                                   const std::filesystem::path &path)
+  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
+    sprite(lib, aUndo, path),
+    wav2Visemes(wav2Visemes)
 {
   viseme2Sprite[Viseme::sil] = 0;
   viseme2Sprite[Viseme::PP] = 1;
@@ -25,19 +33,23 @@ Mouth::Mouth(Wav2Visemes &wav2Visemes, Lib &lib, Undo &aUndo, const std::filesys
   wav2Visemes.reg(*this);
 }
 
-Mouth::~Mouth()
+template <typename S, typename ClassName>
+BaseMouth<S, ClassName>::~BaseMouth()
 {
   wav2Visemes.get().unreg(*this);
 }
 
-auto Mouth::render(float dt, Node *hovered, Node *selected) -> void
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) -> void
 {
-  sprite.frame(viseme2Sprite[viseme] % sprite.numFrames());
+  if (sprite.numFrames() > 0)
+    sprite.frame(viseme2Sprite[viseme] % sprite.numFrames());
   sprite.render();
   Node::render(dt, hovered, selected);
 }
 
-auto Mouth::renderUi() -> void
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::renderUi() -> void
 {
   Node::renderUi();
   sprite.renderUi();
@@ -127,14 +139,16 @@ auto Mouth::renderUi() -> void
   visUi(Viseme::U, "U", "##U");
 }
 
-auto Mouth::ingest(Viseme v) -> void
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::ingest(Viseme v) -> void
 {
   if (std::chrono::high_resolution_clock::now() < freezeTime)
     return;
   viseme = v;
 }
 
-auto Mouth::save(OStrm &strm) const -> void
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::save(OStrm &strm) const -> void
 {
   ::ser(strm, className);
   ::ser(strm, name);
@@ -143,24 +157,31 @@ auto Mouth::save(OStrm &strm) const -> void
   Node::save(strm);
 }
 
-auto Mouth::load(IStrm &strm) -> void
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   sprite.load(strm);
   Node::load(strm);
 }
 
-auto Mouth::h() const -> float
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::h() const -> float
 {
   return sprite.h();
 }
 
-auto Mouth::isTransparent(glm::vec2 v) const -> bool
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::isTransparent(glm::vec2 v) const -> bool
 {
   return sprite.isTransparent(v);
 }
 
-auto Mouth::w() const -> float
+template <typename S, typename ClassName>
+auto BaseMouth<S, ClassName>::w() const -> float
 {
   return sprite.w();
 }
+
+template class BaseMouth<SpriteSheet, SpriteSheetMouthClassName>;
+template class BaseMouth<ImageList, ImageListMouthClassName>;

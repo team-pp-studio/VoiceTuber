@@ -29,11 +29,12 @@ static auto getProjectionMatrix() -> glm::mat4
 
 auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 {
-  sprite.frame(static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
-                                  std::chrono::high_resolution_clock::now() - startTime)
-                                  .count() *
-                                fps / 1'000'000) %
-               sprite.numFrames());
+  if (sprite.numFrames() > 0)
+    sprite.frame(static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(
+                                    std::chrono::high_resolution_clock::now() - startTime)
+                                    .count() *
+                                  fps / 1'000'000) %
+                 sprite.numFrames());
   sprite.render();
   Node::render(dt, hovered, selected);
   if (dt <= 0.f)

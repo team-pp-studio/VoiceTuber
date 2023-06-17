@@ -2,7 +2,7 @@
 #include "audio-sink.hpp"
 #include "gpt.hpp"
 #include "node.hpp"
-#include "sprite.hpp"
+#include "sprite-sheet.hpp"
 #include "visemes-sink.hpp"
 
 class AiMouth final : public AudioSink, public VisemesSink, public TwitchSink, public Node
@@ -27,7 +27,7 @@ public:
   static constexpr const char *className = "AiMouth";
 
 private:
-  Sprite sprite;
+  SpriteSheet sprite;
   std::reference_wrapper<Lib> lib;
   std::reference_wrapper<AudioIn> audioIn;
   std::reference_wrapper<Wav2Visemes> wav2Visemes;

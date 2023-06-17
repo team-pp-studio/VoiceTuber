@@ -1,14 +1,13 @@
 #pragma once
 #include "lib.hpp"
 #include "node.hpp"
-#include "wav-2-visemes.hpp"
 #include <SDL_opengl.h>
 #include <filesystem>
 #include <sdlpp/sdlpp.hpp>
 #include <string>
 #include <unordered_map>
 
-class Sprite
+class SpriteSheet
 {
 public:
 #define SER_PROP_LIST \
@@ -19,17 +18,17 @@ public:
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  Sprite(Lib &, Undo &, const std::filesystem::path &path);
+  SpriteSheet(Lib &, Undo &, const std::filesystem::path &path);
+  auto frame() const -> int;
+  auto frame(int) -> void;
   auto h() const -> float;
   auto isTransparent(glm::vec2) const -> bool;
   auto load(IStrm &) -> void;
+  auto numFrames() const -> int;
   auto render() -> void;
   auto renderUi() -> void;
   auto save(OStrm &) const -> void;
   auto w() const -> float;
-  auto frame(int) -> void;
-  auto frame() const -> int;
-  auto numFrames() const -> int;
 
 private:
   std::reference_wrapper<Undo> undo;

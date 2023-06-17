@@ -1,4 +1,4 @@
-#include "sprite.hpp"
+#include "sprite-sheet.hpp"
 #include "ui.hpp"
 #include <cassert>
 #include <cstdint>
@@ -6,7 +6,7 @@
 #include <imgui/imgui.h>
 #include <log/log.hpp>
 
-Sprite::Sprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
+SpriteSheet::SpriteSheet(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
   : undo(aUndo), texture(lib.queryTex([&]() {
       try
       {
@@ -23,7 +23,7 @@ Sprite::Sprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
 {
 }
 
-auto Sprite::render() -> void
+auto SpriteSheet::render() -> void
 {
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture->texture());
@@ -46,7 +46,7 @@ auto Sprite::render() -> void
   glDisable(GL_TEXTURE_2D);
 }
 
-auto Sprite::renderUi() -> void
+auto SpriteSheet::renderUi() -> void
 {
   ImGui::TableNextColumn();
   Ui::textRj("Cols");
@@ -68,27 +68,27 @@ auto Sprite::renderUi() -> void
     numFrames_ = 1;
 }
 
-auto Sprite::save(OStrm &strm) const -> void
+auto SpriteSheet::save(OStrm &strm) const -> void
 {
   ::ser(strm, *this);
 }
 
-auto Sprite::load(IStrm &strm) -> void
+auto SpriteSheet::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
 }
 
-auto Sprite::w() const -> float
+auto SpriteSheet::w() const -> float
 {
   return 1.f * texture->w() / cols;
 }
 
-auto Sprite::h() const -> float
+auto SpriteSheet::h() const -> float
 {
   return 1.f * texture->h() / rows;
 }
 
-auto Sprite::isTransparent(glm::vec2 v) const -> bool
+auto SpriteSheet::isTransparent(glm::vec2 v) const -> bool
 {
   if (texture->ch() == 3)
     return false;
@@ -103,17 +103,17 @@ auto Sprite::isTransparent(glm::vec2 v) const -> bool
     return false;
 }
 
-auto Sprite::frame(int v) -> void
+auto SpriteSheet::frame(int v) -> void
 {
   frame_ = v;
 }
 
-auto Sprite::frame() const -> int
+auto SpriteSheet::frame() const -> int
 {
   return frame_;
 }
 
-auto Sprite::numFrames() const -> int
+auto SpriteSheet::numFrames() const -> int
 {
   return numFrames_;
 }
