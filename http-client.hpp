@@ -1,8 +1,4 @@
 #pragma once
-#ifdef _WIN32
-#define NOMINMAX
-#endif
-
 #include "uv.hpp"
 #include <curl/curl.h>
 #include <functional>

@@ -9,8 +9,8 @@ EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::fil
 {
   mouseTracking.reg(*this);
 
-  auto name = SDL_GetDisplayName(0);
-  selectedDisplay = name;
+  auto displayName = SDL_GetDisplayName(0);
+  selectedDisplay = displayName;
   SDL_Rect rect;
   SDL_GetDisplayBounds(0, &rect);
   screenTopLeft = glm::vec2{rect.x, rect.y};
@@ -118,11 +118,11 @@ auto EyeV2::renderUi() -> void
       const auto displayCnt = SDL_GetNumVideoDisplays();
       for (auto i = 0; i < displayCnt; ++i)
       {
-        auto name = SDL_GetDisplayName(i);
-        if (ImGui::Selectable(name, name == selectedDisplay))
+        auto displayName = SDL_GetDisplayName(i);
+        if (ImGui::Selectable(displayName, displayName == selectedDisplay))
         {
           undo.get().record(
-            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{name}, i]() {
+            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{displayName}, i]() {
               if (!alive.lock())
                 return;
               selectedDisplay = newDisplay;

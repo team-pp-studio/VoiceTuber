@@ -185,7 +185,6 @@
     <ClInclude Include="azure-tts.hpp" />
     <ClInclude Include="bouncer.hpp" />
     <ClInclude Include="bouncer2.hpp" />
-    <ClInclude Include="channel-dialog.hpp" />
     <ClInclude Include="chat-v2.hpp" />
     <ClInclude Include="chat.hpp" />
     <ClInclude Include="dialog.hpp" />
@@ -219,6 +218,17 @@
       <Filter>3rd-party</Filter>
     </ClInclude>
     <ClInclude Include="http-client.hpp" />
+    <ClInclude Include="version.hpp" />
+    <ClInclude Include="eye-v2.hpp" />
+    <ClInclude Include="ai-mouth.hpp" />
+    <ClInclude Include="azure-stt.hpp" />
+    <ClInclude Include="azure-token.hpp" />
+    <ClInclude Include="blink.hpp" />
+    <ClInclude Include="gpt.hpp" />
+    <ClInclude Include="image-list.hpp" />
+    <ClInclude Include="input-dialog.hpp" />
+    <ClInclude Include="save-wav.hpp" />
+    <ClInclude Include="sprite-sheet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="3rd-party\imgui\imgui.cpp">
@@ -263,7 +273,6 @@
     <ClCompile Include="azure-tts.cpp" />
     <ClCompile Include="bouncer.cpp" />
     <ClCompile Include="bouncer2.cpp" />
-    <ClCompile Include="channel-dialog.cpp" />
     <ClCompile Include="chat-v2.cpp" />
     <ClCompile Include="chat.cpp" />
     <ClCompile Include="dialog.cpp" />
@@ -282,7 +291,6 @@
     <ClCompile Include="prj-dialog.cpp" />
     <ClCompile Include="root.cpp" />
     <ClCompile Include="save-factory.cpp" />
-    <ClCompile Include="sprite.cpp" />
     <ClCompile Include="stb-image.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="twitch.cpp" />
@@ -294,6 +302,17 @@
       <Filter>3rd-party</Filter>
     </ClCompile>
     <ClCompile Include="http-client.cpp" />
+    <ClCompile Include="version.cpp" />
+    <ClCompile Include="eye-v2.cpp" />
+    <ClCompile Include="ai-mouth.cpp" />
+    <ClCompile Include="azure-stt.cpp" />
+    <ClCompile Include="azure-token.cpp" />
+    <ClCompile Include="blink.cpp" />
+    <ClCompile Include="gpt.cpp" />
+    <ClCompile Include="image-list.cpp" />
+    <ClCompile Include="input-dialog.cpp" />
+    <ClCompile Include="save-wav.cpp" />
+    <ClCompile Include="sprite-sheet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3rd-party">

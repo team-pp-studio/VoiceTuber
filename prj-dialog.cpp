@@ -23,7 +23,7 @@ PrjDialog::PrjDialog(Lib &lib, Cb aCb)
 
 auto PrjDialog::internalDraw() -> DialogState
 {
-  ImGui::Image((void *)(intptr_t)splash->texture(), ImVec2(splash->w(), splash->h()));
+  ImGui::Image((void *)(intptr_t)splash->texture(), ImVec2{static_cast<float>(splash->w()), static_cast<float>(splash->h())});
   auto availableSpace =
     ImVec2{static_cast<float>(splash->w() - 240), static_cast<float>(splash->h() - 180 - 265 + 58)};
 
@@ -129,8 +129,9 @@ auto PrjDialog::internalDraw() -> DialogState
       }();
       if (oldSelectedDir == dirStr)
         hasSelected = true;
-      if (ImGui::Selectable(
-            ("> " + dirStr).c_str(), oldSelectedDir == dirStr, ImGuiSelectableFlags_AllowDoubleClick))
+      if (ImGui::Selectable(("> " + dirStr).c_str(),
+                            oldSelectedDir == dirStr,
+                            ImGuiSelectableFlags_AllowDoubleClick))
       {
         if (ImGui::IsMouseDoubleClicked(0))
         {
@@ -198,10 +199,10 @@ auto PrjDialog::internalDraw() -> DialogState
   }
 
   ImGui::SetCursorPos(ImVec2{1110 - 160 + 20, 412 - 142 + 30});
-  if (ImGui::ImageButton((void *)(intptr_t)donate->texture(), ImVec2(donate->w(), donate->h())))
+  if (ImGui::ImageButton((void *)(intptr_t)donate->texture(), ImVec2{static_cast<float>(donate->w()), static_cast<float>(donate->h())}))
     SDL_OpenURL("https://github.com/sponsors/WichitPritchett");
   ImGui::SetCursorPosX(1110 - 160 + 20);
-  if (ImGui::ImageButton((void *)(intptr_t)github->texture(), ImVec2(github->w(), github->h())))
+  if (ImGui::ImageButton((void *)(intptr_t)github->texture(), ImVec2{static_cast<float>(github->w()), static_cast<float>(github->h())}))
     SDL_OpenURL("https://github.com/team-pp-studio/VoiceTuber");
 
   ImGui::SetCursorPos(ImVec2{226, 140 + 15});

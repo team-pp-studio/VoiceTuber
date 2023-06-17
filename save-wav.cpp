@@ -27,14 +27,14 @@ auto saveWav(std::ostream &f, const Wav &pcm, int sampleRate) -> void
   writeWord(f, 16, 2); // number of bits per sample (use a multiple of 8)
 
   // Write the data chunk header
-  const long dataChunkPos = f.tellp();
+  const auto dataChunkPos = static_cast<long>(f.tellp());
   f << "data----"; // (chunk size to be filled in later)
 
   for (auto a : pcm)
     writeWord(f, a, 2);
 
   // (We'll need the final file size to fix the chunk sizes above)
-  const long fileLength = f.tellp();
+  const auto fileLength = static_cast<long>(f.tellp());
 
   // Fix the data chunk header to contain the data size
   f.seekp(dataChunkPos + 4);

@@ -21,7 +21,7 @@ namespace uv
                              return;
                            self->buf.resize(suggestedSize);
                            aBuf->base = self->buf.data();
-                           aBuf->len = suggestedSize;
+                           aBuf->len = static_cast<ULONG>(suggestedSize);
                          },
                          [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
                            auto self = static_cast<Tcp *>(stream->data);
