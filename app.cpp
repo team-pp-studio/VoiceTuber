@@ -2,7 +2,7 @@
 #include "add-as-dialog.hpp"
 #include "ai-mouth.hpp"
 #include "anim-sprite.hpp"
-#include "base-mouth.hpp"
+#include "blink.hpp"
 #include "bouncer.hpp"
 #include "bouncer2.hpp"
 #include "chat-v2.hpp"
@@ -14,6 +14,7 @@
 #include "imgui-impl-sdl.h"
 #include "input-dialog.hpp"
 #include "message-dialog.hpp"
+#include "mouth.hpp"
 #include "preferences-dialog.hpp"
 #include "prj-dialog.hpp"
 #include "root.hpp"
@@ -147,6 +148,10 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
   saveFactory.reg<AiMouth>([this](std::string name) {
     return std::make_unique<AiMouth>(lib, undo, audioIn, audioOut, wav2Visemes, std::move(name));
   });
+  saveFactory.reg<SpriteSheetBlink>(
+    [this](std::string name) { return std::make_unique<SpriteSheetBlink>(lib, undo, std::move(name)); });
+  saveFactory.reg<ImageListBlink>(
+    [this](std::string name) { return std::make_unique<ImageListBlink>(lib, undo, std::move(name)); });
 
   if (argc == 2)
   {
@@ -344,6 +349,18 @@ auto App::renderUi(float /*dt*/) -> void
           if (r)
             addNode(EyeV2::className, filePath.string());
         });
+      if (ImGui::MenuItem("Add Sprite Sheet Blink..."))
+        dialog = std::make_unique<FileOpen>(
+          lib, "Add Sprite Sheet Blink Dialog", [this](bool r, const auto &filePath) {
+            if (r)
+              addNode(SpriteSheetBlink::className, filePath.string());
+          });
+      if (ImGui::MenuItem("Add Image List Blink..."))
+        dialog =
+          std::make_unique<InputDialog>("Enter Node Name", "Blink", [this](bool r, const auto &input) {
+            if (r)
+              addNode(ImageListBlink::className, input);
+          });
       if (ImGui::MenuItem("Add Twitch Chat..."))
         dialog = std::make_unique<InputDialog>(
           "Enter Twitch Channel Name", "mika314", [this](bool r, const auto &channel) {

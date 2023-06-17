@@ -7,15 +7,15 @@
 #include <filesystem>
 
 template <typename S, typename ClassName>
-class BaseMouth final : public Node, public VisemesSink
+class Mouth final : public Node, public VisemesSink
 {
 public:
 #define SER_PROP_LIST SER_PROP(viseme2Sprite);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
 
-  BaseMouth(class Wav2Visemes &, Lib &, Undo &, const std::filesystem::path &);
-  ~BaseMouth() final;
+  Mouth(class Wav2Visemes &, Lib &, Undo &, const std::filesystem::path &);
+  ~Mouth() final;
 
   constexpr static const char *className = ClassName::v;
 
@@ -46,5 +46,5 @@ struct ImageListMouthClassName
   constexpr static const char *v = "ImageListMouth";
 };
 
-using SpriteSheetMouth = BaseMouth<SpriteSheet, SpriteSheetMouthClassName>;
-using ImageListMouth = BaseMouth<ImageList, ImageListMouthClassName>;
+using SpriteSheetMouth = Mouth<SpriteSheet, SpriteSheetMouthClassName>;
+using ImageListMouth = Mouth<ImageList, ImageListMouthClassName>;

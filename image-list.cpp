@@ -1,5 +1,6 @@
 #include "image-list.hpp"
 #include "file-open.hpp"
+#include "ui.hpp"
 #include <log/log.hpp>
 
 ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &)
@@ -87,7 +88,7 @@ auto ImageList::renderUi() -> void
     if (!dialog->draw())
       dialog = nullptr;
   ImGui::TableNextColumn();
-  ImGui::Text("Images");
+  Ui::textRj("Images");
   ImGui::TableNextColumn();
   auto n = 0;
   auto toDel = -1;

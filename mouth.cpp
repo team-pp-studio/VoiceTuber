@@ -1,4 +1,4 @@
-#include "base-mouth.hpp"
+#include "mouth.hpp"
 #include "image-list.hpp"
 #include "sprite-sheet.hpp"
 #include "ui.hpp"
@@ -7,10 +7,10 @@
 #include <imgui/imgui.h>
 
 template <typename S, typename ClassName>
-BaseMouth<S, ClassName>::BaseMouth(Wav2Visemes &wav2Visemes,
-                                   Lib &lib,
-                                   Undo &aUndo,
-                                   const std::filesystem::path &path)
+Mouth<S, ClassName>::Mouth(Wav2Visemes &wav2Visemes,
+                           Lib &lib,
+                           Undo &aUndo,
+                           const std::filesystem::path &path)
   : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
     sprite(lib, aUndo, path),
     wav2Visemes(wav2Visemes)
@@ -34,13 +34,13 @@ BaseMouth<S, ClassName>::BaseMouth(Wav2Visemes &wav2Visemes,
 }
 
 template <typename S, typename ClassName>
-BaseMouth<S, ClassName>::~BaseMouth()
+Mouth<S, ClassName>::~Mouth()
 {
   wav2Visemes.get().unreg(*this);
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) -> void
+auto Mouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) -> void
 {
   if (sprite.numFrames() > 0)
     sprite.frame(viseme2Sprite[viseme] % sprite.numFrames());
@@ -49,7 +49,7 @@ auto BaseMouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) ->
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::renderUi() -> void
+auto Mouth<S, ClassName>::renderUi() -> void
 {
   Node::renderUi();
   sprite.renderUi();
@@ -140,7 +140,7 @@ auto BaseMouth<S, ClassName>::renderUi() -> void
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::ingest(Viseme v) -> void
+auto Mouth<S, ClassName>::ingest(Viseme v) -> void
 {
   if (std::chrono::high_resolution_clock::now() < freezeTime)
     return;
@@ -148,7 +148,7 @@ auto BaseMouth<S, ClassName>::ingest(Viseme v) -> void
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::save(OStrm &strm) const -> void
+auto Mouth<S, ClassName>::save(OStrm &strm) const -> void
 {
   ::ser(strm, className);
   ::ser(strm, name);
@@ -158,7 +158,7 @@ auto BaseMouth<S, ClassName>::save(OStrm &strm) const -> void
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::load(IStrm &strm) -> void
+auto Mouth<S, ClassName>::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   sprite.load(strm);
@@ -166,22 +166,22 @@ auto BaseMouth<S, ClassName>::load(IStrm &strm) -> void
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::h() const -> float
+auto Mouth<S, ClassName>::h() const -> float
 {
   return sprite.h();
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::isTransparent(glm::vec2 v) const -> bool
+auto Mouth<S, ClassName>::isTransparent(glm::vec2 v) const -> bool
 {
   return sprite.isTransparent(v);
 }
 
 template <typename S, typename ClassName>
-auto BaseMouth<S, ClassName>::w() const -> float
+auto Mouth<S, ClassName>::w() const -> float
 {
   return sprite.w();
 }
 
-template class BaseMouth<SpriteSheet, SpriteSheetMouthClassName>;
-template class BaseMouth<ImageList, ImageListMouthClassName>;
+template class Mouth<SpriteSheet, SpriteSheetMouthClassName>;
+template class Mouth<ImageList, ImageListMouthClassName>;
