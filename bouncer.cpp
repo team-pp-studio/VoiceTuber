@@ -15,8 +15,7 @@ auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
   zOrder = INT_MIN;
   glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
-  offset += std::min(1000.f * dt / 250.f, 1.f) * (strength * audioLevel.getLevel() - offset);
-  loc.y = offset;
+  dLoc.y += std::min(1000.f * dt / 250.f, 1.f) * (strength * audioLevel.getLevel() - dLoc.y);
   Node::render(dt, hovered, selected);
 }
 

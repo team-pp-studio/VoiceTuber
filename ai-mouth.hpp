@@ -36,7 +36,7 @@ private:
   std::shared_ptr<Twitch> twitch;
   Viseme viseme;
   decltype(std::chrono::high_resolution_clock::now()) freezeTime;
-  std::unordered_map<Viseme, int> viseme2Sprite;
+  std::map<Viseme, int> viseme2Sprite;
   std::string voice;
   std::deque<int16_t> wavBuf;
   decltype(std::chrono::high_resolution_clock::now()) silStart;

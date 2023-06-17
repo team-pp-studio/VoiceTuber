@@ -21,7 +21,7 @@ public:
 
 private:
   S sprite;
-  std::unordered_map<Viseme, int> viseme2Sprite;
+  std::map<Viseme, int> viseme2Sprite;
   Viseme viseme = Viseme{};
   decltype(std::chrono::high_resolution_clock::now()) freezeTime;
   std::reference_wrapper<Wav2Visemes> wav2Visemes;

@@ -12,8 +12,7 @@ Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioIn &audioIn, std::string aN
 
 auto Bouncer2::render(float dt, Node *hovered, Node *selected) -> void
 {
-  offset += std::min(1000.f * dt / easing, 1.f) * (strength * audioLevel.getLevel() - offset);
-  loc.y = offset;
+  dLoc.y += std::min(1000.f * dt / easing, 1.f) * (strength * audioLevel.getLevel() - dLoc.y);
   Node::render(dt, hovered, selected);
 }
 

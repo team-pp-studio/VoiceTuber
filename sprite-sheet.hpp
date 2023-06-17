@@ -5,15 +5,14 @@
 #include <filesystem>
 #include <sdlpp/sdlpp.hpp>
 #include <string>
-#include <unordered_map>
 
 class SpriteSheet
 {
 public:
-#define SER_PROP_LIST \
-  SER_PROP(cols);     \
-  SER_PROP(rows);     \
-  SER_PROP(frame_);   \
+#define SER_PROP_LIST         \
+  SER_PROP(cols);             \
+  SER_PROP(rows);             \
+  SER_PROP(depricatedFrame_); \
   SER_PROP(numFrames_);
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
@@ -36,5 +35,6 @@ private:
   int rows = 1;
   int frame_ = 0;
   int numFrames_ = 1;
+  int depricatedFrame_ = 0;
   std::shared_ptr<const Texture> texture;
 };

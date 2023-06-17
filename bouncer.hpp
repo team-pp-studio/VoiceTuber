@@ -19,7 +19,6 @@ public:
 private:
   float strength = 100.f;
   ImVec4 clearColor = ImVec4(123.f / 256.f, 164.f / 256.f, 119.f / 256.f, 1.00f);
-  float offset = 0.f;
   AudioLevel audioLevel;
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;

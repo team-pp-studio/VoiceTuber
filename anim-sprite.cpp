@@ -48,13 +48,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto a = (v - lastProjPivotV + gForce) / dt;
   lastProjPivot = glm::vec2{projPivot.x, projPivot.y};
   lastProjPivotV = v;
-
   if (!physics)
-  {
-    animRotV = {};
-    animRot = {};
     return;
-  }
 
   if (glm::length(end - pivot()) < 1.f)
     return;
@@ -65,8 +60,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto orthogonalVec = glm::vec2{-pivotToEnd.y, pivotToEnd.x};
   const auto normalizedOrthogonalVec = glm::normalize(orthogonalVec);
   float projection = glm::dot(a, normalizedOrthogonalVec);
-  animRotV += (-force * projection - animRot * springness - animRotV * damping) * dt;
-  animRot += animRotV * dt;
+  animRotV += (-force * projection - dRot * springness - animRotV * damping) * dt;
+  dRot += animRotV * dt;
 
   if (selected != this)
     return;
@@ -90,7 +85,14 @@ auto AnimSprite::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("Physics");
   ImGui::TableNextColumn();
-  Ui::checkbox(undo, "##Physics", physics);
+  if (Ui::checkbox(undo, "##Physics", physics))
+  {
+    animRotV = {};
+    dRot = {};
+    dLoc = {};
+    dScale = {};
+  }
+
   ImGui::TableNextColumn();
   {
     auto physicsDisabled = Ui::Disabled{!physics};

@@ -28,7 +28,9 @@ auto Eye::render(float dt, Node *hovered, Node *selected) -> void
     return mousePivot;
   }();
 
-  glTranslatef(clampMouse.x, clampMouse.y, .0f);
+  dLoc.x = clampMouse.x;
+  dLoc.y = clampMouse.y;
+
   AnimSprite::render(dt, hovered, selected);
   if (selected == this)
   {
