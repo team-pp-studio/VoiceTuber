@@ -156,6 +156,7 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
   if (argc == 2)
   {
     std::filesystem::current_path(argv[1]);
+    showUi = false;
     loadPrj();
   }
   setupRendering();
