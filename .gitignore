@@ -4,3 +4,7 @@
 .vs/
 Debug/
 Release/
+
+full_deploy/
+build/
+CMakeUserPresets.json
