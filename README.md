@@ -86,7 +86,7 @@ and equipment.
     * On Linux, Conan might only be available through pip
 * Export PocketSphinx to your conan cache: `conan export ./recipes/pocketsphinx --version 5.0.1`
     * PocketSphinx is not available (yet) on the Conan Center Index, so we use our own recipe
-* Install required dependencies: `conan install ./ --build missing`
+* Install required dependencies: `conan install ./ --build missing -d full_deploy`
     * This step might take a while
 * Build the binary: `cmake --build --preset conan-release`
 * And install locally: `cmake --install build/Release --prefix ./local_install/`
