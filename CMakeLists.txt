@@ -29,7 +29,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/3rd
 target_link_libraries(${PROJECT_NAME} PRIVATE ser json SDL2::SDL2 imgui::imgui SDL2_ttf::SDL2_ttf glm::glm stb::stb pocketsphinx::pocketsphinx cpptoml uv CURL::libcurl)
 
 # TODO: use conanfile.py instead to get access to this directory in a more portable way
-set(imgui_RES_DIR ${CMAKE_CURRENT_LIST_DIR}/full_deploy/host/imgui/cci.20230105+1.89.2.docking/Release/x86_64/res/)
+set(imgui_RES_DIR ${CMAKE_CURRENT_LIST_DIR}/full_deploy/host/imgui/cci.20230105+1.89.2.docking/${CMAKE_BUILD_TYPE}/x86_64/res/)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${imgui_RES_DIR}/bindings)
 target_sources(${PROJECT_NAME} PRIVATE
