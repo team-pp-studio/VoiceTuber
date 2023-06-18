@@ -36,4 +36,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${imgui_RES_DIR}/bindings/imgui_impl_opengl3.cpp
     ${imgui_RES_DIR}/bindings/imgui_impl_sdl.cpp)
 
-install(TARGETS ${PROJECT_NAME})
+# destinations are relative to the install prefix
+install(TARGETS ${PROJECT_NAME} DESTINATION ".")
+install(DIRECTORY assets DESTINATION ".")

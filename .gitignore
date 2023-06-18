@@ -7,4 +7,6 @@ Release/
 
 full_deploy/
 build/
+install/
+.vscode/
 CMakeUserPresets.json
