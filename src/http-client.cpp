@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "http-client.hpp"
 #include <algorithm>
 #include <log/log.hpp>

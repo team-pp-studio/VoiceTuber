@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "twitch.hpp"
 #include <algorithm>
 #include <log/log.hpp>

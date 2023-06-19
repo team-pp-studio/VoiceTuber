@@ -1,6 +1,8 @@
 #include "preferences.hpp"
 #include <SDL.h>
+#include <sdlpp/sdlpp.hpp>
 #include <log/log.hpp>
+#include <filesystem>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcovered-switch-default"
@@ -22,6 +24,14 @@ Preferences::Preferences()
   auto configFilePath = std::string{prefPath};
   configFilePath.append("preferences.toml");
   SDL_free(prefPath);
+
+  if (!std::filesystem::exists(configFilePath)) {
+    // create the file
+    auto *rwops = SDL_RWFromFile(configFilePath.c_str(), "b");
+    if (rwops == nullptr)
+      throw sdl::Error(SDL_GetError());
+    SDL_RWclose(rwops);
+  }
 
   try
   {
