@@ -81,15 +81,24 @@ and equipment.
 6\. Build Instructions
 -----------------------
 
-* Ensure you have Conan, CMake and you system's Build Tools
-    * On Windows you can use [Winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget) to install all these
-    * On Linux, Conan might only be available through pip
-* Export PocketSphinx to your conan cache: `conan export ./recipes/pocketsphinx --version 5.0.1`
-    * PocketSphinx is not available (yet) on the Conan Center Index, so we use our own recipe
-* Install required dependencies: `conan install ./ --build missing -d full_deploy`
-    * This step might take a while
+**Windows/Visual Studio:**
+
+* Ensure you have the *Desktop development with C++* workload and the *C++ CMake tools for Windows* individual component installed.
+* Export PocketSphinx to your Conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
+* Install required dependencies by running `conan install ./ --build missing -s build_type=Release`.
+* Now open the project directory in Visual Studio and it will automatically configure your project.
+
+**Linux:**
+* Ensure you have Conan, CMake and GCC installed.
+    * Conan might not be available in your distribution repositories, but it's also available through pip.
+* Export PocketSphinx to your conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
+* Install required dependencies: `conan install ./ --build missing -s build_type=Release`
 * Build the binary: `cmake --build --preset conan-release`
 * And install locally: `cmake --install build/Release --prefix ./local_install/`
+
+After locally installing, you will need to copy the dependencies DLLs into the installation directory.
+You can add `-d full_deploy` to the `conan install` command to copy them outside the Conan cache and then manually copy them to the installation location.
+On Linux you can also add the location of the shared libraries to the `LD_LIBRARY_PATH` environment variable.
 
 7\. TODO
 --------
