@@ -12,30 +12,48 @@
 static auto CompanyName = "TeamPP";
 static auto AppName = "VoiceTuber";
 
+struct SDLDeleter {
+	void operator()(void* ptr) const noexcept {
+		SDL_free(ptr);
+	}
+};
+
+static std::filesystem::path  get_preferences_path() {
+	auto prefPath = std::unique_ptr<char[], SDLDeleter>(SDL_GetPrefPath(CompanyName, AppName));
+    if (prefPath == nullptr)
+        throw sdl::Error(SDL_GetError());
+	std::filesystem::path result = std::u8string{ (char8_t const*)prefPath.get() };
+	return result;
+}
+
 Preferences::Preferences()
 {
-  auto prefPath = SDL_GetPrefPath(CompanyName, AppName);
-  if (!prefPath)
-  {
-    LOG("Error getting preferences directory:", SDL_GetError());
-    return;
-  }
+  auto configFilePath = get_preferences_path();
+  std::filesystem::create_directories(configFilePath);
+  configFilePath /= "preferences.toml";
 
-  auto configFilePath = std::string{prefPath};
-  configFilePath.append("preferences.toml");
-  SDL_free(prefPath);
 
+  std::fstream configFile;
   if (!std::filesystem::exists(configFilePath)) {
-    // create the file
-    auto *rwops = SDL_RWFromFile(configFilePath.c_str(), "b");
-    if (rwops == nullptr)
-      throw sdl::Error(SDL_GetError());
-    SDL_RWclose(rwops);
+      // create the file
+      configFile.open(configFilePath, std::ios_base::in |std::ios_base::out | std::ios_base::trunc);
+      if (!configFile) {
+          LOG("failed to create preferences file");
+          return;
+      }
+  } else {
+      // just open for read
+      configFile.open(configFilePath, std::ios_base::in);
+      if (!configFile) {
+          LOG("failed to open preferences file");
+          return;
+      }
   }
 
   try
   {
-    auto config = cpptoml::parse_file(configFilePath);
+    auto config = cpptoml::parser(configFile).parse();
+    configFile.close();
     twitchUser = config->get_qualified_as<std::string>("twitch.user").value_or("mika314");
     twitchKey = config->get_qualified_as<std::string>("twitch.key").value_or("");
     audioOut = config->get_qualified_as<std::string>("audio.out").value_or("Default");
@@ -53,16 +71,9 @@ Preferences::Preferences()
 
 auto Preferences::save() -> void
 {
-  auto prefPath = SDL_GetPrefPath(CompanyName, AppName);
-  if (!prefPath)
-  {
-    std::cerr << "Error getting preferences directory: " << SDL_GetError() << std::endl;
-    return;
-  }
-
-  auto configFilePath = std::string{prefPath};
-  configFilePath.append("preferences.toml");
-  SDL_free(prefPath);
+  auto configFilePath = get_preferences_path();
+  std::filesystem::create_directories(configFilePath);
+  configFilePath /= "preferences.toml";
 
   try
   {
