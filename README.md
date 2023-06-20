@@ -141,7 +141,7 @@ cd VoiceTuber/src && coddle
 * Run the application
 ```
 ../VoiceTuber
-
+```
 
 7\. TODO
 --------
