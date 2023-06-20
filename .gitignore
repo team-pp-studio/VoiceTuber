@@ -10,3 +10,5 @@ build/
 install/
 .vscode/
 CMakeUserPresets.json
+/src/.coddle/
+/src/VoiceTuber

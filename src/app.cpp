@@ -10,6 +10,8 @@
 #include "eye-v2.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
+#include "imgui-impl-opengl3.h"
+#include "imgui-impl-sdl.h"
 #include "input-dialog.hpp"
 #include "message-dialog.hpp"
 #include "mouth.hpp"
@@ -18,8 +20,6 @@
 #include "root.hpp"
 #include "ui.hpp"
 #include "version.hpp"
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_sdl.h>
 #include <SDL_opengl.h>
 #include <fstream>
 #include <log/log.hpp>

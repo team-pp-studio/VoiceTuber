@@ -1,0 +1,17 @@
+[[library]]
+type="git"
+name="imgui"
+version="docking"
+path="https://github.com/ocornut/imgui.git"
+includes=[
+  "imgui.h",
+]
+incdir="."
+
+[[library]]
+type="git"
+version="master"
+name="stb"
+path="https://github.com/nothings/stb.git"
+includes=["stb_image.h"]
+incdir="."
