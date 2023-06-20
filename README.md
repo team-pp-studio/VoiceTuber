@@ -88,7 +88,13 @@ and equipment.
 * Install required dependencies by running `conan install ./ --build missing -s build_type=Release`.
 * Now open the project directory in Visual Studio and it will automatically configure your project.
 
+After locally installing, you will need to copy the dependencies DLLs into the installation directory.
+You can add `-d full_deploy` to the `conan install` command to copy them outside the Conan cache and then manually copy them to the installation location.
+
 **Linux:**
+
+Building with Conan:
+
 * Ensure you have Conan, CMake and GCC installed.
     * Conan might not be available in your distribution repositories, but it's also available through pip.
 * Export PocketSphinx to your conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
@@ -96,16 +102,53 @@ and equipment.
 * Build the binary: `cmake --build --preset conan-release`
 * And install locally: `cmake --install build/Release --prefix ./local_install/`
 
-After locally installing, you will need to copy the dependencies DLLs into the installation directory.
-You can add `-d full_deploy` to the `conan install` command to copy them outside the Conan cache and then manually copy them to the installation location.
-On Linux you can also add the location of the shared libraries to the `LD_LIBRARY_PATH` environment variable.
+You can also add the location of the shared libraries to the `LD_LIBRARY_PATH` environment variable.
+
+Building with coddle:
+
+* Install dependencies
+```
+sudo apt-get install -y clang pkg-config libsdl2-dev libuv1-dev git cmake
+```
+* Clone the app
+```
+git clone --recurse-submodules https://github.com/team-pp-studio/VoiceTuber.git
+```
+
+* Build Pocketsphinx
+```
+cd VoiceTuber/3rd-party/pocketsphinx
+cmake -S . -B build
+cmake --build build
+cmake --build build --target install
+cd ../../..
+```
+Last `cmake` command you may need to run with `sudo`.
+
+* Clone and compile the build tool `coddle`
+```
+git clone https://github.com/coddle-cpp/coddle.git && cd coddle && ./build.sh
+```
+* Install `coddle`
+```
+sudo ./deploy.sh
+cd ..
+```
+* Build VoiceTuber
+```
+cd VoiceTuber/src && coddle
+```
+* Run the application
+```
+../VoiceTuber
+
 
 7\. TODO
 --------
 Top Priority
  - [ ] the app crashes on Twitch chat with unstable Internet
- - [ ] implement mouth based on individual images instead of the sprite sheet
- - [ ] implement blink based on individual images
+ - [x] implement mouth based on individual images instead of the sprite sheet
+ - [x] implement blink based on individual images
 
 
 General Priority
