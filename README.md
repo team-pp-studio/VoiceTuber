@@ -81,71 +81,25 @@ and equipment.
 6\. Build Instructions
 -----------------------
 
-### Windows
-* Clone the source code using GitHub Desktop
-   * You can install Github Desktop from: <https://desktop.github.com/>
-* Build Pocketsphinx
-   * Install CMake from: <https://cmake.org/download/>
-   * In the cloned project, locate the Pocketsphinx copy at `VoiceTuber/3rd-party/pocketsphinx`. Run the following commands in `cmd`:
-```
-cmake -S . -B build
-cmake --build build
-cmake --build build --target install -DCMAKE_INSTALL_PREFIX=bin
-```
-* Build libuv
-    * Assume CMake is installed from the Pocketsphinx sections
-    * In the cloned project, locate the libuv copy at `VoiceTuber/3rd-party/libuv`. Run the following commands in `cmd`:
-```
-$ mkdir -p build
-$ (cd build && cmake .. -DBUILD_TESTING=ON) # generate project with tests
-$ cmake --build build                       # add `-j <n>` with cmake >= 3.12
-```
-*
-    * This steps will build Debug version of libuv, open generated `.sln` file from `VoiceTuber/3rd-party/libuv/libuv.sln` in Visual Studio
-    * Switch Solution Configuration to Release
-    * Build Solution with `Build/Build Solution` menu
-* Build the rest of the project
-    * Open `VoiceTuber.sln` in Visual Studio 2022
-    * Use the menu option `Build/Build Solution`
-* If you want to run the app in the Visual Studio debugger, the
-  easiest way is to copy the whole `Assets` directory into the
-  `Release` directory.
-### Linux
-* Install dependencies
-```
-sudo apt-get install -y clang pkg-config libsdl2-dev libuv1-dev git cmake
-```
-* Clone the app
-```
-git clone --recurse-submodules https://github.com/team-pp-studio/VoiceTuber.git
-```
-* Build Pocketsphinx
-```
-cd VoiceTuber/3rd-party/pocketsphinx
-cmake -S . -B build
-cmake --build build
-cmake --build build --target install
-cd ../../..
-```
-Last `cmake` command you may need to run with `sudo`.
+**Windows/Visual Studio:**
 
-* Clone and compile the build tool `coddle`
-```
-git clone https://github.com/coddle-cpp/coddle.git && cd coddle && ./build.sh
-```
-* Install `coddle`
-```
-sudo ./deploy.sh
-cd ..
-```
-* Build VoiceTuber
-```
-cd VoiceTuber && coddle
-```
-* Run the application
-```
-./VoiceTuber
-```
+* Ensure you have the *Desktop development with C++* workload and the *C++ CMake tools for Windows* individual component installed.
+* Export PocketSphinx to your Conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
+* Install required dependencies by running `conan install ./ --build missing -s build_type=Release`.
+* Now open the project directory in Visual Studio and it will automatically configure your project.
+
+**Linux:**
+* Ensure you have Conan, CMake and GCC installed.
+    * Conan might not be available in your distribution repositories, but it's also available through pip.
+* Export PocketSphinx to your conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
+* Install required dependencies: `conan install ./ --build missing -s build_type=Release`
+* Build the binary: `cmake --build --preset conan-release`
+* And install locally: `cmake --install build/Release --prefix ./local_install/`
+
+After locally installing, you will need to copy the dependencies DLLs into the installation directory.
+You can add `-d full_deploy` to the `conan install` command to copy them outside the Conan cache and then manually copy them to the installation location.
+On Linux you can also add the location of the shared libraries to the `LD_LIBRARY_PATH` environment variable.
+
 7\. TODO
 --------
 Top Priority
@@ -158,12 +112,12 @@ General Priority
 - [ ] remember directory in open/save dialog boxes
 - [ ] search for files in the dialog box
 
-- [ ] Transition to/Add Softbody Phyics
+- [ ] Transition to/Add Softbody Physics
 
 - [ ] (feature) support for transparency (Transparency for OBS so users will not need a green/blue background and can use all colors in the PNG model)
-- [ ] twitch extention (triggers for bits)
+- [ ] twitch extension (triggers for bits)
 - [ ] TikTok companion app
-- [ ] outdoor streaming from the phone wiht PNGTuber overlay
+- [ ] outdoor streaming from the phone with PNGTuber overlay
 - [ ] stream directly from VoiceTuber
 
 Feedback
@@ -213,7 +167,7 @@ Completed
 - [x] (bug) App crashes after deleting a mouth and clicking on another mouth.
 - [x] add "add" buttons in the add menu 
 - [x] (bug) crash if an image is deleted from the project
-- [x] (bug) after transpancy fix was made, bouncer stopped working.
+- [x] (bug) after transparency fix was made, bouncer stopped working.
 - [x] (Feature) App works when minimized.
 - [x] (bug) The app is crashing if it is not started from the directory where the executable is located.
 - [x] (bug) changing the disk does not work
@@ -227,13 +181,13 @@ Completed
 - [x] (feature) each node can have different amount of bounce
 - [X] They REALLY expected That value bars were able to be clicked and dragged
 - [X] REALLY WANTS CLICK AND DRAG - covered in TODO
-- [X] Drag and drop files into the software - coverd in TODO
+- [X] Drag and drop files into the software - covered in TODO
 - [x] Really wants drag and drop files
 - [x] highlight the chat if it is disconnected from the Internet
  - [x] allow limiting of frame rate
  - [x] better compatibility for multiple windows
  - [x] rotation slider
- - [x] Hotkeys infomation
+ - [x] Hotkeys information
  - [x] Physics breaks - cannot reproduce
  - [x] have it so you can enter a value for rotation instead of a
       slider... or at least a mouse tooltip that says "hold ctrl to
@@ -242,4 +196,4 @@ Completed
  - [x] Azure TTS
 - [x] (feature) Easing the bounce with a filter, maybe add some 2nd-order filter
       to have overshooting
-- [x] Have a spalsh dialog simular as Blender one (Easier initial Project navigtion)
+- [x] Have a splash dialog similar as Blender one (Easier initial Project navigation)
