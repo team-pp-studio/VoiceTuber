@@ -17,10 +17,12 @@ find_package(OpenGL REQUIRED MODULE)
 add_library(ser)
 file(GLOB_RECURSE SER_SOURCE_FILES CONFIGURE_DEPENDS "3rd-party/ser/*.cpp")
 target_sources(ser PRIVATE ${SER_SOURCE_FILES})
+set_target_properties(ser PROPERTIES CXX_STANDARD_REQUIRED ON CXX_STANDARD 17)
 
 add_library(json)
 file(GLOB JSON_SOURCE_FILES CONFIGURE_DEPENDS "3rd-party/json/*.cpp")
 target_sources(json PRIVATE ${JSON_SOURCE_FILES})
+set_target_properties(json PROPERTIES CXX_STANDARD_REQUIRED ON CXX_STANDARD 17)
 
 add_library(imgui_bindings)
 target_include_directories(imgui_bindings PUBLIC ${imgui_RES_DIR}/bindings)
