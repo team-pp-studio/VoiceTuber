@@ -18,7 +18,7 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #pragma once
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 struct SDL_Window;
 struct SDL_Renderer;
