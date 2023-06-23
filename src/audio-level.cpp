@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #define NOMINMAX
+#endif
 
 #include "audio-level.hpp"
 #include "audio-in.hpp"

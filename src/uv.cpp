@@ -139,7 +139,7 @@ namespace uv
     }
 
     char addr[17] = {'\0'};
-    uv_ip4_name((struct sockaddr_in *)res->ai_addr, addr, 16);
+    uv_ip4_name(reinterpret_cast<struct sockaddr_in *>(res->ai_addr), addr, 16);
     LOG("Resolved:", addr);
 
     // TODO-Mika Can we combine two memory allocations into one?

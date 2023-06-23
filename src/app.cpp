@@ -48,8 +48,8 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
     translateDisabledIco(lib.queryTex("engine:transalte-disabled.png", true)),
     scaleDisabledIco(lib.queryTex("engine:scale-disabled.png", true)),
     rotateDisabledIco(lib.queryTex("engine:rotate-disabled.png", true)),
-    hideUiIco(lib.queryTex("engine:eye-sprite.png", true)),
-    showUiIco(lib.queryTex("engine:not-visable.png", true)),
+    hideIco(lib.queryTex("engine:eye-sprite.png", true)),
+    showIco(lib.queryTex("engine:not-visable.png", true)),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowE(lib.queryTex("engine:arrow-e-circle.png", true)),
     arrowS(lib.queryTex("engine:arrow-s-circle.png", true)),
@@ -213,7 +213,7 @@ auto App::render(float dt) -> void
         auto theta = 0.0f;
         glColor4f(0.f, 0.f, 1.f, 1.f);
         glBegin(GL_LINE_LOOP);
-        for (int i = 0; i < circlePoints; i++)
+        for (auto i = 0.f; i < circlePoints; i++)
         {
           auto x = radius * cosf(theta) + local.x;
           auto y = radius * sinf(theta) + local.y;
@@ -286,7 +286,7 @@ auto App::renderUi(float /*dt*/) -> void
       style.Colors[ImGuiCol_WindowBg].w = .2f;
     auto showUiWindow = Ui::Window("##Show UI");
     const auto sz = 2 * ImGui::GetFontSize();
-    if (Ui::btnImg("Show UI", *showUiIco, sz, sz))
+    if (Ui::btnImg("Show UI", *showIco, sz, sz))
       showUi = true;
     if (ImGui::IsItemHovered())
       ImGui::SetTooltip("Show UI");
@@ -402,7 +402,7 @@ auto App::renderUi(float /*dt*/) -> void
     {
       {
         const auto sz = 2 * ImGui::GetFontSize();
-        if (Ui::btnImg("Hide UI", *hideUiIco, sz, sz))
+        if (Ui::btnImg("Hide UI", *hideIco, sz, sz))
           showUi = false;
         if (ImGui::IsItemHovered())
           ImGui::SetTooltip("Hide UI");
@@ -682,8 +682,16 @@ auto App::renderTree(Node &v) -> void
     }
   };
   const auto &nodes = v.getNodes();
+  const auto sz = ImGui::GetFontSize();
+  std::ostringstream ss;
+  ss << "##" << &v;
   if (!nodes.empty())
   {
+    if (Ui::btnImg(ss.str().c_str(), v.visible ? *hideIco : *showIco, sz, sz))
+      undo.record([&v, newVisibility = !v.visible]() { v.visible = newVisibility; },
+                  [&v, oldVisibility = v.visible]() { v.visible = oldVisibility; });
+
+    ImGui::SameLine();
     nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
     const auto nodeOpen = ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());
     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -699,6 +707,10 @@ auto App::renderTree(Node &v) -> void
   }
   else
   {
+    if (Ui::btnImg(ss.str().c_str(), v.visible ? *hideIco : *showIco, sz, sz))
+      undo.record([&v, newVisibility = !v.visible]() { v.visible = newVisibility; },
+                  [&v, oldVisibility = v.visible]() { v.visible = oldVisibility; });
+    ImGui::SameLine();
     nodeFlags |=
       ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
     ImGui::TreeNodeEx(&v, nodeFlags, "%s", nm.c_str());

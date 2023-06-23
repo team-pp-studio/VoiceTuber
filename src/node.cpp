@@ -84,7 +84,8 @@ auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
   for (auto &n : ns)
   {
     setModelViewMatrix(n.get().modelViewMat);
-    n.get().render(dt, hovered, selected);
+    if (n.get().visible)
+      n.get().render(dt, hovered, selected);
   }
   glPopMatrix();
 }
@@ -111,6 +112,12 @@ auto Node::renderUi() -> void
   ImGui::Text("#");
   ImGui::TableNextColumn();
   ImGui::Text("%s", name.c_str());
+
+  ImGui::TableNextColumn();
+  Ui::textRj("Visible");
+  ImGui::TableNextColumn();
+  Ui::checkbox(undo, "##Visible", visible);
+
   ImGui::TableNextColumn();
   Ui::textRj("Location");
   ImGui::TableNextColumn();
@@ -424,7 +431,7 @@ auto Node::collectUnderNodes(const glm::mat4 &projMat, glm::vec2 v, Nodes &under
 
   auto localPos = screenToLocal(projMat, v);
   if (!(localPos.x < 0.f || localPos.x > w() || localPos.y < 0.f || localPos.y > h() ||
-        isTransparent(localPos)))
+        isTransparent(localPos) || !visible))
     underNodes.push_back(*this);
 }
 

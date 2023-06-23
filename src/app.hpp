@@ -59,8 +59,8 @@ private:
   std::shared_ptr<const Texture> translateDisabledIco;
   std::shared_ptr<const Texture> scaleDisabledIco;
   std::shared_ptr<const Texture> rotateDisabledIco;
-  std::shared_ptr<const Texture> hideUiIco;
-  std::shared_ptr<const Texture> showUiIco;
+  std::shared_ptr<const Texture> hideIco;
+  std::shared_ptr<const Texture> showIco;
   std::shared_ptr<const Texture> arrowN;
   std::shared_ptr<const Texture> arrowE;
   std::shared_ptr<const Texture> arrowS;

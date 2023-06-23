@@ -70,6 +70,8 @@ public:
   virtual auto w() const -> float;
   virtual ~Node() = default;
 
+  bool visible = true;
+
 protected:
   auto screenToLocal(const glm::mat4 &projMat, glm::vec2) const -> glm::vec2;
   virtual auto load(IStrm &) -> void;

@@ -3,6 +3,7 @@
      (flycheck-clang-include-path
       . (
          ".coddle/libs_src"
+         ".coddle/libs_src/imgui"
          ".coddle/libs_src/cpptoml/include"
          ".coddle/libs_src/glm"
          "/usr/include/SDL2"

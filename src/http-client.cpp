@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #define NOMINMAX
+#endif
 
 #include "http-client.hpp"
 #include <algorithm>
@@ -76,7 +78,7 @@ auto HttpClient::socketFunc(CURL *, curl_socket_t s, int action, void *socketp) 
       break;
     uv_poll_stop(&((SockContext *)socketp)->pollHandle);
     destroySockContext(static_cast<SockContext *>(socketp));
-    curl_multi_assign(multiHandle, s, NULL);
+    curl_multi_assign(multiHandle, s, nullptr);
     break;
   default: abort();
   }
