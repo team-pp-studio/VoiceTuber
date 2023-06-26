@@ -62,7 +62,10 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                    sampleRate,
                    [alive = std::weak_ptr<int>(alive), this](std::string txt) {
                      if (!alive.lock())
+                     {
+                       LOG("this was destroyed");
                        return;
+                     }
                      if (!txt.empty())
                      {
                        hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
@@ -74,7 +77,10 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                                             std::move(hostMsg),
                                             [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
                                               if (!alive.lock())
+                                              {
+                                                LOG("this was destroyed");
                                                 return;
+                                              }
                                               LOG("Co-host:", rsp);
                                               tts->say("en-US-AmberNeural", std::move(rsp), false);
                                               talkStart = std::chrono::high_resolution_clock::now();
@@ -89,7 +95,10 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
     lib.get().gpt().prompt(
       "Host", std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         if (rsp.empty())
           return;
         LOG("Co-host:", rsp);
@@ -193,7 +202,10 @@ auto AiMouth::renderUi() -> void
       undo.get().record(
         [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -201,7 +213,10 @@ auto AiMouth::renderUi() -> void
         },
         [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -251,7 +266,10 @@ auto AiMouth::onMsg(Msg val) -> void
   lib.get().gpt().prompt(
     val.displayName, val.msg, [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       if (rsp.empty())
         return;
       LOG("co-host", rsp);

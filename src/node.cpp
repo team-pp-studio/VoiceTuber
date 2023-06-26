@@ -167,12 +167,18 @@ auto Node::renderUi() -> void
         undo.get().record(
           [avgScale, alive = std::weak_ptr<int>(alive), this]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             scale.x = scale.y = avgScale;
           },
           [oldScale = scale, alive = std::weak_ptr<int>(alive), this]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             scale = oldScale;
           },
           "Scale");
@@ -240,12 +246,18 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -253,12 +265,18 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -266,24 +284,36 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   if (Ui::btnImg("w", *arrowW, sz, sz))
     undo.get().record(
       [newPivot = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -291,12 +321,18 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -304,24 +340,36 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
     undo.get().record(
       [newPivot = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -329,12 +377,18 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::SameLine();
@@ -342,12 +396,18 @@ auto Node::renderUi() -> void
     undo.get().record(
       [newPivot = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = newPivot;
       },
       [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         pivot_ = oldPivot;
       });
   ImGui::TableNextColumn();
@@ -483,7 +543,10 @@ auto Node::moveUp() -> void
   undo.get().record(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -493,7 +556,10 @@ auto Node::moveUp() -> void
     },
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -514,7 +580,10 @@ auto Node::moveDown() -> void
   undo.get().record(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -524,7 +593,10 @@ auto Node::moveDown() -> void
     },
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto it = std::find_if(std::begin(parent()->nodes),
                              std::end(parent()->nodes),
                              [this](const auto &v) { return this == v.get(); });
@@ -551,7 +623,10 @@ auto Node::unparent() -> void
   undo.get().record(
     [it, newParent, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       loc += oldParent->loc;
       newParent->nodes.emplace_back(std::move(self));
       oldParent->nodes.erase(it);
@@ -559,7 +634,10 @@ auto Node::unparent() -> void
     },
     [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent->nodes),
                               std::end(newParent->nodes),
@@ -590,7 +668,10 @@ auto Node::parentWithBellow() -> void
   undo.get().record(
     [newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       glm::mat4 newParentTransform = newParent->modelViewMat;
       modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
       loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
@@ -601,7 +682,10 @@ auto Node::parentWithBellow() -> void
     },
     [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent->nodes),
                               std::end(newParent->nodes),
@@ -812,12 +896,18 @@ auto Node::commit() -> void
     undo.get().record(
       [newLoc = loc, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         loc = newLoc;
       },
       [oldLoc = initLoc, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         loc = oldLoc;
       });
     break;
@@ -825,12 +915,18 @@ auto Node::commit() -> void
     undo.get().record(
       [newRot = rot, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         rot = newRot;
       },
       [oldRot = initRot, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         rot = oldRot;
       });
     break;
@@ -838,12 +934,18 @@ auto Node::commit() -> void
     undo.get().record(
       [newScale = scale, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         scale = newScale;
       },
       [oldScale = initScale, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         scale = oldScale;
       });
     break;
@@ -878,7 +980,10 @@ auto Node::parentWith(Node &newParent) -> void
   undo.get().record(
     [&newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       glm::mat4 newParentTransform = newParent.modelViewMat;
       modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
       loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
@@ -889,7 +994,10 @@ auto Node::parentWith(Node &newParent) -> void
     },
     [it, &newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       loc = oldLoc;
       auto it2 = std::find_if(std::begin(newParent.nodes),
                               std::end(newParent.nodes),
@@ -907,7 +1015,10 @@ auto Node::placeBellow(Node &newSibling) -> void
   undo.get().record(
     [alive = std::weak_ptr<int>(alive), this, &newSibling]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto selfIt = std::find_if(std::begin(parent()->nodes),
                                  std::end(parent()->nodes),
                                  [this](const auto &v) { return this == v.get(); });
@@ -923,7 +1034,10 @@ auto Node::placeBellow(Node &newSibling) -> void
     },
     [alive = std::weak_ptr<int>(alive), this, nodes = parent()->nodes, oldParent = parent()]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto selfIt = std::find_if(std::begin(parent()->nodes),
                                  std::end(parent()->nodes),
                                  [this](const auto &v) { return this == v.get(); });

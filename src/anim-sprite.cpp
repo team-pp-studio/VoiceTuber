@@ -117,12 +117,18 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -130,12 +136,18 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -143,24 +155,36 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     if (Ui::btnImg("w2", *arrowW, sz, sz))
       undo.get().record(
         [newEnd = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -168,12 +192,18 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -181,24 +211,36 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     if (Ui::btnImg("sw2", *arrowSW, sz, sz))
       undo.get().record(
         [newEnd = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -206,12 +248,18 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::SameLine();
@@ -219,12 +267,18 @@ auto AnimSprite::renderUi() -> void
       undo.get().record(
         [newEnd = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = newEnd;
         },
         [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           end = oldEnd;
         });
     ImGui::TableNextColumn();

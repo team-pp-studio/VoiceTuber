@@ -1,5 +1,6 @@
 #include "audio-out.hpp"
 #include "preferences.hpp"
+#include <log/log.hpp>
 
 AudioOut::AudioOut(const std::string &device, int sampleRate, int frameSize)
   : alive(std::make_shared<int>()),
@@ -54,7 +55,10 @@ auto AudioOut::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Aud
                                  0,
                                  [alive = std::weak_ptr<int>(alive), this](Uint8 *stream, int len) {
                                    if (!alive.lock())
+                                   {
+                                     LOG("this was destroyed");
                                      return;
+                                   }
                                    for (auto i = 0U; i < len / sizeof(int16_t); ++i)
                                    {
                                      if (buf.empty())

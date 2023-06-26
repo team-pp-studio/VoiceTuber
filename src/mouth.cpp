@@ -5,6 +5,7 @@
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
 #include <imgui.h>
+#include <log/log.hpp>
 
 template <typename S, typename ClassName>
 Mouth<S, ClassName>::Mouth(Wav2Visemes &wav2Visemes,
@@ -95,7 +96,10 @@ auto Mouth<S, ClassName>::renderUi() -> void
       undo.get().record(
         [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           f = newF;
           viseme = vis;
           using namespace std::chrono_literals;
@@ -103,7 +107,10 @@ auto Mouth<S, ClassName>::renderUi() -> void
         },
         [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           f = oldF;
           viseme = vis;
           using namespace std::chrono_literals;

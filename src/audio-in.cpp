@@ -18,7 +18,10 @@ AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int fram
 {
   prepare.start([alive = std::weak_ptr<int>(alive), this]() {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     tick();
   });
 }
@@ -69,7 +72,10 @@ auto AudioIn::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audi
     0,
     [alive = std::weak_ptr<int>(alive), this](Uint8 *stream, int len) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       buf.insert(std::end(buf),
                  reinterpret_cast<int16_t *>(stream),
                  reinterpret_cast<int16_t *>(stream) + len / sizeof(int16_t));

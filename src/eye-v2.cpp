@@ -2,6 +2,7 @@
 #include "mouse-tracking.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
+#include <log/log.hpp>
 #include <numbers>
 
 EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
@@ -107,12 +108,18 @@ auto EyeV2::renderUi() -> void
         undo.get().record(
           [alive = std::weak_ptr<int>(alive), this]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             selectedDisplay = "Custom";
           },
           [alive = std::weak_ptr<int>(alive), this, oldDisplay = selectedDisplay]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             selectedDisplay = oldDisplay;
           });
       const auto displayCnt = SDL_GetNumVideoDisplays();
@@ -124,7 +131,10 @@ auto EyeV2::renderUi() -> void
           undo.get().record(
             [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{displayName}, i]() {
               if (!alive.lock())
+              {
+                LOG("this was destroyed");
                 return;
+              }
               selectedDisplay = newDisplay;
               SDL_Rect rect;
               SDL_GetDisplayBounds(i, &rect);

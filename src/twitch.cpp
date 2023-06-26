@@ -160,7 +160,10 @@ auto Twitch::init() -> void
   auto s =
     uv.get().connect(server, port, [alive = std::weak_ptr<int>(alive), this](int status, uv::Tcp aTcp) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       if (status < 0)
       {
         LOG(__func__, "error:", uv_err_name(status));
@@ -186,7 +189,10 @@ auto Twitch::sendPassNickUser() -> void
   msg << "USER nobody unknown unknown :noname\r\n";
   auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -207,7 +213,10 @@ auto Twitch::readStart() -> void
 {
   auto s = tcp.readStart([alive = std::weak_ptr<int>(alive), this](int status, std::string msg) {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -355,7 +364,10 @@ auto Twitch::onPing(const std::string &val) -> void
   sendMsg << "PONG " << val << "\r\n";
   auto s = tcp.write(sendMsg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -385,7 +397,10 @@ auto Twitch::onWelcome() -> void
       << "JOIN #" << channel << "\r\n";
   auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
@@ -410,10 +425,16 @@ auto Twitch::schedulePing() -> void
   retry.start(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       tcp.write("PING :tmi.twitch.tv\r\n", [alive = std::weak_ptr<int>(alive), this](int status) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         if (status < 0)
         {
           LOG(__func__, "error:", uv_err_name(status));
@@ -424,7 +445,10 @@ auto Twitch::schedulePing() -> void
       retry.start(
         [alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           LOG(__func__, "error: PING timeout");
           initiateRetry();
         },
@@ -451,11 +475,15 @@ auto Twitch::initiateRetry() -> void
   retry.start(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
+      LOG("Retrying...");
       init();
     },
     initRetry);
-  LOG("Retry in ", initRetry);
+  LOG("Retry in", initRetry);
   initRetry = std::min(32000, initRetry * 2);
 }
 

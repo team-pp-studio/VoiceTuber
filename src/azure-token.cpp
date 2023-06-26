@@ -22,7 +22,10 @@ auto AzureToken::get(Cb cb) -> void
     "",
     [alive = std::weak_ptr<int>(alive), this](CURLcode code, long httpStatus, std::string payload) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       if (code != CURLE_OK)
       {
         LOG(code, httpStatus, payload);

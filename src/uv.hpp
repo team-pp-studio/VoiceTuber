@@ -15,9 +15,9 @@ namespace uv
     using WriteCb = std::function<auto(int status)->void>;
 
     Tcp() = default;
-    Tcp(Tcp &&) = default;
+    Tcp(Tcp &&);
     Tcp(uv_loop_t *);
-    Tcp &operator=(Tcp &&) = default;
+    Tcp &operator=(Tcp &&);
     ~Tcp();
     auto readStart(ReadCb) -> int;
     auto write(std::string, WriteCb) -> int;

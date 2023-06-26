@@ -107,7 +107,10 @@ auto Gpt::process() -> void
                          alive = std::weak_ptr<int>(alive),
                          this](CURLcode code, long httpStatus, std::string payload) {
                           if (!alive.lock())
+                          {
+                            LOG("this was destroyed");
                             return;
+                          }
                           if (code != CURLE_OK)
                           {
                             for (const auto &msg : qMsgs)
@@ -135,7 +138,10 @@ auto Gpt::process() -> void
                             timer.start(
                               [alive = std::weak_ptr<int>(alive), this]() {
                                 if (!alive.lock())
-                                  return;
+            {
+              LOG("this was destroyed");
+              return;
+            }
                                 state = State::idle;
                                 process();
                               },

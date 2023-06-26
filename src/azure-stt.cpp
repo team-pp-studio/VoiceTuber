@@ -25,13 +25,19 @@ auto AzureStt::process() -> void
   token.get().get(
     [alive = std::weak_ptr<int>(alive), this](const std::string &t, const std::string &err) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       if (t.empty())
       {
         lastError = err;
         timer.start([alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           state = State::idle;
           process();
         });
@@ -39,10 +45,16 @@ auto AzureStt::process() -> void
       }
       queue.front()(t, [alive = std::weak_ptr<int>(alive), this](bool r) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         timer.start([alive = std::weak_ptr<int>(alive), this, r]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (r)
             queue.pop();
           state = State::idle;
@@ -58,7 +70,10 @@ auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
     [cb = std::move(cb), sampleRate, alive = std::weak_ptr<int>(alive), this, wav = std::move(wav)](
       const std::string &t, PostTask postTask) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       std::ostringstream ss;
       saveWav(ss, wav, sampleRate);
       httpClient.get().post(
@@ -68,7 +83,10 @@ auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
         [cb = std::move(cb), postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
           CURLcode code, long httpStatus, std::string payload) {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (code != CURLE_OK)
           {
             cb("");

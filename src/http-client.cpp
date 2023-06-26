@@ -169,7 +169,10 @@ auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
     timeout.start(
       [alive = std::weak_ptr<int>(alive), this, multi]() {
         if (!alive.lock())
-          return;
+          {
+            LOG("this was destroyed");
+            return;
+          }
         onTimeout(multi);
       },
       timeoutMs == 0 ? 1 : timeoutMs,

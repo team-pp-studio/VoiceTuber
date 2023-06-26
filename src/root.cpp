@@ -30,12 +30,18 @@ auto Root::renderUi() -> void
     undo.get().record(
       [alive = std::weak_ptr<int>(alive), this, newColor = clearColor]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         clearColor = newColor;
       },
       [alive = std::weak_ptr<int>(alive), this, oldColor]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         clearColor = oldColor;
       },
       "##BG color");

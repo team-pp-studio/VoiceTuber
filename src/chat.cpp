@@ -102,7 +102,10 @@ auto Chat::onMsg(Msg val) -> void
     timer.start(
       [alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         showChat = false;
       },
       hideChatSec * 1000);
@@ -114,9 +117,10 @@ auto Chat::onMsg(Msg val) -> void
     const auto supressName = (lastName == displayName) && !isMe;
     const auto voice = getVoice(displayName);
     if (voice != mute)
-      azureTts->say(voice,
-                    (!supressName ? (escName(displayName) + " " + getDialogLine(text, isMe) + " ") : "") +
-                      dedup(text));
+      azureTts->say(
+        voice,
+        (!supressName ? (escName(displayName) + " " + getDialogLine(text, isMe) + " ") : "") +
+          dedup(text));
     else
       audioSink.get().ingest(noVoice());
     lastName = displayName;
@@ -161,7 +165,10 @@ auto Chat::load(IStrm &strm) -> void
       azureTts = lib.get().queryAzureTts(audioSink);
       azureTts->listVoices([alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         voices = std::move(aVoices);
       });
     }
@@ -270,14 +277,20 @@ auto Chat::renderUi() -> void
     undo.get().record(
       [newSize = ptsize, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         ptsize = newSize;
         font = lib.get().queryFont(
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
       },
       [oldSize, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         ptsize = oldSize;
         font = lib.get().queryFont(
           SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
@@ -297,7 +310,10 @@ auto Chat::renderUi() -> void
       undo.get().record(
         [alive = std::weak_ptr<int>(alive), this, newTts = tts]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (newTts)
           {
             if (!azureTts)
@@ -306,7 +322,10 @@ auto Chat::renderUi() -> void
               azureTts->listVoices(
                 [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
                   if (!alive.lock())
+                  {
+                    LOG("this was destroyed");
                     return;
+                  }
                   voices = std::move(aVoices);
                 });
             }
@@ -316,7 +335,10 @@ auto Chat::renderUi() -> void
         },
         [alive = std::weak_ptr<int>(alive), this, oldTts]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (oldTts)
           {
             if (!azureTts)
@@ -325,7 +347,10 @@ auto Chat::renderUi() -> void
               azureTts->listVoices(
                 [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
                   if (!alive.lock())
+                  {
+                    LOG("this was destroyed");
                     return;
+                  }
                   voices = std::move(aVoices);
                 });
             }

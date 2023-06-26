@@ -6,12 +6,14 @@ namespace uv
 {
   Tcp::Tcp(uv_loop_t *loop) : socket(std::make_unique<uv_tcp_t>())
   {
+    LOG(this, "Tcp ctor");
     uv_tcp_init(loop, socket.get());
     socket->data = this;
   }
 
   auto Tcp::readStart(ReadCb cb) -> int
   {
+    LOG(this, "readStart socket:", socket);
     readCb = std::move(cb);
     socket->data = this;
     return uv_read_start((uv_stream_t *)socket.get(),
@@ -103,6 +105,7 @@ namespace uv
 
   auto Uv::connect(const std::string &domain, const std::string &port, ConnectCb cb) -> int
   {
+    LOG("connect ", domain, ":", port);
     // TODO-Mika Can we combine two memory allocations into one?
     auto resolver = new uv_getaddrinfo_t;
     auto connectCtx = new ConnectCtx;
@@ -190,10 +193,30 @@ namespace uv
     return Prepare{loop_};
   }
 
+  Tcp::Tcp(Tcp &&other)
+    : socket(std::move(other.socket)), readCb(std::move(other.readCb)), buf(std::move(other.buf))
+  {
+    socket->data = this;
+    other.socket = nullptr;
+    LOG(this, "Tcp ctor move bye-bye", &other);
+  }
+
+  Tcp &Tcp::operator=(Tcp &&other)
+  {
+    socket = std::move(other.socket);
+    readCb = std::move(other.readCb);
+    buf = std::move(other.buf);
+    socket->data = this;
+    other.socket = nullptr;
+    LOG(this, "Tcp assign bye-bye", &other);
+    return *this;
+  }
+
   Tcp::~Tcp()
   {
     if (socket)
     {
+      LOG(this, "Tcp dtor");
       LOG("Graceful disconnect");
       socket->data = nullptr;
       auto rawSocket = socket.release();
@@ -208,6 +231,8 @@ namespace uv
         delete handle;
       });
     }
+    else
+      LOG(this, "Tcp dtor from moved");
   }
 
   Timer::Timer(uv_loop_t *loop) : timer(std::make_unique<uv_timer_t>())

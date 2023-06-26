@@ -43,7 +43,10 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
     [msg = std::move(msg), alive = std::weak_ptr<int>(alive), this, voice = std::move(voice), overlap](
       const std::string &t, PostTask postTask) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       auto xml = R"(<speak version="1.0" xml:lang="en-us"><voice xml:lang="en-US" name=")" + voice +
                  R"("><prosody rate="0.00%">)" + escape(msg) + R"(</prosody></voice></speak>)";
       httpClient.get().post(
@@ -52,7 +55,10 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
         [overlap, postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
           CURLcode code, long httpStatus, std::string payload) {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (code != CURLE_OK)
           {
             postTask(false);
@@ -114,13 +120,19 @@ auto AzureTts::process() -> void
   token.get().get(
     [alive = std::weak_ptr<int>(alive), this](const std::string &t, const std::string &err) {
       if (!alive.lock())
+      {
+        LOG("this was destroyed");
         return;
+      }
       if (t.empty())
       {
         lastError = err;
         timer.start([alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           state = State::idle;
           process();
         });
@@ -128,10 +140,16 @@ auto AzureTts::process() -> void
       }
       queue.front()(t, [alive = std::weak_ptr<int>(alive), this](bool r) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         timer.start([alive = std::weak_ptr<int>(alive), this, r]() {
           if (!alive.lock())
+          {
+            LOG("this was destroyed");
             return;
+          }
           if (r)
             queue.pop();
           state = State::idle;
@@ -146,13 +164,19 @@ auto AzureTts::listVoices(ListVoicesCb cb) -> void
   queue.emplace([cb = std::move(cb), alive = std::weak_ptr<int>(alive), this](const std::string &t,
                                                                               PostTask postTask) {
     if (!alive.lock())
+    {
+      LOG("this was destroyed");
       return;
+    }
     httpClient.get().get(
       "https://eastus.tts.speech.microsoft.com/cognitiveservices/voices/list",
       [cb = std::move(cb), postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
         CURLcode code, long httpStatus, std::string payload) {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         if (code != CURLE_OK)
         {
           cb({});

@@ -104,12 +104,18 @@ auto ImageList::renderUi() -> void
     undo.get().record(
       [alive = std::weak_ptr<int>(alive), this, toDel]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         textures.erase(std::begin(textures) + toDel);
       },
       [alive = std::weak_ptr<int>(alive), oldTextures = textures, this]() {
         if (!alive.lock())
+        {
+          LOG("this was destroyed");
           return;
+        }
         textures = oldTextures;
       });
   if (ImGui::Button("Add##Image"))
@@ -119,7 +125,10 @@ auto ImageList::renderUi() -> void
         undo.get().record(
           [alive = std::weak_ptr<int>(alive), path, this]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             textures.emplace_back(lib.get().queryTex([&]() {
               try
               {
@@ -136,7 +145,10 @@ auto ImageList::renderUi() -> void
           },
           [alive = std::weak_ptr<int>(alive), this]() {
             if (!alive.lock())
+            {
+              LOG("this was destroyed");
               return;
+            }
             textures.pop_back();
           });
     });
