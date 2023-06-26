@@ -2,6 +2,7 @@
 #include <log/log.hpp>
 #include <sstream>
 #include <stdexcept>
+
 namespace uv
 {
   Tcp::Tcp(uv_loop_t *loop) : socket(std::make_unique<uv_tcp_t>())
@@ -14,13 +15,22 @@ namespace uv
   auto Tcp::readStart(ReadCb cb) -> int
   {
     LOG(this, "readStart socket:", socket);
+    if (!socket)
+    {
+      LOG(this, "Uninitialized TCP connection");
+      cb(static_cast<int>(-1), std::string{});
+      return -1;
+    }
     readCb = std::move(cb);
     socket->data = this;
     return uv_read_start((uv_stream_t *)socket.get(),
                          [](uv_handle_t *handle, size_t suggestedSize, uv_buf_t *aBuf) {
                            auto self = static_cast<Tcp *>(handle->data);
                            if (!self)
+                           {
+                             LOG("self is nullptr");
                              return;
+                           }
                            self->buf.resize(suggestedSize);
                            aBuf->base = self->buf.data();
                            aBuf->len = static_cast<decltype(aBuf->len)>(suggestedSize);
@@ -28,7 +38,10 @@ namespace uv
                          [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
                            auto self = static_cast<Tcp *>(stream->data);
                            if (!self)
+                           {
+                             LOG("self is nullptr");
                              return;
+                           }
                            self->onRead(nread, aBuf);
                          });
   }
@@ -46,6 +59,12 @@ namespace uv
 
   auto Tcp::write(std::string val, WriteCb cb) -> int
   {
+    if (!socket)
+    {
+      LOG(this, "Uninitialized TCP connection");
+      cb(-1);
+      return -1;
+    }
     // TODO-Mika Can we combine two memory allocations into one?
     socket->data = this;
     auto req = new uv_write_t;
@@ -74,7 +93,10 @@ namespace uv
       return;
     }
     if (!readCb)
+    {
+      LOG("The TCP read callback is not set up");
       return;
+    }
     readCb(0, std::string{aBuf->base, aBuf->base + nread});
   }
 
@@ -196,28 +218,16 @@ namespace uv
   Tcp::Tcp(Tcp &&other)
     : socket(std::move(other.socket)), readCb(std::move(other.readCb)), buf(std::move(other.buf))
   {
-    socket->data = this;
+    if (socket)
+      socket->data = this;
     other.socket = nullptr;
-    LOG(this, "Tcp ctor move bye-bye", &other);
   }
 
-  Tcp &Tcp::operator=(Tcp &&other)
-  {
-    socket = std::move(other.socket);
-    readCb = std::move(other.readCb);
-    buf = std::move(other.buf);
-    socket->data = this;
-    other.socket = nullptr;
-    LOG(this, "Tcp assign bye-bye", &other);
-    return *this;
-  }
-
-  Tcp::~Tcp()
+  auto Tcp::deinit() -> void
   {
     if (socket)
     {
-      LOG(this, "Tcp dtor");
-      LOG("Graceful disconnect");
+      LOG(this, "Graceful disconnect");
       socket->data = nullptr;
       auto rawSocket = socket.release();
       uv_read_stop((uv_stream_t *)rawSocket);
@@ -231,8 +241,24 @@ namespace uv
         delete handle;
       });
     }
-    else
-      LOG(this, "Tcp dtor from moved");
+  }
+
+  Tcp &Tcp::operator=(Tcp &&other)
+  {
+    deinit();
+
+    socket = std::move(other.socket);
+    readCb = std::move(other.readCb);
+    buf = std::move(other.buf);
+    if (socket)
+      socket->data = this;
+    other.socket = nullptr;
+    return *this;
+  }
+
+  Tcp::~Tcp()
+  {
+    deinit();
   }
 
   Timer::Timer(uv_loop_t *loop) : timer(std::make_unique<uv_timer_t>())
@@ -250,7 +276,10 @@ namespace uv
       [](uv_timer_t *handle) {
         auto self = static_cast<Timer *>(handle->data);
         if (!self->cb)
+        {
+          LOG("The Timer callback is not set up");
           return;
+        }
         self->cb();
       },
       timeout,
@@ -259,6 +288,11 @@ namespace uv
 
   auto Timer::stop() -> int
   {
+    if (!timer)
+    {
+      LOG("timer is nullptr");
+      return -1;
+    }
     return uv_timer_stop(timer.get());
   }
 
@@ -290,13 +324,21 @@ namespace uv
     return uv_idle_start(idle.get(), [](uv_idle_t *handle) {
       auto self = static_cast<Idle *>(handle->data);
       if (!self->cb)
+      {
+        LOG("The Idle callback is not set up");
         return;
+      }
       self->cb();
     });
   }
 
   auto Idle::stop() -> int
   {
+    if (!idle)
+    {
+      LOG("idle is nullptr");
+      return -1;
+    }
     return uv_idle_stop(idle.get());
   }
 
@@ -318,13 +360,21 @@ namespace uv
     return uv_prepare_start(prepare.get(), [](uv_prepare_t *handle) {
       auto self = static_cast<Prepare *>(handle->data);
       if (!self->cb)
+      {
+        LOG("The Prepare callback is not set up");
         return;
+      }
       self->cb();
     });
   }
 
   auto Prepare::stop() -> int
   {
+    if (!prepare)
+    {
+      LOG("prepare is nullptr");
+      return -1;
+    }
     return uv_prepare_stop(prepare.get());
   }
 
@@ -348,7 +398,10 @@ namespace uv
       [](uv_fs_event_t *handle, const char *filename, int events, int status) {
         auto self = static_cast<FsEvent *>(handle->data);
         if (!self->cb)
+        {
+          LOG("The FsEvent callback is not set up");
           return;
+        }
         self->cb(filename, events, status);
       },
       path.c_str(),
@@ -358,7 +411,10 @@ namespace uv
   auto FsEvent::stop() -> int
   {
     if (!event)
-      return 0;
+    {
+      LOG("event is nullptr");
+      return -1;
+    }
     return uv_fs_event_stop(event.get());
   }
 

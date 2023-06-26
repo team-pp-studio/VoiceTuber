@@ -146,7 +146,8 @@ Twitch::Twitch(uv::Uv &uv, std::string aUser, std::string aKey, std::string aCha
     user(std::move(aUser)),
     key(std::move(aKey)),
     channel(std::move(aChannel)),
-    retry(uv.createTimer())
+    retryTimer(uv.createTimer()),
+    pingTimer(uv.createTimer())
 {
   init();
 }
@@ -155,7 +156,8 @@ auto Twitch::init() -> void
 {
   LOG("Init:", server, ":", port, "user", user, "channel", channel);
   state = State::connecting;
-  retry.stop();
+  retryTimer.stop();
+  pingTimer.stop();
 
   auto s =
     uv.get().connect(server, port, [alive = std::weak_ptr<int>(alive), this](int status, uv::Tcp aTcp) {
@@ -385,7 +387,7 @@ auto Twitch::onPing(const std::string &val) -> void
 
 auto Twitch::onPong() -> void
 {
-  retry.stop();
+  pingTimer.stop();
   schedulePing();
 }
 
@@ -422,7 +424,7 @@ auto Twitch::onWelcome() -> void
 
 auto Twitch::schedulePing() -> void
 {
-  retry.start(
+  pingTimer.start(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
       {
@@ -442,7 +444,7 @@ auto Twitch::schedulePing() -> void
           return;
         }
       });
-      retry.start(
+      pingTimer.start(
         [alive = std::weak_ptr<int>(alive), this]() {
           if (!alive.lock())
           {
@@ -472,7 +474,7 @@ auto Twitch::unreg(TwitchSink &v) -> void
 auto Twitch::initiateRetry() -> void
 {
   state = State::connecting;
-  retry.start(
+  retryTimer.start(
     [alive = std::weak_ptr<int>(alive), this]() {
       if (!alive.lock())
       {

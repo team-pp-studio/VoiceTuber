@@ -33,7 +33,8 @@ private:
   std::deque<char> buf;
   std::vector<std::reference_wrapper<TwitchSink>> sinks;
   int initRetry = 1000;
-  uv::Timer retry;
+  uv::Timer retryTimer;
+  uv::Timer pingTimer;
 
   auto init() -> void;
   auto initiateRetry() -> void;
