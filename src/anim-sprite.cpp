@@ -44,8 +44,8 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto pivot4 = glm::vec4{pivot().x, pivot().y, 0.f, 1.f};
   const auto projPivot = projMat * modelViewMat * pivot4;
   const auto v = (glm::vec2{projPivot.x, projPivot.y} - lastProjPivot) / dt;
-  const auto gForce = glm::vec2{0.f, .01f};
-  const auto a = (v - lastProjPivotV + gForce) / dt;
+  const auto gForce = glm::vec2{0.f, .3f};
+  const auto a = (v - lastProjPivotV) / dt + gForce;
   lastProjPivot = glm::vec2{projPivot.x, projPivot.y};
   lastProjPivotV = v;
   if (!physics)
