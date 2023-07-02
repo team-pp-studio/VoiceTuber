@@ -52,41 +52,47 @@ AiMouth::~AiMouth()
 
 auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
 {
+  if (!visible)
+    return;
   wavBuf.insert(std::end(wavBuf), std::begin(wav), std::end(wav));
   using namespace std::chrono_literals;
   if (std::chrono::high_resolution_clock::now() > silStart + 1000ms)
   {
     const auto sampleRate = audioIn.get().sampleRate();
     if (static_cast<int>(wavBuf.size()) > 1 * sampleRate)
-      stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
-                   sampleRate,
-                   [alive = std::weak_ptr<int>(alive), this](std::string txt) {
-                     if (!alive.lock())
-                     {
-                       LOG("this was destroyed");
-                       return;
-                     }
-                     if (!txt.empty())
-                     {
-                       hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
-                       LOG("Host:", txt);
-                     }
-                     if (hostMsg.size() < 75)
-                       return;
-                     lib.get().gpt().prompt("Host",
-                                            std::move(hostMsg),
-                                            [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
-                                              if (!alive.lock())
-                                              {
-                                                LOG("this was destroyed");
-                                                return;
-                                              }
-                                              LOG("Co-host:", rsp);
-                                              tts->say("en-US-AmberNeural", std::move(rsp), false);
-                                              talkStart = std::chrono::high_resolution_clock::now();
-                                            });
-                     hostMsg.clear();
-                   });
+    {
+      auto max = std::max_element(std::begin(wavBuf), std::end(wavBuf));
+      if (*max > 0x2000 || static_cast<int>(wavBuf.size()) > 10 * sampleRate)
+        stt->perform(
+          Wav{std::begin(wavBuf), std::end(wavBuf)},
+          sampleRate,
+          [alive = std::weak_ptr<int>(alive), this](std::string txt) {
+            if (!alive.lock())
+            {
+              LOG("this was destroyed");
+              return;
+            }
+            if (!txt.empty())
+            {
+              hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
+              LOG("Host:", txt);
+            }
+            if (hostMsg.size() < 75)
+              return;
+            lib.get().gpt().prompt(
+              "Host", std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+                if (!alive.lock())
+                {
+                  LOG("this was destroyed");
+                  return;
+                }
+                LOG("Co-host:", rsp);
+                tts->say("en-US-AmberNeural", std::move(rsp), false);
+                talkStart = std::chrono::high_resolution_clock::now();
+              });
+            hostMsg.clear();
+          });
+    }
     while (static_cast<int>(wavBuf.size()) > sampleRate / 5)
       wavBuf.pop_front();
   }

@@ -2,6 +2,7 @@
 #include "azure-token.hpp"
 #include "http-client.hpp"
 #include "save-wav.hpp"
+#include <cmath>
 #include <json/json.hpp>
 #include <log/log.hpp>
 #include <sstream>
@@ -66,6 +67,15 @@ auto AzureStt::process() -> void
 
 auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
 {
+  auto dur = 1.f * wav.size() / sampleRate;
+  total += dur;
+  LOG("Azure",
+      dur,
+      "seconds Total:",
+      std::floor(total / 60),
+      "minuts",
+      static_cast<int>(total) % 60,
+      "seconds");
   queue.emplace(
     [cb = std::move(cb), sampleRate, alive = std::weak_ptr<int>(alive), this, wav = std::move(wav)](
       const std::string &t, PostTask postTask) {

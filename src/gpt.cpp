@@ -80,7 +80,7 @@ auto Gpt::process() -> void
   std::ostringstream ss;
   const auto embedName = (rand() % 5 == 0) || msgs.empty();
   ss << R"({
-    "model": "text-davinci-003",
+    "model": "text-curie-001",
     "prompt": ")";
   ss << esc(systemPrompt_);
   for (const auto &msg : msgs)

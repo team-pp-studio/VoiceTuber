@@ -25,6 +25,7 @@ private:
   std::reference_wrapper<HttpClient> httpClient;
   std::queue<Task> queue;
   State state = State::idle;
+  float total = 0.f;
 
   auto process() -> void;
 };
