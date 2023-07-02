@@ -91,9 +91,8 @@ auto Gpt::process() -> void
     msgs.emplace_back(std::move(msg.first));
   }
 
-  static const auto cohost = "Co-host";
   if (embedName)
-    ss << R"(\n| )" << cohost << R"(:)";
+    ss << R"(\n| )" << cohost_ << R"(:)";
   else
     ss << R"(\n|)";
   ss
@@ -138,10 +137,10 @@ auto Gpt::process() -> void
                             timer.start(
                               [alive = std::weak_ptr<int>(alive), this]() {
                                 if (!alive.lock())
-            {
-              LOG("this was destroyed");
-              return;
-            }
+                                {
+                                  LOG("this was destroyed");
+                                  return;
+                                }
                                 state = State::idle;
                                 process();
                               },
@@ -183,7 +182,7 @@ auto Gpt::process() -> void
                             stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
                           if (!embedName)
                           {
-                            if (cohostMsg.find(cohost + std::string{":"}) != 0)
+                            if (cohostMsg.find(cohost_ + std::string{":"}) != 0)
                             {
                               for (const auto &msg : qMsgs)
                                 msg.second("");
@@ -191,16 +190,16 @@ auto Gpt::process() -> void
                               process();
                               return;
                             }
-                            cohostMsg = stripWhiteSpaces(cohostMsg.substr(strlen(cohost) + 1));
+                            cohostMsg = stripWhiteSpaces(cohostMsg.substr(cohost_.size() + 1));
                           }
 
                           {
                             Msg msg;
-                            msg.name = cohost;
+                            msg.name = cohost_;
                             msg.msg = cohostMsg;
                             msgs.emplace_back(std::move(msg));
                           }
-                          const auto MaxTokens = 4097 * 5 / 10;
+                          const auto MaxTokens = 2048 * 4 / 10;
                           const auto initWords = countWords();
                           for (auto words = initWords; words > MaxTokens;)
                           {
@@ -250,4 +249,14 @@ auto Gpt::systemPrompt(std::string v) -> void
 auto Gpt::systemPrompt() const -> const std::string &
 {
   return systemPrompt_;
+}
+
+auto Gpt::cohost(std::string v) -> void
+{
+  cohost_ = std::move(v);
+}
+
+auto Gpt::cohost() const -> std::string
+{
+  return cohost_;
 }

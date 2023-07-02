@@ -216,9 +216,9 @@ auto HttpClient::CurlContext::write(char *in, unsigned size, unsigned nmemb) -> 
 
 auto HttpClient::CurlContext::read(char *out, unsigned size, unsigned nmemb) -> size_t
 {
-  const auto ret = std::min(static_cast<unsigned>(payloadOut.size()), size * nmemb);
-  std::copy(std::begin(payloadOut), std::begin(payloadOut) + ret, out);
-  payloadOut.erase(0, ret);
+  const auto ret = std::min(static_cast<unsigned>(payloadIn.size()), size * nmemb);
+  std::copy(std::begin(payloadIn), std::begin(payloadIn) + ret, out);
+  payloadIn.erase(0, ret);
   return ret;
 }
 
@@ -233,7 +233,7 @@ auto HttpClient::post(const std::string &url, std::string post, Cb cb, const Hea
   auto ctx = new CurlContext;
   ctx->self = this;
   ctx->cb = std::move(cb);
-  ctx->payloadOut = std::move(post);
+  ctx->payloadIn = std::move(post);
   curl_easy_setopt(handle, CURLOPT_PRIVATE, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, CurlContext::write_);

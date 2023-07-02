@@ -75,7 +75,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
             if (!txt.empty())
             {
               hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
-              LOG("Host:", txt);
+              LOG(host, ":", txt);
             }
             if (hostMsg.size() < 75)
               return;
@@ -86,7 +86,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                   LOG("this was destroyed");
                   return;
                 }
-                LOG("Co-host:", rsp);
+                LOG(cohost, ":", rsp);
                 tts->say("en-US-AmberNeural", std::move(rsp), false);
                 talkStart = std::chrono::high_resolution_clock::now();
               });
@@ -99,7 +99,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
     lib.get().gpt().prompt(
-      "Host", std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+      host, std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
         if (!alive.lock())
         {
           LOG("this was destroyed");
@@ -107,7 +107,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
         }
         if (rsp.empty())
           return;
-        LOG("Co-host:", rsp);
+        LOG(cohost, ":", rsp);
         tts->say("en-US-AmberNeural", std::move(rsp), false);
         talkStart = std::chrono::high_resolution_clock::now();
       });
@@ -133,6 +133,7 @@ auto AiMouth::load(IStrm &strm) -> void
   sprite.load(strm);
   Node::load(strm);
   lib.get().gpt().systemPrompt(systemPrompt);
+  lib.get().gpt().cohost(cohost);
 }
 
 auto AiMouth::render(float dt, Node *hovered, Node *selected) -> void
@@ -165,6 +166,29 @@ auto AiMouth::renderUi() -> void
     {
       systemPrompt = text;
       lib.get().gpt().systemPrompt(systemPrompt);
+    }
+  }
+  ImGui::TableNextColumn();
+  Ui::textRj("Host");
+  ImGui::TableNextColumn();
+  {
+    char text[1024 * 16];
+    std::copy(std::begin(host), std::end(host), text);
+    text[host.size()] = '\0';
+    if (ImGui::InputText("##host", text, IM_ARRAYSIZE(text)))
+      host = text;
+  }
+  ImGui::TableNextColumn();
+  Ui::textRj("Cohost");
+  ImGui::TableNextColumn();
+  {
+    char text[1024 * 16];
+    std::copy(std::begin(cohost), std::end(cohost), text);
+    text[cohost.size()] = '\0';
+    if (ImGui::InputText("##cohost", text, IM_ARRAYSIZE(text)))
+    {
+      cohost = text;
+      lib.get().gpt().cohost(cohost);
     }
   }
   ImGui::TableNextColumn();
@@ -270,7 +294,7 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(
-    val.displayName, val.msg, [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
+    val.displayName + " from chat", val.msg, [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
       if (!alive.lock())
       {
         LOG("this was destroyed");
@@ -278,7 +302,7 @@ auto AiMouth::onMsg(Msg val) -> void
       }
       if (rsp.empty())
         return;
-      LOG("co-host", rsp);
+      LOG(cohost, ":", rsp);
       tts->say("en-US-AmberNeural", std::move(rsp), false);
       talkStart = std::chrono::high_resolution_clock::now();
     });

@@ -10,6 +10,8 @@ class AiMouth final : public AudioSink, public VisemesSink, public TwitchSink, p
 public:
 #define SER_PROP_LIST      \
   SER_PROP(viseme2Sprite); \
+  SER_PROP(host);          \
+  SER_PROP(cohost);        \
   SER_PROP(systemPrompt);  \
   SER_PROP(voice);
 
@@ -42,6 +44,8 @@ private:
   decltype(std::chrono::high_resolution_clock::now()) silStart;
   std::string hostMsg;
   std::string systemPrompt;
+  std::string host = "Mika";
+  std::string cohost = "Clara";
   decltype(std::chrono::high_resolution_clock::now()) talkStart;
 
   auto h() const -> float final;
