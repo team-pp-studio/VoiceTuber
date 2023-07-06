@@ -379,6 +379,13 @@ auto App::renderUi(float /*dt*/) -> void
       ImGui::Separator();
       {
         auto delDisabled = Ui::Disabled(!selected);
+        if (ImGui::MenuItem("Toggle Visiblity", "H"))
+          if (selected)
+            undo.record([isVisible = selected->visible, this]() { selected->visible = !isVisible; },
+                        [isVisible = selected->visible, this]() { selected->visible = isVisible; });
+      }
+      {
+        auto delDisabled = Ui::Disabled(!selected);
         if (ImGui::MenuItem("Delete", "Del"))
           if (selected)
             Node::del(&selected);
@@ -570,6 +577,9 @@ auto App::processIo() -> void
       }
       if (ImGui::IsKeyPressed(ImGuiKey_X) || ImGui::IsKeyPressed(ImGuiKey_Delete))
         Node::del(&selected);
+      if (ImGui::IsKeyPressed(ImGuiKey_H))
+        undo.record([isVisible = selected->visible, this]() { selected->visible = !isVisible; },
+                    [isVisible = selected->visible, this]() { selected->visible = isVisible; });
       if (ImGui::IsKeyPressed(ImGuiKey_D))
       {
         if (selected)
