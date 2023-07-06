@@ -286,10 +286,10 @@ auto App::renderUi(float /*dt*/) -> void
       style.Colors[ImGuiCol_WindowBg].w = .2f;
     auto showUiWindow = Ui::Window("##Show UI");
     const auto sz = 2 * ImGui::GetFontSize();
-    if (Ui::btnImg("Show UI", *showIco, sz, sz))
+    if (Ui::btnImg("Show UI (U)", *showIco, sz, sz))
       showUi = true;
     if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Show UI");
+      ImGui::SetTooltip("Show UI (U)");
     return;
   }
 
@@ -409,10 +409,10 @@ auto App::renderUi(float /*dt*/) -> void
     {
       {
         const auto sz = 2 * ImGui::GetFontSize();
-        if (Ui::btnImg("Hide UI", *hideIco, sz, sz))
+        if (Ui::btnImg("Hide UI (U)", *hideIco, sz, sz))
           showUi = false;
         if (ImGui::IsItemHovered())
-          ImGui::SetTooltip("Hide UI");
+          ImGui::SetTooltip("Hide UI (U)");
         ImGui::SameLine();
         if (Ui::btnImg("Select", editMode == EditMode::select ? *selectIco : *selectDisabledIco, sz, sz))
           editMode = EditMode::select;
@@ -580,6 +580,8 @@ auto App::processIo() -> void
       if (ImGui::IsKeyPressed(ImGuiKey_H))
         undo.record([isVisible = selected->visible, this]() { selected->visible = !isVisible; },
                     [isVisible = selected->visible, this]() { selected->visible = isVisible; });
+      if (ImGui::IsKeyPressed(ImGuiKey_U))
+        showUi = !showUi;
       if (ImGui::IsKeyPressed(ImGuiKey_D))
       {
         if (selected)
