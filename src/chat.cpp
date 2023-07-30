@@ -5,8 +5,8 @@
 #include "ui.hpp"
 #include "undo.hpp"
 #include <log/log.hpp>
+#include <sdlpp/sdlpp.hpp>
 #include <sstream>
-
 static const char *mute = "Mute";
 
 Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std::string n)
@@ -14,7 +14,7 @@ Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std
     lib(aLib),
     audioSink(aAudioSink),
     twitch(aLib.queryTwitch(n)),
-    font(aLib.queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize)),
+    font(aLib.queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize)),
     timer(aUv.createTimer())
 {
   twitch->reg(*this);
@@ -156,8 +156,7 @@ auto Chat::load(IStrm &strm) -> void
 {
   ::deser(strm, *this);
   Node::load(strm);
-  font =
-    lib.get().queryFont(SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+  font = lib.get().queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize);
   if (tts)
   {
     if (!azureTts)
@@ -282,8 +281,7 @@ auto Chat::renderUi() -> void
           return;
         }
         ptsize = newSize;
-        font = lib.get().queryFont(
-          SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+        font = lib.get().queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize);
       },
       [oldSize, alive = std::weak_ptr<int>(alive), this]() {
         if (!alive.lock())
@@ -292,8 +290,7 @@ auto Chat::renderUi() -> void
           return;
         }
         ptsize = oldSize;
-        font = lib.get().queryFont(
-          SDL_GetBasePath() + std::string{"assets/notepad_font/NotepadFont.ttf"}, ptsize);
+        font = lib.get().queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize);
       });
   ImGui::TableNextColumn();
   Ui::textRj("Hide Time");

@@ -1,8 +1,8 @@
 #include "texture.hpp"
 #include <cassert>
 #include <log/log.hpp>
+#include <sdlpp/sdlpp.hpp>
 #include <sstream>
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
 #pragma GCC diagnostic ignored "-Wextra-semi-stmt"
@@ -31,7 +31,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
         catch (std::runtime_error &e)
         {
           LOG(e.what());
-          auto engineImgPath = SDL_GetBasePath() + std::string{"assets/corrupted.png"};
+          auto engineImgPath = sdl::get_base_path() / "assets/corrupted.png";
           auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
           if (!ret)
           {
@@ -44,7 +44,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
       }
       else
       {
-        auto engineImgPath = SDL_GetBasePath() + std::string{"assets/"} + path_.substr(7);
+        auto engineImgPath = sdl::get_base_path() / "assets" / path_.substr(7);
         auto ret = stbi_load(engineImgPath.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
         {
