@@ -309,12 +309,12 @@ auto App::renderUi(float /*dt*/) -> void
     {
       {
         auto undoDisabled = Ui::Disabled(!undo.hasUndo());
-        if (auto undoMenu = ImGui::MenuItem("Undo", "Ctrl+Z"))
+        if (ImGui::MenuItem("Undo", "Ctrl+Z"))
           undo.undo();
       }
       {
         auto redoDisabled = Ui::Disabled(!undo.hasRedo());
-        if (auto redoMenu = ImGui::MenuItem("Redo", "Ctrl+Y"))
+        if (ImGui::MenuItem("Redo", "Ctrl+Y"))
           undo.redo();
       }
       ImGui::Separator();
