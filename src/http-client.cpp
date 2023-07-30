@@ -16,6 +16,7 @@ namespace
       if (curl_global_init(CURL_GLOBAL_ALL))
         throw std::runtime_error("Could not init curl");
     }
+    ~CurlInitializer() { curl_global_cleanup(); }
     static auto init() -> void { [[maybe_unused]] static auto curlInit = CurlInitializer{}; }
   };
 
@@ -27,7 +28,7 @@ namespace uv
 }
 
 HttpClient::HttpClient(uv::Uv &aUv)
-  : alive(std::make_unique<int>()), uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
+  : alive(std::make_shared<int>()), uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
 {
   CurlInitializer::init();
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
@@ -49,7 +50,7 @@ auto HttpClient::socketFunc_(CURL *easy, curl_socket_t s, int action, void *user
 
 HttpClient::~HttpClient()
 {
-  // TODO-Mika cleanup curl_multi_cleanup(multiHandle);
+  curl_multi_cleanup(multiHandle);
 }
 
 auto HttpClient::socketFunc(CURL *, curl_socket_t s, int action, void *socketp) -> int
