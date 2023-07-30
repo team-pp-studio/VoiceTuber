@@ -46,7 +46,7 @@ class VoiceTuberConan(ConanFile):
         self.requires("stb/cci.20220909")
         self.requires("libcurl/8.1.2")
         self.requires("glm/cci.20230113")
-        self.requires("sdl/2.26.1")
+        self.requires("sdl/2.26.5")
         self.requires("sdl_ttf/2.20.1")
         self.requires("libuv/1.45.0")
         self.requires("cpptoml/0.1.1")
