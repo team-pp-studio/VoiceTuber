@@ -16,7 +16,7 @@ namespace
       if (curl_global_init(CURL_GLOBAL_ALL))
         throw std::runtime_error("Could not init curl");
     }
-    static auto init() -> void { static auto curlInit = CurlInitializer{}; }
+    static auto init() -> void { [[maybe_unused]] static auto curlInit = CurlInitializer{}; }
   };
 
 } // namespace
@@ -169,10 +169,10 @@ auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
     timeout.start(
       [alive = std::weak_ptr<int>(alive), this, multi]() {
         if (!alive.lock())
-          {
-            LOG("this was destroyed");
-            return;
-          }
+        {
+          LOG("this was destroyed");
+          return;
+        }
         onTimeout(multi);
       },
       timeoutMs == 0 ? 1 : timeoutMs,

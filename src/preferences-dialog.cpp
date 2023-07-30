@@ -83,11 +83,6 @@ auto PreferencesDialog::internalDraw() -> DialogState
     }
     {
       ImGui::TableNextColumn();
-      ImGui::Text("");
-      ImGui::TableNextColumn();
-    }
-    {
-      ImGui::TableNextColumn();
       ImGui::Text("Audio Settings");
       ImGui::TableNextColumn();
     }
