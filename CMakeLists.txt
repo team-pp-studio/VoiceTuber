@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(VoiceTuber)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 find_package(SDL2 REQUIRED CONFIG)
 find_package(imgui REQUIRED CONFIG)
