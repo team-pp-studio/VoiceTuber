@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   auto init = sdl::Init{SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO};
   SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-  std::filesystem::current_path(SDL_GetBasePath());
+  std::filesystem::current_path(sdl::get_base_path());
 
   // From 2.0.18: Enable native IME.
 #ifdef SDL_HINT_IME_SHOW_UI
