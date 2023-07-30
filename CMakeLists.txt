@@ -23,6 +23,9 @@ elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang*")
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
     target_compile_options(warnings INTERFACE /W4)
 endif()
+add_library(sanitizers INTERFACE)
+target_link_libraries(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
+target_compile_options(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
 
 add_library(ser)
 file(GLOB_RECURSE SER_SOURCE_FILES CONFIGURE_DEPENDS "3rd-party/ser/*.cpp")
@@ -46,7 +49,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON CXX_ST
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "src/**")
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/3rd-party)
-target_link_libraries(${PROJECT_NAME} PRIVATE warnings ser json imgui_bindings OpenGL::GL SDL2::SDL2 imgui::imgui SDL2_ttf::SDL2_ttf glm::glm stb::stb pocketsphinx::pocketsphinx cpptoml uv CURL::libcurl)
+target_link_libraries(${PROJECT_NAME} PRIVATE warnings sanitizers ser json imgui_bindings OpenGL::GL SDL2::SDL2 imgui::imgui SDL2_ttf::SDL2_ttf glm::glm stb::stb pocketsphinx::pocketsphinx cpptoml uv CURL::libcurl)
 
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main)    
