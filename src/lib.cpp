@@ -45,20 +45,20 @@ auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
   return shared;
 }
 
-auto Lib::queryFont(const std::string &path, int size) -> std::shared_ptr<Font>
+auto Lib::queryFont(const std::filesystem::path &path, int size) -> std::shared_ptr<Font>
 {
-  auto it = fonts.find({path, size});
+  auto it = fonts.find(std::make_pair(std::cref(path), size));
   if (it != std::end(fonts))
   {
-    auto shared = it->second.lock();
-    if (shared)
+    if (auto shared = it->second.lock())
       return shared;
-    fonts.erase(it);
   }
-  auto shared = std::make_shared<Font>(path, size);
-  auto tmp = fonts.emplace(std::pair{path, size}, shared);
-  assert(tmp.second);
-  return shared;
+
+  auto font = std::make_shared<Font>(path, size);
+  fonts.emplace_hint(
+    it, std::piecewise_construct, std::forward_as_tuple(path, size), std::forward_as_tuple(font));
+
+  return font;
 }
 
 auto Lib::flush() -> void
