@@ -1,4 +1,5 @@
 #include "font.hpp"
+#include "file.hpp"
 #include <log/log.hpp>
 #include <sstream>
 
@@ -23,10 +24,12 @@ namespace
   };
 } // namespace
 
-Font::Font(std::string file, int ptsize)
+Font::Font(std::filesystem::path file, int ptsize)
   : file_(std::move(file)), ptsize_(ptsize), font([this]() {
       FontInitializer::init();
-      return TTF_OpenFont(file_.c_str(), ptsize_);
+      auto fp = open_file(file_, "rb");
+      auto *rw = SDL_RWFromFP(fp.get(), SDL_FALSE);
+      return TTF_OpenFontRW(rw, SDL_TRUE, ptsize_);
     }())
 {
   if (!font)
@@ -105,7 +108,7 @@ auto Font::getSize(const std::string &txt) const -> glm::vec2
   return glm::vec2{w, h};
 }
 
-auto Font::file() const -> const std::string &
+auto Font::file() const -> const std::filesystem::path &
 {
   return file_;
 }
