@@ -24,9 +24,12 @@ elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang*")
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
     target_compile_options(warnings INTERFACE /W4)
 endif()
+
 add_library(sanitizers INTERFACE)
+if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang*"))
 target_link_libraries(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
 target_compile_options(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
+endif()
 
 add_library(ser)
 file(GLOB_RECURSE SER_SOURCE_FILES CONFIGURE_DEPENDS "3rd-party/ser/*.cpp")
