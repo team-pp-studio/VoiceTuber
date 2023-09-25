@@ -90,6 +90,9 @@ and equipment.
 
 After locally installing, you will need to copy the dependencies DLLs into the installation directory.
 You can add `-d full_deploy` to the `conan install` command to copy them outside the Conan cache and then manually copy them to the installation location.
+Links: 
+Cmake: https://cmake.org/download/
+Conan: https://conan.io/downloads
 
 **Linux:**
 
