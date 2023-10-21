@@ -1,25 +1,26 @@
 #include "add-as-dialog.hpp"
 #include <imgui.h>
 
-AddAsDialog::AddAsDialog(std::string aPath, Cb aCb)
-  : Dialog("Add As...", [aCb = std::move(aCb), this](bool r) { aCb(r, nodeType); }),
-    path(std::move(aPath))
+AddAsDialog::AddAsDialog(std::string path, Callback callback)
+  : Dialog("Add As...",
+           [callback = std::move(callback), this](bool r) mutable { callback(r, nodeType); }),
+    path(std::move(path))
 {
 }
 
 auto AddAsDialog::internalDraw() -> DialogState
 {
   ImGui::Text("Add \"%s\" as...", path.c_str());
-  if (ImGui::RadioButton("Sprite", nodeType == NodeType::sprite))
-    nodeType = NodeType::sprite;
-  ImGui::SameLine();
-  if (ImGui::RadioButton("Mouth", nodeType == NodeType::mouth))
-    nodeType = NodeType::mouth;
-  ImGui::SameLine();
-  if (ImGui::RadioButton("Eye", nodeType == NodeType::eye))
-    nodeType = NodeType::eye;
-  if (ImGui::RadioButton("AiMouth", nodeType == NodeType::mouth))
-    nodeType = NodeType::aiMouth;
+  char const *options[] = {
+    "Sprite",
+    "Mouth",
+    "Eye",
+    "AiMouth",
+  };
+  if (int index = 0; ImGui::Combo("Add as", &index, &options[0], std::size(options)))
+  {
+    nodeType = static_cast<NodeType>(index);
+  }
 
   const auto BtnSz = 90;
   ImGui::SameLine(700 - 2 * BtnSz - 10);

@@ -8,8 +8,8 @@
 class FileOpen final : public Dialog
 {
 public:
-  using Cb = std::function<auto(bool, const std::filesystem::path &)->void>;
-  FileOpen(Lib &, std::string dialogName, Cb);
+  using Callback = std::move_only_function<void(bool, const std::filesystem::path &)>;
+  FileOpen(Lib &, std::string dialogName, Callback);
 
 private:
   auto internalDraw() -> DialogState final;
@@ -17,6 +17,6 @@ private:
 
   std::vector<std::filesystem::path> files;
   std::string selectedFile;
-  decltype(std::filesystem::current_path()) cwd;
+  std::filesystem::path cwd;
   std::shared_ptr<const Texture> upDir;
 };

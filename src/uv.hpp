@@ -11,25 +11,25 @@ namespace uv
     friend class Uv;
 
   public:
-    using ReadCb = std::function<auto(int status, std::string)->void>;
-    using WriteCb = std::function<auto(int status)->void>;
+    using ReadCallback = std::move_only_function<void(int status, std::string_view)>;
+    using WriteCallback = std::move_only_function<void(int status)>;
 
     Tcp() = default;
     Tcp(Tcp &&);
     Tcp(uv_loop_t *);
     Tcp &operator=(Tcp &&);
     ~Tcp();
-    auto readStart(ReadCb) -> int;
-    auto write(std::string, WriteCb) -> int;
+    auto readStart(ReadCallback) -> int;
+    auto write(std::string, WriteCallback) -> int;
     auto isInitialized() const -> bool { return socket != nullptr; }
 
   private:
     std::unique_ptr<uv_tcp_t> socket = nullptr;
-    ReadCb readCb;
+    ReadCallback readCb;
     std::string buf;
 
     auto onRead(ssize_t nread, const uv_buf_t *buf) -> void;
-    auto onWrite(int status, WriteCb cb) -> void { cb(status); }
+    auto onWrite(int status, WriteCallback cb) -> void { cb(status); }
     auto deinit() -> void;
   };
 
@@ -38,16 +38,16 @@ namespace uv
     friend class Uv;
 
   public:
-    using Cb = std::function<auto()->void>;
+    using Callback = std::move_only_function<void()>;
 
     ~Timer();
-    auto start(Cb, uint64_t timeout = 0, uint64_t repeat = 0) -> int;
+    auto start(Callback, uint64_t timeout = 0, uint64_t repeat = 0) -> int;
     auto stop() -> int;
 
   private:
     Timer(uv_loop_t *);
     std::unique_ptr<uv_timer_t> timer;
-    Cb cb = nullptr;
+    Callback callback = nullptr;
   };
 
   class Idle

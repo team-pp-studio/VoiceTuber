@@ -94,27 +94,33 @@ auto Mouth<S, ClassName>::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
-          if (!alive.lock())
+        [&f, newF = f, alive = this->weak_from_this(), vis]() {
+          if (auto self = std::static_pointer_cast<Mouth>(alive.lock()))
+          {
+            using namespace std::chrono_literals;
+            f = std::move(newF);
+            self->viseme = std::move(vis);
+            self->freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+          }
+          else
           {
             LOG("this was destroyed");
             return;
           }
-          f = newF;
-          viseme = vis;
-          using namespace std::chrono_literals;
-          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
-        [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
-          if (!alive.lock())
+        [&f, oldF, alive = this->weak_from_this(), vis]() {
+          if (auto self = std::static_pointer_cast<Mouth>(alive.lock()))
+          {
+            using namespace std::chrono_literals;
+            f = std::move(oldF);
+            self->viseme = std::move(vis);
+            self->freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+          }
+          else
           {
             LOG("this was destroyed");
             return;
           }
-          f = oldF;
-          viseme = vis;
-          using namespace std::chrono_literals;
-          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         });
     }
     ImGui::SameLine();

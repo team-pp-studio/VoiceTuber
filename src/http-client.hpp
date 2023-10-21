@@ -11,20 +11,22 @@ namespace uv
   class Uv;
 }
 
-class HttpClient
+class HttpClient : public std::enable_shared_from_this<HttpClient>
 {
 public:
   using Headers = std::vector<std::pair<std::string, std::string>>;
-  using Cb = std::function<auto(CURLcode, long httpStatus, std::string payload)->void>;
+  using Callback = std::move_only_function<void(CURLcode, long httpStatus, std::string payload)>;
 
   HttpClient(uv::Uv &);
   HttpClient(const HttpClient &) = delete;
   ~HttpClient();
-  auto get(const std::string &url, Cb cb, const Headers &headers = Headers{}) -> void;
-  auto post(const std::string &url, std::string post, Cb cb, const Headers &chunks = Headers{}) -> void;
+  auto get(const std::string &url, Callback callback, const Headers &headers = Headers{}) -> void;
+  auto post(const std::string &url,
+            std::string post,
+            Callback callback,
+            const Headers &chunks = Headers{}) -> void;
 
 private:
-  std::shared_ptr<int> alive;
   std::reference_wrapper<uv::Uv> uv;
   uv::Timer timeout;
   CURLM *multiHandle = nullptr;
@@ -40,7 +42,7 @@ private:
     std::string payloadIn;
     std::string payloadOut;
     curl_slist *headers = nullptr;
-    Cb cb;
+    Callback callback;
     auto write(char *in, unsigned size, unsigned nmemb) -> size_t;
     static auto write_(char *in, unsigned size, unsigned nmemb, void *ctx) -> size_t;
     auto read(char *in, unsigned size, unsigned nmemb) -> size_t;

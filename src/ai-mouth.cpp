@@ -13,7 +13,7 @@ AiMouth::AiMouth(Lib &aLib,
                  AudioOut &audioOut,
                  Wav2Visemes &aWav2Visemes,
                  const std::filesystem::path &path)
-  : Node(aLib, aUndo, [&path]() { return path.filename().string(); }()),
+  : Node(aLib, aUndo, path.filename().string()),
     sprite(aLib, aUndo, path),
     lib(aLib),
     audioIn(aAudioIn),
@@ -63,54 +63,58 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
     {
       auto max = std::max_element(std::begin(wavBuf), std::end(wavBuf));
       if (*max > 0x2000 || static_cast<int>(wavBuf.size()) > 10 * sampleRate)
-        stt->perform(
-          Wav{std::begin(wavBuf), std::end(wavBuf)},
-          sampleRate,
-          [alive = std::weak_ptr<int>(alive), this](std::string txt) {
-            if (!alive.lock())
-            {
-              LOG("this was destroyed");
-              return;
-            }
-            if (!txt.empty())
-            {
-              hostMsg += (hostMsg.empty() ? "" : "\n") + txt;
-              LOG(host, ":", txt);
-            }
-            if (hostMsg.size() < 75)
-              return;
-            lib.get().gpt().prompt(
-              "Host", std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
-                if (!alive.lock())
-                {
-                  LOG("this was destroyed");
-                  return;
-                }
-                LOG(cohost, ":", rsp);
-                tts->say("en-US-AmberNeural", std::move(rsp), false);
-                talkStart = std::chrono::high_resolution_clock::now();
-              });
-            hostMsg.clear();
-          });
+        stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
+                     sampleRate,
+                     [alive = this->weak_from_this()](std::string txt) {
+                       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+                       {
+                         if (!self->hostMsg.empty())
+                           self->hostMsg += '\n';
+                         self->hostMsg += txt;
+                         LOG(self->host, ":", txt);
+                         if (self->hostMsg.size() < 75)
+                           return;
+
+                         self->lib.get().gpt().prompt(
+                           "Host", std::move(self->hostMsg), [alive](std::string rsp) {
+                             if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+                             {
+                               LOG(self->cohost, ":", rsp);
+                               self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+                               self->talkStart = std::chrono::high_resolution_clock::now();
+                             }
+                             else
+                             {
+                               LOG("this was destroyed");
+                             };
+                           });
+                         self->hostMsg.clear();
+                       }
+                       else
+                       {
+                         LOG("this was destroyed");
+                       }
+                     });
     }
     while (static_cast<int>(wavBuf.size()) > sampleRate / 5)
       wavBuf.pop_front();
   }
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    lib.get().gpt().prompt(
-      host, std::move(hostMsg), [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
-        if (!alive.lock())
-        {
-          LOG("this was destroyed");
-          return;
-        }
+    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = this->weak_from_this()](std::string rsp) {
+      if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+      {
         if (rsp.empty())
           return;
-        LOG(cohost, ":", rsp);
-        tts->say("en-US-AmberNeural", std::move(rsp), false);
-        talkStart = std::chrono::high_resolution_clock::now();
-      });
+        LOG(self->cohost, ":", rsp);
+        self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+        self->talkStart = std::chrono::high_resolution_clock::now();
+      }
+      else
+      {
+        LOG("this was destroyed");
+      }
+    });
     hostMsg.clear();
   }
 }
@@ -230,27 +234,31 @@ auto AiMouth::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, alive = std::weak_ptr<int>(alive), this, vis]() {
-          if (!alive.lock())
+        [&f, newF = f, alive = this->weak_from_this(), vis]() {
+          if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+          {
+            using namespace std::chrono_literals;
+            f = std::move(newF);
+            self->viseme = std::move(vis);
+            self->freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          f = newF;
-          viseme = vis;
-          using namespace std::chrono_literals;
-          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         },
-        [&f, oldF, alive = std::weak_ptr<int>(alive), this, vis]() {
-          if (!alive.lock())
+        [&f, oldF, alive = this->weak_from_this(), vis]() {
+          if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+          {
+            using namespace std::chrono_literals;
+            f = std::move(oldF);
+            self->viseme = std::move(vis);
+            self->freezeTime = std::chrono::high_resolution_clock::now() + 1s;
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          f = oldF;
-          viseme = vis;
-          using namespace std::chrono_literals;
-          freezeTime = std::chrono::high_resolution_clock::now() + 1s;
         });
     }
     ImGui::SameLine();
@@ -294,17 +302,19 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(
-    val.displayName + " from chat", val.msg, [alive = std::weak_ptr<int>(alive), this](std::string rsp) {
-      if (!alive.lock())
+    val.displayName + " from chat", val.msg, [alive = this->weak_from_this()](std::string rsp) {
+      if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+      {
+        if (rsp.empty())
+          return;
+        LOG(self->cohost, ":", rsp);
+        self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+        self->talkStart = std::chrono::high_resolution_clock::now();
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      if (rsp.empty())
-        return;
-      LOG(cohost, ":", rsp);
-      tts->say("en-US-AmberNeural", std::move(rsp), false);
-      talkStart = std::chrono::high_resolution_clock::now();
     });
 }
 

@@ -12,7 +12,7 @@ namespace uv
     socket->data = this;
   }
 
-  auto Tcp::readStart(ReadCb cb) -> int
+  auto Tcp::readStart(ReadCallback cb) -> int
   {
     LOG(this, "readStart socket:", socket);
     if (!socket)
@@ -53,11 +53,11 @@ namespace uv
       Tcp *tcp;
       std::string buf;
       uv_buf_t uvBuf;
-      Tcp::WriteCb cb;
+      Tcp::WriteCallback cb;
     };
   } // namespace
 
-  auto Tcp::write(std::string val, WriteCb cb) -> int
+  auto Tcp::write(std::string val, WriteCallback cb) -> int
   {
     if (!socket)
     {
@@ -65,22 +65,23 @@ namespace uv
       cb(-1);
       return -1;
     }
-    // TODO-Mika Can we combine two memory allocations into one?
+
     socket->data = this;
-    auto req = new uv_write_t;
-    auto writeCtx = new WriteCtx;
-    req->data = writeCtx;
-    writeCtx->tcp = this;
+    struct Request : uv_write_t
+    {
+      WriteCtx ctx;
+    };
+
+    auto req = std::make_unique<Request>();
+    req->ctx.tcp = this;
     const auto sz = static_cast<int>(val.size());
-    writeCtx->buf = std::move(val);
-    writeCtx->uvBuf = uv_buf_init(writeCtx->buf.data(), sz);
-    writeCtx->cb = std::move(cb);
+    req->ctx.buf = std::move(val);
+    req->ctx.uvBuf = uv_buf_init(req->ctx.buf.data(), sz);
+    req->ctx.cb = std::move(cb);
     return uv_write(
-      req, (uv_stream_t *)socket.get(), &writeCtx->uvBuf, 1, [](uv_write_t *aReq, int status) {
-        auto ctx = static_cast<WriteCtx *>(aReq->data);
-        ctx->tcp->onWrite(status, std::move(ctx->cb));
-        delete ctx;
-        delete aReq;
+      req.release(), (uv_stream_t *)socket.get(), &req->ctx.uvBuf, 1, [](uv_write_t *aReq, int status) {
+        auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
+        req->ctx.tcp->onWrite(status, std::move(req->ctx.cb));
       });
   }
 
@@ -89,7 +90,7 @@ namespace uv
     if (nread < 0)
     {
       LOG(__func__, "error:", uv_err_name(static_cast<int>(nread)));
-      readCb(static_cast<int>(nread), std::string{});
+      readCb(static_cast<int>(nread), std::string_view{});
       return;
     }
     if (!readCb)
@@ -97,7 +98,7 @@ namespace uv
       LOG("The TCP read callback is not set up");
       return;
     }
-    readCb(0, std::string{aBuf->base, aBuf->base + nread});
+    readCb(0, std::string_view{aBuf->base, aBuf->base + nread});
   }
 
   Uv::Uv() : loop_(uv_default_loop())
@@ -129,11 +130,15 @@ namespace uv
   {
     LOG("connect ", domain, ":", port);
     // TODO-Mika Can we combine two memory allocations into one?
-    auto resolver = new uv_getaddrinfo_t;
-    auto connectCtx = new ConnectCtx;
-    resolver->data = connectCtx;
-    connectCtx->uv = this;
-    connectCtx->cb = std::move(cb);
+    struct Request : uv_getaddrinfo_t
+    {
+      ConnectCtx ctx;
+    };
+
+    auto req = std::make_unique<Request>();
+
+    req->ctx.uv = this;
+    req->ctx.cb = std::move(cb);
     LOG("Resolve:", domain, port);
     struct addrinfo hints;
     hints.ai_family = PF_INET;
@@ -142,12 +147,10 @@ namespace uv
     hints.ai_flags = 0;
     return uv_getaddrinfo(
       loop_,
-      resolver,
-      [](uv_getaddrinfo_t *req, int status, struct addrinfo *res) -> void {
-        auto ctx = static_cast<ConnectCtx *>(req->data);
-        ctx->uv->onResolved(status, res, std::move(ctx->cb));
-        delete ctx;
-        delete req;
+      req.release(),
+      [](uv_getaddrinfo_t *aReq, int status, struct addrinfo *res) -> void {
+        auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
+        req->ctx.uv->onResolved(status, res, std::move(req->ctx.cb));
       },
       domain.c_str(),
       port.c_str(),
@@ -156,43 +159,47 @@ namespace uv
 
   auto Uv::onResolved(int status, struct addrinfo *res, ConnectCb cb) -> void
   {
+
     if (status < 0)
     {
       LOG(__func__, "error:", uv_err_name(status));
       cb(status, Tcp{});
       return;
     }
+    auto result = std::unique_ptr<addrinfo, void (*)(addrinfo *)>(res, &uv_freeaddrinfo);
 
     char addr[17] = {'\0'};
-    uv_ip4_name(reinterpret_cast<struct sockaddr_in *>(res->ai_addr), addr, 16);
+    uv_ip4_name(reinterpret_cast<struct sockaddr_in *>(result->ai_addr), addr, 16);
     LOG("Resolved:", addr);
 
     // TODO-Mika Can we combine two memory allocations into one?
-    auto connectReq = new uv_connect_t;
-    auto connectCtx = new ConnectCtx2;
-    connectReq->data = connectCtx;
-    connectCtx->uv = this;
-    connectCtx->tcp = Tcp{loop_};
+    struct Request : uv_connect_t
+    {
+      ConnectCtx2 ctx;
+    };
+    auto req = std::make_unique<Request>();
+    req->ctx.uv = this;
+    req->ctx.tcp = Tcp{loop_};
+    req->ctx.cb = std::move(cb);
 
-    auto s = uv_tcp_connect(connectReq,
-                            connectCtx->tcp.socket.get(),
-                            (const struct sockaddr *)res->ai_addr,
-                            [](uv_connect_t *req, int aStatus) {
+    auto sock = req->ctx.tcp.socket.get();
+    auto s = uv_tcp_connect(req.release(),
+                            sock,
+                            (const struct sockaddr *)result->ai_addr,
+                            [](uv_connect_t *aReq, int aStatus) {
+                              auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
                               LOG("Connected");
-                              auto ctx = static_cast<ConnectCtx2 *>(req->data);
-                              ctx->uv->onConnected(aStatus, std::move(ctx->tcp), std::move(ctx->cb));
-                              delete ctx;
-                              delete req;
+
+                              req->ctx.uv->onConnected(
+                                aStatus, std::move(req->ctx.tcp), std::move(req->ctx.cb));
                             });
     if (s < 0)
     {
       LOG(__func__, "error:", uv_err_name(s));
       cb(s, Tcp{});
-      uv_freeaddrinfo(res);
+
       return;
     }
-    connectCtx->cb = std::move(cb);
-    uv_freeaddrinfo(res);
   }
 
   auto Uv::onConnected(int status, Tcp tcp, ConnectCb cb) -> void
@@ -231,14 +238,17 @@ namespace uv
       socket->data = nullptr;
       auto rawSocket = socket.release();
       uv_read_stop((uv_stream_t *)rawSocket);
-      auto req = new uv_shutdown_t;
-      req->data = rawSocket;
-      uv_shutdown(req, (uv_stream_t *)rawSocket, [](uv_shutdown_t *handle, int status) {
+      struct Request : uv_shutdown_t
+      {
+        Request(uv_tcp_t *tcp) { this->handle = reinterpret_cast<uv_stream_t *>(tcp); }
+        ~Request() { delete static_cast<uv_tcp_t *>(this->data); }
+      };
+      auto req = std::make_unique<uv_shutdown_t>(rawSocket);
+      uv_shutdown(req.release(), (uv_stream_t *)rawSocket, [](uv_shutdown_t *aReq, int status) {
+        auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
         LOG("Disconnected");
         if (status < 0)
           LOG(__func__, "error:", uv_err_name(status));
-        delete static_cast<uv_tcp_t *>(handle->data);
-        delete handle;
       });
     }
   }
@@ -267,20 +277,20 @@ namespace uv
     timer->data = this;
   }
 
-  auto Timer::start(Cb aCb, uint64_t timeout, uint64_t repeat) -> int
+  auto Timer::start(Callback aCb, uint64_t timeout, uint64_t repeat) -> int
   {
-    cb = std::move(aCb);
+    callback = std::move(aCb);
     timer->data = this;
     return uv_timer_start(
       timer.get(),
       [](uv_timer_t *handle) {
         auto self = static_cast<Timer *>(handle->data);
-        if (!self->cb)
+        if (!self->callback)
         {
           LOG("The Timer callback is not set up");
           return;
         }
-        self->cb();
+        self->callback();
       },
       timeout,
       repeat);

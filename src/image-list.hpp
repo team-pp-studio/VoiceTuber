@@ -5,7 +5,7 @@
 #include "undo.hpp"
 #include <filesystem>
 
-class ImageList
+class ImageList : public std::enable_shared_from_this<ImageList>
 {
 public:
 #define SER_PROP_LIST SER_PROP(texturesForSaveLoad);
@@ -25,7 +25,6 @@ public:
   auto w() const -> float;
 
 private:
-  std::shared_ptr<int> alive;
   std::reference_wrapper<Lib> lib;
   std::reference_wrapper<Undo> undo;
   int frame_ = 0;

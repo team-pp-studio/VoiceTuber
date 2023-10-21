@@ -1,9 +1,14 @@
 #include "dialog.hpp"
 #include <imgui.h>
 
-Dialog::Dialog(std::string aTitle, Cb cb) : cb(std::move(cb)), title(std::move(aTitle)) {}
+Dialog::Dialog(std::string title, Callback callback)
+  : callback(std::move(callback)), title(std::move(title))
+{
+}
 
-auto Dialog::draw() -> bool
+Dialog::~Dialog() {}
+
+bool Dialog::draw()
 {
   if (first)
   {
@@ -19,12 +24,12 @@ auto Dialog::draw() -> bool
   case DialogState::ok:
     ImGui::CloseCurrentPopup();
     ImGui::EndPopup();
-    cb(true);
+    callback(true);
     return false;
   case DialogState::cancel:
     ImGui::CloseCurrentPopup();
     ImGui::EndPopup();
-    cb(false);
+    callback(false);
     return false;
   }
   return true;

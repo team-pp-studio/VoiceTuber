@@ -141,8 +141,7 @@ static const char *server = "irc.chat.twitch.tv";
 static const char *port = "6667";
 
 Twitch::Twitch(uv::Uv &uv, std::string aUser, std::string aKey, std::string aChannel)
-  : alive(std::make_shared<int>()),
-    uv(uv),
+  : uv(uv),
     user(std::move(aUser)),
     key(std::move(aKey)),
     channel(std::move(aChannel)),
@@ -159,22 +158,24 @@ auto Twitch::init() -> void
   retryTimer.stop();
   pingTimer.stop();
 
-  auto s =
-    uv.get().connect(server, port, [alive = std::weak_ptr<int>(alive), this](int status, uv::Tcp aTcp) {
-      if (!alive.lock())
-      {
-        LOG("this was destroyed");
-        return;
-      }
+  auto s = uv.get().connect(server, port, [alive = this->weak_from_this()](int status, uv::Tcp aTcp) {
+    if (auto self = alive.lock())
+    {
       if (status < 0)
       {
         LOG(__func__, "error:", uv_err_name(status));
-        initiateRetry();
+        self->initiateRetry();
         return;
       }
-      tcp = std::move(aTcp);
-      sendPassNickUser();
-    });
+      self->tcp = std::move(aTcp);
+      self->sendPassNickUser();
+    }
+    else
+
+    {
+      LOG("this was destroyed");
+    }
+  });
   if (s < 0)
   {
     LOG(__func__, "error:", uv_err_name(s));
@@ -189,19 +190,21 @@ auto Twitch::sendPassNickUser() -> void
   msg << "PASS " << key << "\r\n";
   msg << "NICK " << user << "\r\n";
   msg << "USER nobody unknown unknown :noname\r\n";
-  auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
-    if (!alive.lock())
+  auto s = tcp.write(msg.str(), [alive = this->weak_from_this()](int status) {
+    if (auto self = alive.lock())
+    {
+      if (status < 0)
+      {
+        LOG(__func__, "error:", uv_err_name(status));
+        self->initiateRetry();
+        return;
+      }
+      self->readStart();
+    }
+    else
     {
       LOG("this was destroyed");
-      return;
     }
-    if (status < 0)
-    {
-      LOG(__func__, "error:", uv_err_name(status));
-      initiateRetry();
-      return;
-    }
-    readStart();
   });
   if (s < 0)
   {
@@ -213,19 +216,21 @@ auto Twitch::sendPassNickUser() -> void
 
 auto Twitch::readStart() -> void
 {
-  auto s = tcp.readStart([alive = std::weak_ptr<int>(alive), this](int status, std::string msg) {
-    if (!alive.lock())
+  auto s = tcp.readStart([alive = this->weak_from_this()](int status, std::string_view msg) {
+    if (auto self = alive.lock())
+    {
+      if (status < 0)
+      {
+        LOG(__func__, "error:", uv_err_name(status));
+        self->initiateRetry();
+      }
+      self->buf.insert(std::end(self->buf), std::begin(msg), std::end(msg));
+      self->parseMsg();
+    }
+    else
     {
       LOG("this was destroyed");
-      return;
     }
-    if (status < 0)
-    {
-      LOG(__func__, "error:", uv_err_name(status));
-      initiateRetry();
-    }
-    buf.insert(std::end(buf), std::begin(msg), std::end(msg));
-    parseMsg();
   });
   if (s < 0)
   {
@@ -364,17 +369,19 @@ auto Twitch::onPing(const std::string &val) -> void
 {
   std::ostringstream sendMsg;
   sendMsg << "PONG " << val << "\r\n";
-  auto s = tcp.write(sendMsg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
-    if (!alive.lock())
+  auto s = tcp.write(sendMsg.str(), [alive = this->weak_from_this()](int status) {
+    if (auto self = alive.lock())
+    {
+      if (status < 0)
+      {
+        LOG(__func__, "error:", uv_err_name(status));
+        self->initiateRetry();
+        return;
+      }
+    }
+    else
     {
       LOG("this was destroyed");
-      return;
-    }
-    if (status < 0)
-    {
-      LOG(__func__, "error:", uv_err_name(status));
-      initiateRetry();
-      return;
     }
   });
   if (s < 0)
@@ -397,17 +404,19 @@ auto Twitch::onWelcome() -> void
   msg << "CAP REQ :twitch.tv/tags\r\n"
       << "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n"
       << "JOIN #" << channel << "\r\n";
-  auto s = tcp.write(msg.str(), [alive = std::weak_ptr<int>(alive), this](int status) {
-    if (!alive.lock())
+  auto s = tcp.write(msg.str(), [alive = this->weak_from_this()](int status) {
+    if (auto self = alive.lock())
+    {
+      if (status < 0)
+      {
+        LOG(__func__, "error:", uv_err_name(status));
+        self->initiateRetry();
+        return;
+      }
+    }
+    else
     {
       LOG("this was destroyed");
-      return;
-    }
-    if (status < 0)
-    {
-      LOG(__func__, "error:", uv_err_name(status));
-      initiateRetry();
-      return;
     }
   });
   if (s < 0)
@@ -425,36 +434,42 @@ auto Twitch::onWelcome() -> void
 auto Twitch::schedulePing() -> void
 {
   pingTimer.start(
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
       {
-        LOG("this was destroyed");
-        return;
-      }
-      tcp.write("PING :tmi.twitch.tv\r\n", [alive = std::weak_ptr<int>(alive), this](int status) {
-        if (!alive.lock())
-        {
-          LOG("this was destroyed");
-          return;
-        }
-        if (status < 0)
-        {
-          LOG(__func__, "error:", uv_err_name(status));
-          initiateRetry();
-          return;
-        }
-      });
-      pingTimer.start(
-        [alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        self->tcp.write("PING :tmi.twitch.tv\r\n", [alive](int status) {
+          if (auto self = alive.lock())
+          {
+            if (status < 0)
+            {
+              LOG(__func__, "error:", uv_err_name(status));
+              self->initiateRetry();
+              return;
+            }
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          LOG(__func__, "error: PING timeout");
-          initiateRetry();
-        },
-        2'000);
+        });
+        self->pingTimer.start(
+          [alive]() {
+            if (auto self = alive.lock())
+            {
+              LOG(__func__, "error: PING timeout");
+              self->initiateRetry();
+            }
+            else
+            {
+              LOG("this was destroyed");
+            }
+          },
+          2'000);
+      }
+      else
+      {
+        LOG("this was destroyed");
+      }
     },
     120'000);
 }
@@ -475,14 +490,16 @@ auto Twitch::initiateRetry() -> void
 {
   state = State::connecting;
   retryTimer.start(
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
+      {
+        LOG("Retrying...");
+        self->init();
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      LOG("Retrying...");
-      init();
     },
     initRetry);
   LOG("Retry in", initRetry);

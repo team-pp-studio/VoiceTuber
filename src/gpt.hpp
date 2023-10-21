@@ -7,14 +7,14 @@
 #include <queue>
 #include <string>
 
-class Gpt
+class Gpt : public std::enable_shared_from_this<Gpt>
 {
 public:
-  using Cb = std::function<auto(const std::string &)->void>;
+  using Callback = std::move_only_function<void(const std::string &)>;
   Gpt(uv::Uv &, std::string token, class HttpClient &);
   auto cohost() const -> std::string;
   auto cohost(std::string) -> void;
-  auto prompt(std::string name, std::string msg, Cb) -> void;
+  auto prompt(std::string name, std::string msg, Callback) -> void;
   auto systemPrompt() const -> const std::string &;
   auto systemPrompt(std::string) -> void;
   auto updateToken(std::string token) -> void;
@@ -29,7 +29,6 @@ private:
   };
   enum class State { idle, waiting };
 
-  std::shared_ptr<int> alive;
   uv::Timer timer;
   std::string token;
   std::string systemPrompt_ =
@@ -39,7 +38,7 @@ atmosphere. She is funny and likes to make quirky jokes. She has
 extensive knowledge about games, game development, Unreal Engine, and
 C++.)";
   std::reference_wrapper<HttpClient> httpClient;
-  std::vector<std::pair<Msg, Cb>> queuedMsgs;
+  std::vector<std::pair<Msg, Callback>> queuedMsgs;
   std::deque<Msg> msgs;
   State state = State::idle;
   decltype(std::chrono::high_resolution_clock::now()) lastReply;

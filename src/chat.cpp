@@ -100,13 +100,15 @@ auto Chat::onMsg(Msg val) -> void
   timer.stop();
   if (hideChatSec > 0)
     timer.start(
-      [alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this()]() {
+        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        {
+          self->showChat = false;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        showChat = false;
       },
       hideChatSec * 1000);
   if (azureTts)
@@ -162,13 +164,15 @@ auto Chat::load(IStrm &strm) -> void
     if (!azureTts)
     {
       azureTts = lib.get().queryAzureTts(audioSink);
-      azureTts->listVoices([alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
-        if (!alive.lock())
+      azureTts->listVoices([alive = this->weak_from_this()](std::vector<std::string> aVoices) {
+        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        {
+          self->voices = std::move(aVoices);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        voices = std::move(aVoices);
       });
     }
   }
@@ -274,23 +278,29 @@ auto Chat::renderUi() -> void
   const auto oldSize = ptsize;
   if (ImGui::InputInt("##Font Size", &ptsize))
     undo.get().record(
-      [newSize = ptsize, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newSize = ptsize, alive = this->weak_from_this()]() {
+        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        {
+          self->ptsize = newSize;
+          self->font = self->lib.get().queryFont(
+            sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", self->ptsize);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        ptsize = newSize;
-        font = lib.get().queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize);
       },
-      [oldSize, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldSize, alive = this->weak_from_this()]() {
+        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        {
+          self->ptsize = oldSize;
+          self->font = self->lib.get().queryFont(
+            sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", self->ptsize);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        ptsize = oldSize;
-        font = lib.get().queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize);
       });
   ImGui::TableNextColumn();
   Ui::textRj("Hide Time");
@@ -305,55 +315,67 @@ auto Chat::renderUi() -> void
     if (ImGui::Checkbox("##AzureTTS", &tts))
     {
       undo.get().record(
-        [alive = std::weak_ptr<int>(alive), this, newTts = tts]() {
-          if (!alive.lock())
+        [alive = this->weak_from_this(), newTts = tts]() {
+          if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
           {
-            LOG("this was destroyed");
-            return;
-          }
-          if (newTts)
-          {
-            if (!azureTts)
+            if (newTts)
             {
-              azureTts = lib.get().queryAzureTts(audioSink);
-              azureTts->listVoices(
-                [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
-                  if (!alive.lock())
+              if (!self->azureTts)
+              {
+                self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
+                self->azureTts->listVoices([alive](std::vector<std::string> aVoices) {
+                  if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+                  {
+                    self->voices = std::move(aVoices);
+                  }
+                  else
                   {
                     LOG("this was destroyed");
-                    return;
                   }
-                  voices = std::move(aVoices);
                 });
+              }
+            }
+            else
+            {
+              self->azureTts = nullptr;
             }
           }
           else
-            azureTts = nullptr;
+
+          {
+            LOG("this was destroyed");
+          }
         },
-        [alive = std::weak_ptr<int>(alive), this, oldTts]() {
-          if (!alive.lock())
+        [alive = this->weak_from_this(), oldTts]() {
+          if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
           {
-            LOG("this was destroyed");
-            return;
-          }
-          if (oldTts)
-          {
-            if (!azureTts)
+            if (oldTts)
             {
-              azureTts = lib.get().queryAzureTts(audioSink);
-              azureTts->listVoices(
-                [alive = std::weak_ptr<int>(alive), this](std::vector<std::string> aVoices) {
-                  if (!alive.lock())
+              if (!self->azureTts)
+              {
+                self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
+                self->azureTts->listVoices([alive](std::vector<std::string> voices) {
+                  if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+                  {
+                    self->voices = std::move(voices);
+                  }
+                  else
                   {
                     LOG("this was destroyed");
-                    return;
                   }
-                  voices = std::move(aVoices);
                 });
+              }
+            }
+            else
+            {
+              self->azureTts = nullptr;
             }
           }
           else
-            azureTts = nullptr;
+
+          {
+            LOG("this was destroyed");
+          }
         });
     }
   }

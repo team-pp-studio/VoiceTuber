@@ -5,7 +5,7 @@
 class PreferencesDialog final : public Dialog
 {
 public:
-  PreferencesDialog(class Preferences &, class AudioOut &, class AudioIn &, Cb);
+  PreferencesDialog(class Preferences &, class AudioOut &, class AudioIn &, Callback);
 
 private:
   std::reference_wrapper<Preferences> preferences;

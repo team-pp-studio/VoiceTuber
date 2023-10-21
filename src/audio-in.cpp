@@ -3,8 +3,7 @@
 #include <log/log.hpp>
 
 AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int frameSize)
-  : alive(std::make_shared<int>()),
-    prepare(uv.createPrepare()),
+  : prepare(uv.createPrepare()),
     want([sampleRate, frameSize]() {
       SDL_AudioSpec ret;
       SDL_zero(ret);
@@ -16,13 +15,15 @@ AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int fram
     }()),
     audio(makeDevice(device))
 {
-  prepare.start([alive = std::weak_ptr<int>(alive), this]() {
-    if (!alive.lock())
+  prepare.start([alive = this->weak_from_this()]() {
+    if (auto self = alive.lock())
+    {
+      self->tick();
+    }
+    else
     {
       LOG("this was destroyed");
-      return;
     }
-    tick();
   });
 }
 
@@ -64,22 +65,24 @@ auto AudioIn::updateDevice(const std::string &device) -> void
 auto AudioIn::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audio>
 {
   SDL_AudioSpec have;
-  auto ret = std::make_unique<sdl::Audio>(
-    device != Preferences::DefaultAudio ? device.c_str() : nullptr,
-    1,
-    &want,
-    &have,
-    0,
-    [alive = std::weak_ptr<int>(alive), this](Uint8 *stream, int len) {
-      if (!alive.lock())
-      {
-        LOG("this was destroyed");
-        return;
-      }
-      buf.insert(std::end(buf),
-                 reinterpret_cast<int16_t *>(stream),
-                 reinterpret_cast<int16_t *>(stream) + len / sizeof(int16_t));
-    });
+  auto ret = std::make_unique<sdl::Audio>(device != Preferences::DefaultAudio ? device.c_str() : nullptr,
+                                          1,
+                                          &want,
+                                          &have,
+                                          0,
+                                          [alive = this->weak_from_this()](Uint8 *stream, int len) {
+                                            if (auto self = alive.lock())
+                                            {
+                                              self->buf.insert(std::end(self->buf),
+                                                               reinterpret_cast<int16_t *>(stream),
+                                                               reinterpret_cast<int16_t *>(stream) +
+                                                                 len / sizeof(int16_t));
+                                            }
+                                            else
+                                            {
+                                              LOG("this was destroyed");
+                                            }
+                                          });
   if (have.format != want.format)
     throw std::runtime_error("Failed to get the desired AudioSpec");
   ret->pause(0);

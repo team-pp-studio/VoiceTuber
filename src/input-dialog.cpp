@@ -1,8 +1,8 @@
 #include "input-dialog.hpp"
 #include <imgui.h>
 
-InputDialog::InputDialog(std::string title, std::string init, Cb aCb)
-  : Dialog(std::move(title), [aCb = std::move(aCb), this](bool r) { aCb(r, input); }),
+InputDialog::InputDialog(std::string title, std::string init, Callback aCb)
+  : Dialog(std::move(title), [aCb = std::move(aCb), this](bool r) mutable { aCb(r, input); }),
     input(std::move(init))
 {
 }

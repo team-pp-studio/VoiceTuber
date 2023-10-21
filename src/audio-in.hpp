@@ -6,7 +6,7 @@
 #include <sdlpp/sdlpp.hpp>
 #include <unordered_set>
 
-class AudioIn
+class AudioIn : public std::enable_shared_from_this<AudioIn>
 {
 public:
   AudioIn(uv::Uv &, const std::string &device, int sampleRate, int frameSize);
@@ -16,7 +16,6 @@ public:
   auto sampleRate() const -> int;
 
 private:
-  std::shared_ptr<int> alive;
   uv::Prepare prepare;
   std::vector<std::reference_wrapper<AudioSink>> sinks;
   SDL_AudioSpec want;

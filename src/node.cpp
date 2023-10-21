@@ -56,8 +56,7 @@ static auto setModelViewMatrix(glm::mat4 v) -> void
 }
 
 Node::Node(Lib &lib, Undo &undo, std::string name)
-  : alive(std::make_unique<int>()),
-    name(std::move(name)),
+  : name(std::move(name)),
     undo(undo),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
     arrowNE(lib.queryTex("engine:arrow-ne-circle.png", true)),
@@ -70,6 +69,8 @@ Node::Node(Lib &lib, Undo &undo, std::string name)
     center(lib.queryTex("engine:center-circle.png", true))
 {
 }
+
+Node::~Node() {}
 
 auto Node::renderAll(float dt, Node *hovered, Node *selected) -> void
 {
@@ -165,21 +166,25 @@ auto Node::renderUi() -> void
                            "%.2f"))
       {
         undo.get().record(
-          [avgScale, alive = std::weak_ptr<int>(alive), this]() {
-            if (!alive.lock())
+          [avgScale, alive = this->weak_from_this()]() {
+            if (auto self = alive.lock())
+            {
+              self->scale.x = self->scale.y = avgScale;
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            scale.x = scale.y = avgScale;
           },
-          [oldScale = scale, alive = std::weak_ptr<int>(alive), this]() {
-            if (!alive.lock())
+          [oldScale = scale, alive = this->weak_from_this()]() {
+            if (auto self = alive.lock())
+            {
+              self->scale = oldScale;
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            scale = oldScale;
           },
           "Scale");
       }
@@ -244,171 +249,207 @@ auto Node::renderUi() -> void
   const auto sz = 2 * ImGui::GetFontSize();
   if (Ui::btnImg("nw", *arrowNW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{0, h()}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("n", *arrowN, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w() / 2, h()}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("ne", *arrowNE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w(), h()}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   if (Ui::btnImg("w", *arrowW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{0, h() / 2}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("c", *center, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w() / 2, h() / 2}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("e", *arrowE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w(), h() / 2}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{0, 0}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("s", *arrowS, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w() / 2, 0}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::SameLine();
   if (Ui::btnImg("se", *arrowSE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newPivot = glm::vec2{w() / 2, 0}, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = newPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = newPivot;
       },
-      [oldPivot = pivot_, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->pivot_ = oldPivot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        pivot_ = oldPivot;
       });
   ImGui::TableNextColumn();
   Ui::textRj("Rotation");
@@ -541,31 +582,31 @@ auto Node::moveUp() -> void
   if (parent()->nodes.front().get() == this)
     return;
   undo.get().record(
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
+      {
+        auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        assert(it != std::end(self->parent()->nodes));
+        auto prev = it - 1;
+        std::swap(*it, *prev);
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      auto it = std::find_if(std::begin(parent()->nodes),
-                             std::end(parent()->nodes),
-                             [this](const auto &v) { return this == v.get(); });
-      assert(it != std::end(parent()->nodes));
-      auto prev = it - 1;
-      std::swap(*it, *prev);
     },
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
+      {
+        auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        assert(it != std::end(self->parent()->nodes));
+        auto prev = it + 1;
+        std::swap(*it, *prev);
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      auto it = std::find_if(std::begin(parent()->nodes),
-                             std::end(parent()->nodes),
-                             [this](const auto &v) { return this == v.get(); });
-      assert(it != std::end(parent()->nodes));
-      auto prev = it + 1;
-      std::swap(*it, *prev);
     });
 }
 
@@ -578,31 +619,33 @@ auto Node::moveDown() -> void
   if (parent()->nodes.back().get() == this)
     return;
   undo.get().record(
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
+      {
+        auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        assert(it != std::end(self->parent()->nodes));
+        auto prev = it + 1;
+        std::swap(*it, *prev);
+      }
+      else
+
       {
         LOG("this was destroyed");
-        return;
       }
-      auto it = std::find_if(std::begin(parent()->nodes),
-                             std::end(parent()->nodes),
-                             [this](const auto &v) { return this == v.get(); });
-      assert(it != std::end(parent()->nodes));
-      auto prev = it + 1;
-      std::swap(*it, *prev);
     },
-    [alive = std::weak_ptr<int>(alive), this]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this()]() {
+      if (auto self = alive.lock())
+      {
+        auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        assert(it != std::end(self->parent()->nodes));
+        auto prev = it - 1;
+        std::swap(*it, *prev);
+      }
+      else
+
       {
         LOG("this was destroyed");
-        return;
       }
-      auto it = std::find_if(std::begin(parent()->nodes),
-                             std::end(parent()->nodes),
-                             [this](const auto &v) { return this == v.get(); });
-      assert(it != std::end(parent()->nodes));
-      auto prev = it - 1;
-      std::swap(*it, *prev);
     });
 }
 
@@ -619,33 +662,34 @@ auto Node::unparent() -> void
                          std::end(oldParent->nodes),
                          [this](const auto &v) { return this == v.get(); });
   assert(it != std::end(oldParent->nodes));
-  auto self = std::move(*it);
+  auto other = std::move(*it);
   undo.get().record(
-    [it, newParent, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
-      if (!alive.lock())
+    [it, newParent, oldParent, alive = this->weak_from_this(), other]() {
+      if (auto self = alive.lock())
+      {
+        self->loc += oldParent->loc;
+        newParent->nodes.emplace_back(std::move(other));
+        oldParent->nodes.erase(it);
+        self->parent_ = newParent;
+      }
       {
         LOG("this was destroyed");
-        return;
       }
-      loc += oldParent->loc;
-      newParent->nodes.emplace_back(std::move(self));
-      oldParent->nodes.erase(it);
-      parent_ = newParent;
     },
-    [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
-      if (!alive.lock())
+    [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+      if (auto self = alive.lock())
+      {
+        self->loc = oldLoc;
+        auto it2 = std::find(std::begin(newParent->nodes), std::end(newParent->nodes), self);
+        assert(it2 != std::end(newParent->nodes));
+        newParent->nodes.erase(it2);
+        oldParent->nodes.emplace(it, std::move(other));
+        self->parent_ = oldParent;
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      loc = oldLoc;
-      auto it2 = std::find_if(std::begin(newParent->nodes),
-                              std::end(newParent->nodes),
-                              [this](const auto &v) { return this == v.get(); });
-      assert(it2 != std::end(newParent->nodes));
-      newParent->nodes.erase(it2);
-      oldParent->nodes.emplace(it, std::move(self));
-      parent_ = oldParent;
     });
 }
 
@@ -663,37 +707,39 @@ auto Node::parentWithBellow() -> void
     return;
 
   auto newParent = (it + 1)->get();
-  auto self = std::move(*it);
+  auto other = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
-      if (!alive.lock())
+    [newParent, alive = this->weak_from_this(), it, other]() {
+      if (auto self = alive.lock())
       {
-        LOG("this was destroyed");
-        return;
-      }
-      glm::mat4 newParentTransform = newParent->modelViewMat;
-      modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
-      loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
+        glm::mat4 newParentTransform = newParent->modelViewMat;
+        self->modelViewMat = glm::inverse(newParentTransform) * self->modelViewMat;
+        self->loc = glm::vec2{self->modelViewMat[3][0], self->modelViewMat[3][1]};
 
-      newParent->nodes.emplace_back(std::move(self));
-      parent_->nodes.erase(it);
-      parent_ = newParent;
-    },
-    [it, newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
-      if (!alive.lock())
+        newParent->nodes.emplace_back(std::move(other));
+        self->parent_->nodes.erase(it);
+        self->parent_ = newParent;
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      loc = oldLoc;
-      auto it2 = std::find_if(std::begin(newParent->nodes),
-                              std::end(newParent->nodes),
-                              [this](const auto &v) { return this == v.get(); });
-      assert(it2 != std::end(newParent->nodes));
-      newParent->nodes.erase(it2);
-      oldParent->nodes.emplace(it, std::move(self));
-      parent_ = oldParent;
+    },
+    [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+      if (auto self = alive.lock())
+      {
+        self->loc = oldLoc;
+        auto it2 = std::find(std::begin(newParent->nodes), std::end(newParent->nodes), self);
+        assert(it2 != std::end(newParent->nodes));
+        newParent->nodes.erase(it2);
+        oldParent->nodes.emplace(it, std::move(other));
+        self->parent_ = oldParent;
+      }
+      else
+      {
+        LOG("this was destroyed");
+      }
     });
 }
 
@@ -769,9 +815,9 @@ auto Node::rotUpdate(const glm::mat4 &projMat, glm::vec2 mouse) -> void
 
   // Calculate the angles between the pivot and start/end locations
   const auto startAngle =
-    atan2f(startLoc.y - pivot_.y, startLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
+    std::atan2(startLoc.y - pivot_.y, startLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
   const auto endAngle =
-    atan2f(endLoc.y - pivot_.y, endLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
+    std::atan2(endLoc.y - pivot_.y, endLoc.x - pivot_.x) * 180.f / std::numbers::pi_v<float>;
 
   // Calculate the rotation difference and update the rotation
   const auto rotDiff = endAngle - startAngle;
@@ -894,59 +940,71 @@ auto Node::commit() -> void
   {
   case EditMode::translate:
     undo.get().record(
-      [newLoc = loc, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newLoc = loc, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->loc = newLoc;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        loc = newLoc;
       },
-      [oldLoc = initLoc, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldLoc = initLoc, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->loc = oldLoc;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        loc = oldLoc;
       });
     break;
   case EditMode::rotate:
     undo.get().record(
-      [newRot = rot, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newRot = rot, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->rot = newRot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        rot = newRot;
       },
-      [oldRot = initRot, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldRot = initRot, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->rot = oldRot;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        rot = oldRot;
       });
     break;
   case EditMode::scale:
     undo.get().record(
-      [newScale = scale, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [newScale = scale, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->scale = newScale;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        scale = newScale;
       },
-      [oldScale = initScale, alive = std::weak_ptr<int>(alive), this]() {
-        if (!alive.lock())
+      [oldScale = initScale, alive = this->weak_from_this()]() {
+        if (auto self = alive.lock())
+        {
+          self->scale = oldScale;
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        scale = oldScale;
       });
     break;
   case EditMode::select: break;
@@ -975,37 +1033,39 @@ auto Node::parentWith(Node &newParent) -> void
 
   assert(it != std::end(parent()->nodes));
 
-  auto self = std::move(*it);
+  auto other = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [&newParent, alive = std::weak_ptr<int>(alive), this, it, self]() {
-      if (!alive.lock())
+    [&newParent, alive = this->weak_from_this(), it, other]() {
+      if (auto self = alive.lock())
       {
-        LOG("this was destroyed");
-        return;
-      }
-      glm::mat4 newParentTransform = newParent.modelViewMat;
-      modelViewMat = glm::inverse(newParentTransform) * modelViewMat;
-      loc = glm::vec2{modelViewMat[3][0], modelViewMat[3][1]};
+        glm::mat4 newParentTransform = newParent.modelViewMat;
+        self->modelViewMat = glm::inverse(newParentTransform) * self->modelViewMat;
+        self->loc = glm::vec2{self->modelViewMat[3][0], self->modelViewMat[3][1]};
 
-      newParent.nodes.emplace_back(std::move(self));
-      parent_->nodes.erase(it);
-      parent_ = &newParent;
-    },
-    [it, &newParent, oldLoc = loc, oldParent, alive = std::weak_ptr<int>(alive), this, self]() {
-      if (!alive.lock())
+        newParent.nodes.emplace_back(std::move(other));
+        self->parent_->nodes.erase(it);
+        self->parent_ = &newParent;
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      loc = oldLoc;
-      auto it2 = std::find_if(std::begin(newParent.nodes),
-                              std::end(newParent.nodes),
-                              [this](const auto &v) { return this == v.get(); });
-      assert(it2 != std::end(newParent.nodes));
-      newParent.nodes.erase(it2);
-      oldParent->nodes.emplace(it, std::move(self));
-      parent_ = oldParent;
+    },
+    [it, &newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+      if (auto self = alive.lock())
+      {
+        self->loc = oldLoc;
+        auto it2 = std::find(std::begin(newParent.nodes), std::end(newParent.nodes), self);
+        assert(it2 != std::end(newParent.nodes));
+        newParent.nodes.erase(it2);
+        oldParent->nodes.emplace(it, std::move(other));
+        self->parent_ = oldParent;
+      }
+      else
+      {
+        LOG("this was destroyed");
+      }
     });
 }
 
@@ -1013,37 +1073,41 @@ auto Node::placeBellow(Node &newSibling) -> void
 {
   assert(newSibling.parent());
   undo.get().record(
-    [alive = std::weak_ptr<int>(alive), this, &newSibling]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this(), &newSibling]() {
+      if (auto self = alive.lock())
+      {
+        auto selfIt =
+          std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        auto other = std::move(*selfIt);
+        self->parent()->nodes.erase(selfIt);
+        other->parent_ = newSibling.parent();
+        auto newSiblingIt =
+          std::find_if(std::begin(newSibling.parent()->nodes),
+                       std::end(newSibling.parent()->nodes),
+                       [&newSibling](const auto &v) { return &newSibling == v.get(); });
+        assert(newSiblingIt != std::end(newSibling.parent()->nodes));
+        ++newSiblingIt;
+        newSibling.parent()->nodes.insert(newSiblingIt, std::move(other));
+      }
+      else
       {
         LOG("this was destroyed");
-        return;
       }
-      auto selfIt = std::find_if(std::begin(parent()->nodes),
-                                 std::end(parent()->nodes),
-                                 [this](const auto &v) { return this == v.get(); });
-      auto self = std::move(*selfIt);
-      parent()->nodes.erase(selfIt);
-      self->parent_ = newSibling.parent();
-      auto newSiblingIt = std::find_if(std::begin(newSibling.parent()->nodes),
-                                       std::end(newSibling.parent()->nodes),
-                                       [&newSibling](const auto &v) { return &newSibling == v.get(); });
-      assert(newSiblingIt != std::end(newSibling.parent()->nodes));
-      ++newSiblingIt;
-      newSibling.parent()->nodes.insert(newSiblingIt, std::move(self));
     },
-    [alive = std::weak_ptr<int>(alive), this, nodes = parent()->nodes, oldParent = parent()]() {
-      if (!alive.lock())
+    [alive = this->weak_from_this(), nodes = parent()->nodes, oldParent = parent()]() {
+      if (auto self = alive.lock())
+      {
+        auto selfIt =
+          std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
+        assert(selfIt != std::end(parent()->nodes));
+        self->parent()->nodes.erase(selfIt);
+        oldParent->nodes = nodes;
+        self->parent_ = oldParent;
+      }
+      else
+
       {
         LOG("this was destroyed");
-        return;
       }
-      auto selfIt = std::find_if(std::begin(parent()->nodes),
-                                 std::end(parent()->nodes),
-                                 [this](const auto &v) { return this == v.get(); });
-      assert(selfIt != std::end(parent()->nodes));
-      parent()->nodes.erase(selfIt);
-      oldParent->nodes = nodes;
-      parent_ = oldParent;
     });
 }

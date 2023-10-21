@@ -1,13 +1,15 @@
 #pragma once
 
 #include "dialog.hpp"
+#include <functional>
 
 class AddAsDialog final : public Dialog
 {
 public:
   enum class NodeType { sprite, mouth, eye, aiMouth };
-  using Cb = std::function<auto(bool, NodeType)->void>;
-  AddAsDialog(std::string path, Cb cb);
+  using Callback = std::move_only_function<void(bool, NodeType)>;
+
+  AddAsDialog(std::string path, Callback cb);
 
 private:
   std::string path;

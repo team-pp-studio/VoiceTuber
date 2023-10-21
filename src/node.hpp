@@ -21,7 +21,7 @@ namespace Internal
 } // namespace Internal
 #include <ser/ser.hpp>
 
-class Node
+class Node : public std::enable_shared_from_this<Node>
 {
 public:
 #define SER_PROP_LIST       \
@@ -68,7 +68,7 @@ public:
   virtual auto isTransparent(glm::vec2) const -> bool;
   virtual auto renderUi() -> void;
   virtual auto w() const -> float;
-  virtual ~Node() = default;
+  virtual ~Node();
 
   bool visible = true;
 
@@ -78,7 +78,6 @@ protected:
   virtual auto render(float dt, Node *hovered, Node *selected) -> void;
   virtual auto save(OStrm &) const -> void;
 
-  std::shared_ptr<int> alive;
   std::string name;
 
 private:

@@ -3,10 +3,7 @@
 #include "ui.hpp"
 #include <log/log.hpp>
 
-ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &)
-  : alive(std::make_shared<int>()), lib(aLib), undo(aUndo)
-{
-}
+ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &) : lib(aLib), undo(aUndo) {}
 
 auto ImageList::frame() const -> int
 {
@@ -102,54 +99,62 @@ auto ImageList::renderUi() -> void
   }
   if (toDel >= 0)
     undo.get().record(
-      [alive = std::weak_ptr<int>(alive), this, toDel]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this(), toDel]() {
+        if (auto self = alive.lock())
+        {
+          self->textures.erase(std::begin(self->textures) + toDel);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        textures.erase(std::begin(textures) + toDel);
       },
-      [alive = std::weak_ptr<int>(alive), oldTextures = textures, this]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this(), oldTextures = textures]() {
+        if (auto self = alive.lock())
+        {
+          self->textures = std::move(oldTextures);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        textures = oldTextures;
       });
   if (ImGui::Button("Add##Image"))
   {
     dialog = std::make_unique<FileOpen>(lib, "Add Image Dialog", [this](bool r, const auto &path) {
       if (r)
         undo.get().record(
-          [alive = std::weak_ptr<int>(alive), path, this]() {
-            if (!alive.lock())
+          [alive = this->weak_from_this(), path]() {
+            if (auto self = alive.lock())
+            {
+              self->textures.emplace_back(self->lib.get().queryTex([&]() {
+                try
+                {
+                  if (!std::filesystem::exists(path.filename()))
+                    std::filesystem::copy(path, path.filename());
+                  return path.filename().string();
+                }
+                catch (std::runtime_error &e)
+                {
+                  LOG(e.what());
+                  return std::string{"engine:missing.png"};
+                }
+              }()));
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            textures.emplace_back(lib.get().queryTex([&]() {
-              try
-              {
-                if (!std::filesystem::exists(path.filename()))
-                  std::filesystem::copy(path, path.filename());
-                return path.filename().string();
-              }
-              catch (std::runtime_error &e)
-              {
-                LOG(e.what());
-                return std::string{"engine:missing.png"};
-              }
-            }()));
           },
-          [alive = std::weak_ptr<int>(alive), this]() {
-            if (!alive.lock())
+          [alive = this->weak_from_this()]() {
+            if (auto self = alive.lock())
+            {
+              self->textures.pop_back();
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            textures.pop_back();
           });
     });
   }

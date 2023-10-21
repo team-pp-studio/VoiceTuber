@@ -11,8 +11,7 @@
 #include <sstream>
 
 Gpt::Gpt(uv::Uv &uv, std::string aToken, HttpClient &aHttpClient)
-  : alive(std::make_shared<int>()),
-    timer(uv.createTimer()),
+  : timer(uv.createTimer()),
     token(std::move(aToken)),
     httpClient(aHttpClient),
     lastReply(std::chrono::high_resolution_clock::now())
@@ -60,7 +59,7 @@ static auto stripHangingSentences(std::string v) -> std::string
   return (pos != std::string::npos) ? v.substr(0, pos + 1) : v;
 }
 
-auto Gpt::prompt(std::string name, std::string p, Cb cb) -> void
+auto Gpt::prompt(std::string name, std::string p, Callback cb) -> void
 {
   p = stripWhiteSpaces(p);
   queuedMsgs.emplace_back(std::make_pair(Msg{std::move(name), std::move(p)}, std::move(cb)));
@@ -98,126 +97,127 @@ auto Gpt::process() -> void
   ss
     << R"(", "temperature": 1, "max_tokens": 24, "top_p": 1.0, "frequency_penalty": 0.5, "presence_penalty": 0.6, "stop": ["\n| "]})";
 
-  httpClient.get().post("https://api.openai.com/v1/completions",
-                        ss.str(),
-                        [embedName,
-                         qMsgs = std::move(queuedMsgs),
-                         jsonPrompt = ss.str(),
-                         alive = std::weak_ptr<int>(alive),
-                         this](CURLcode code, long httpStatus, std::string payload) {
-                          if (!alive.lock())
-                          {
-                            LOG("this was destroyed");
-                            return;
-                          }
-                          if (code != CURLE_OK)
-                          {
-                            for (const auto &msg : qMsgs)
-                              msg.second("");
-                            state = State::idle;
-                            return;
-                          }
-                          if (httpStatus >= 400 && httpStatus < 500)
-                          {
-                            LOG(code, httpStatus, payload);
-                            LOG(jsonPrompt);
-                            lastError = payload;
-                            for (const auto &msg : qMsgs)
-                              msg.second("");
-                            state = State::idle;
-                            return;
-                          }
-                          if (httpStatus != 200)
-                          {
-                            LOG(code, httpStatus, payload);
-                            LOG(jsonPrompt);
-                            lastError = payload;
-                            for (const auto &msg : qMsgs)
-                              msg.second("");
-                            timer.start(
-                              [alive = std::weak_ptr<int>(alive), this]() {
-                                if (!alive.lock())
-                                {
-                                  LOG("this was destroyed");
-                                  return;
-                                }
-                                state = State::idle;
-                                process();
-                              },
-                              10'000);
-                            return;
-                          }
-                          lastError = "";
-                          const auto j = json::Root{std::move(payload)};
-                          // {
-                          //   "id": "cmpl-7PJIyTy1pXJD3OvzekQOQnqOdcUF5",
-                          //   "object": "text_completion",
-                          //   "created": 1686266764,
-                          //   "model": "text-davinci-003",
-                          //   "choices": [
-                          //     {
-                          //       "text": " Is this thing on?\n",
-                          //       "index": 0,
-                          //       "logprobs": null,
-                          //       "finish_reason": "stop"
-                          //     }
-                          //   ],
-                          //   "usage": {
-                          //     "prompt_tokens": 58,
-                          //     "completion_tokens": 6,
-                          //     "total_tokens": 64
-                          //   }
-                          // }
-                          auto choices = j("choices");
-                          if (choices.empty())
-                          {
-                            LOG(code, httpStatus, payload);
-                            lastError = "0 Choices";
-                            for (const auto &msg : qMsgs)
-                              msg.second("");
-                            state = State::idle;
-                            process();
-                          }
-                          auto cohostMsg =
-                            stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
-                          if (!embedName)
-                          {
-                            if (cohostMsg.find(cohost_ + std::string{":"}) != 0)
-                            {
-                              for (const auto &msg : qMsgs)
-                                msg.second("");
-                              state = State::idle;
-                              process();
-                              return;
-                            }
-                            cohostMsg = stripWhiteSpaces(cohostMsg.substr(cohost_.size() + 1));
-                          }
+  httpClient.get().post(
+    "https://api.openai.com/v1/completions",
+    ss.str(),
+    [embedName, qMsgs = std::move(queuedMsgs), jsonPrompt = ss.str(), alive = this->weak_from_this()](
+      CURLcode code, long httpStatus, std::string payload) mutable {
+      if (auto self = alive.lock())
+      {
+        if (code != CURLE_OK)
+        {
+          for (auto &msg : qMsgs)
+            msg.second("");
+          self->state = State::idle;
+          return;
+        }
+        if (httpStatus >= 400 && httpStatus < 500)
+        {
+          LOG(code, httpStatus, payload);
+          LOG(jsonPrompt);
+          self->lastError = payload;
+          for (auto &msg : qMsgs)
+            msg.second("");
+          self->state = State::idle;
+          return;
+        }
+        if (httpStatus != 200)
+        {
+          LOG(code, httpStatus, payload);
+          LOG(jsonPrompt);
+          self->lastError = payload;
+          for (auto &msg : qMsgs)
+            msg.second("");
+          self->timer.start(
+            [alive]() {
+              if (auto self = alive.lock())
+              {
+                self->state = State::idle;
+                self->process();
+              }
+              else
+              {
+                LOG("this was destroyed");
+              }
+            },
+            10'000);
+          return;
+        }
+        self->lastError = "";
+        const auto j = json::Root{std::move(payload)};
+        // {
+        //   "id": "cmpl-7PJIyTy1pXJD3OvzekQOQnqOdcUF5",
+        //   "object": "text_completion",
+        //   "created": 1686266764,
+        //   "model": "text-davinci-003",
+        //   "choices": [
+        //     {
+        //       "text": " Is this thing on?\n",
+        //       "index": 0,
+        //       "logprobs": null,
+        //       "finish_reason": "stop"
+        //     }
+        //   ],
+        //   "usage": {
+        //     "prompt_tokens": 58,
+        //     "completion_tokens": 6,
+        //     "total_tokens": 64
+        //   }
+        // }
+        auto choices = j("choices");
+        if (choices.empty())
+        {
+          LOG(code, httpStatus, payload);
+          self->lastError = "0 Choices";
+          for (auto &msg : qMsgs)
+            msg.second("");
+          self->state = State::idle;
+          self->process();
+        }
+        auto cohostMsg = stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
+        if (!embedName)
+        {
+          if (cohostMsg.find(self->cohost_ + std::string{":"}) != 0)
+          {
+            for (auto &msg : qMsgs)
+              msg.second("");
+            self->state = State::idle;
+            self->process();
+            return;
+          }
+          cohostMsg = stripWhiteSpaces(cohostMsg.substr(self->cohost_.size() + 1));
+        }
 
-                          {
-                            Msg msg;
-                            msg.name = cohost_;
-                            msg.msg = cohostMsg;
-                            msgs.emplace_back(std::move(msg));
-                          }
-                          const auto MaxTokens = 2048 * 4 / 10;
-                          const auto initWords = countWords();
-                          for (auto words = initWords; words > MaxTokens;)
-                          {
-                            words -= countWords(msgs.front());
-                            msgs.pop_front();
-                          }
-                          for (auto i = 0U; i < qMsgs.size(); ++i)
-                          {
-                            if (i == 0)
-                              qMsgs[i].second(cohostMsg);
-                            else
-                              qMsgs[i].second("");
-                          }
-                          state = State::idle;
-                          lastReply = std::chrono::high_resolution_clock::now();
-                          process();
-                        },
-                        {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});
+        {
+          Msg msg;
+          msg.name = self->cohost_;
+          msg.msg = cohostMsg;
+          self->msgs.emplace_back(std::move(msg));
+        }
+        const auto MaxTokens = 2048 * 4 / 10;
+        const auto initWords = self->countWords();
+        for (auto words = initWords; words > MaxTokens;)
+        {
+          words -= self->countWords(self->msgs.front());
+          self->msgs.pop_front();
+        }
+        for (auto i = 0U; i < qMsgs.size(); ++i)
+        {
+          if (i == 0)
+            qMsgs[i].second(cohostMsg);
+          else
+            qMsgs[i].second("");
+        }
+        self->state = State::idle;
+        self->lastReply = std::chrono::high_resolution_clock::now();
+        self->process();
+      }
+      else
+      {
+        LOG("this was destroyed");
+      }
+    },
+    {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});
   queuedMsgs.clear();
 }
 

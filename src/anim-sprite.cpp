@@ -115,171 +115,207 @@ auto AnimSprite::renderUi() -> void
     const auto sz = 2 * ImGui::GetFontSize();
     if (Ui::btnImg("nw2", *arrowNW, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{0, h()}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{0, h()}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("n2", *arrowN, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w() / 2, h()}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w() / 2, h()}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = newEnd;
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("ne2", *arrowNE, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w(), h()}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w(), h()}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     if (Ui::btnImg("w2", *arrowW, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{0, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{0, h() / 2}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("c2", *center, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w() / 2, h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w() / 2, h() / 2}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("e2", *arrowE, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w(), h() / 2}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w(), h() / 2}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     if (Ui::btnImg("sw2", *arrowSW, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{0, 0}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{0, 0}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("s2", *arrowS, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w() / 2, 0}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w() / 2, 0}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::SameLine();
     if (Ui::btnImg("se2", *arrowSE, sz, sz))
       undo.get().record(
-        [newEnd = glm::vec2{w(), 0}, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [newEnd = glm::vec2{w(), 0}, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(newEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = newEnd;
         },
-        [oldEnd = end, alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        [oldEnd = end, alive = this->weak_from_this()]() {
+          if (auto self = std::static_pointer_cast<AnimSprite>(alive.lock()))
+          {
+            self->end = std::move(oldEnd);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          end = oldEnd;
         });
     ImGui::TableNextColumn();
     Ui::textRj("Force");

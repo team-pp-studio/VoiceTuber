@@ -7,10 +7,10 @@
 class Undo
 {
 public:
-  using Op = std::function<auto()->void>;
+  using Operation = std::move_only_function<void()>;
   struct Action
   {
-    Action(std::string aTag, Uint32 aTimestamp, Op aAction, Op aRollback)
+    Action(std::string aTag, Uint32 aTimestamp, Operation aAction, Operation aRollback)
       : tag(std::move(aTag)),
         timestamp(aTimestamp),
         action(std::move(aAction)),
@@ -19,10 +19,10 @@ public:
     }
     std::string tag;
     Uint32 timestamp;
-    Op action;
-    Op rollback;
+    Operation action;
+    Operation rollback;
   };
-  auto record(Op action, Op rollback, std::string tag = "") -> void;
+  auto record(Operation action, Operation rollback, std::string tag = "") -> void;
   auto undo() -> void;
   auto redo() -> void;
   auto hasUndo() const -> bool;
