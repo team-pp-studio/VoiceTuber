@@ -23,7 +23,7 @@ auto Lib::queryTex(const std::string &v, bool isUi) -> std::shared_ptr<const Tex
     textures.erase(it);
   }
   auto shared = std::make_shared<Texture>(uv, v, isUi);
-  auto tmp = textures.emplace(std::pair{v, isUi}, shared);
+  [[maybe_unused]] auto tmp = textures.emplace(std::pair{v, isUi}, shared);
   assert(tmp.second);
   return shared;
 }
@@ -40,7 +40,7 @@ auto Lib::queryTwitch(const std::string &v) -> std::shared_ptr<Twitch>
   }
   auto shared =
     std::make_shared<Twitch>(uv, preferences.get().twitchUser, preferences.get().twitchKey, v);
-  auto tmp = twitchChannels.emplace(v, shared);
+  [[maybe_unused]] auto tmp = twitchChannels.emplace(v, shared);
   assert(tmp.second);
   return shared;
 }

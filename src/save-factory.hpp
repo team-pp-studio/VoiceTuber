@@ -8,14 +8,14 @@
 class SaveFactory
 {
 public:
-  using Ctor = std::function<std::unique_ptr<Node>(std::string /*name*/)>;
+  using Constructor = std::move_only_function<std::unique_ptr<Node>(std::string const & /*name*/) const>;
   template <typename T>
-  auto reg(Ctor ctor) -> void
+  auto reg(Constructor ctor) -> void
   {
     classes[T::className] = std::move(ctor);
   }
-  auto ctor(const std::string &className, std::string name) const -> std::unique_ptr<Node>;
+  std::unique_ptr<Node> ctor(const std::string &className, std::string const &name) const;
 
 private:
-  std::unordered_map<std::string, Ctor> classes;
+  std::unordered_map<std::string, Constructor> classes;
 };

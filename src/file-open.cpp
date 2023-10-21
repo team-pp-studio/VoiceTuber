@@ -7,8 +7,9 @@
 #include <Windows.h>
 #endif
 
-FileOpen::FileOpen(Lib &lib, std::string dialogName, Cb aCb)
-  : Dialog(std::move(dialogName), [this, aCb = std::move(aCb)](bool r) { aCb(r, getSelectedFile()); }),
+FileOpen::FileOpen(Lib &lib, std::string dialogName, Callback aCb)
+  : Dialog(std::move(dialogName),
+           [this, aCb = std::move(aCb)](bool r) mutable { aCb(r, getSelectedFile()); }),
     cwd(std::filesystem::current_path()),
     upDir(lib.queryTex("engine:up-dir.png", true))
 {
@@ -68,7 +69,7 @@ auto FileOpen::internalDraw() -> DialogState
   // Populate the files in the list box
   if (auto listBoxFiles = Ui::ListBox{"##files", ImVec2(700, 400)})
   {
-    std::function<void()> postponedAction = nullptr;
+    std::move_only_function<void()> postponedAction = nullptr;
     for (auto &file : files)
     {
       try

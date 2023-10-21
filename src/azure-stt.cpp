@@ -8,7 +8,7 @@
 #include <sstream>
 
 AzureStt::AzureStt(uv::Uv &uv, AzureToken &aToken, HttpClient &aHttpClient)
-  : alive(std::make_shared<int>()), timer(uv.createTimer()), token(aToken), httpClient(aHttpClient)
+  : timer(uv.createTimer()), token(aToken), httpClient(aHttpClient)
 {
   process();
 }
@@ -23,49 +23,58 @@ auto AzureStt::process() -> void
     return;
   }
   state = State::waiting;
-  token.get().get(
-    [alive = std::weak_ptr<int>(alive), this](const std::string &t, const std::string &err) {
-      if (!alive.lock())
-      {
-        LOG("this was destroyed");
-        return;
-      }
+  token.get().get([alive = this->weak_from_this()](const std::string &t, const std::string &err) {
+    if (auto self = alive.lock())
+    {
       if (t.empty())
       {
-        lastError = err;
-        timer.start([alive = std::weak_ptr<int>(alive), this]() {
-          if (!alive.lock())
+        self->lastError = err;
+        self->timer.start([alive]() {
+          if (auto self = alive.lock())
+          {
+            self->state = State::idle;
+            self->process();
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          state = State::idle;
-          process();
         });
         return;
       }
-      queue.front()(t, [alive = std::weak_ptr<int>(alive), this](bool r) {
-        if (!alive.lock())
+      self->queue.front()(t, [alive](bool r) {
+        if (auto self = alive.lock())
+        {
+          self->timer.start([alive, r]() {
+            if (auto self = alive.lock())
+            {
+              if (r)
+                self->queue.pop();
+              self->state = State::idle;
+              self->process();
+            }
+            else
+
+            {
+              LOG("this was destroyed");
+            }
+          });
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        timer.start([alive = std::weak_ptr<int>(alive), this, r]() {
-          if (!alive.lock())
-          {
-            LOG("this was destroyed");
-            return;
-          }
-          if (r)
-            queue.pop();
-          state = State::idle;
-          process();
-        });
       });
-    });
+    }
+    else
+
+    {
+      LOG("this was destroyed");
+    }
+  });
 }
 
-auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
+auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
 {
   auto dur = 1.f * wav.size() / sampleRate;
   total += dur;
@@ -76,69 +85,73 @@ auto AzureStt::perform(Wav wav, int sampleRate, Cb cb) -> void
       "minuts",
       static_cast<int>(total) % 60,
       "seconds");
-  queue.emplace(
-    [cb = std::move(cb), sampleRate, alive = std::weak_ptr<int>(alive), this, wav = std::move(wav)](
-      const std::string &t, PostTask postTask) {
-      if (!alive.lock())
-      {
-        LOG("this was destroyed");
-        return;
-      }
+  queue.emplace([cb = std::move(cb), sampleRate, alive = this->weak_from_this(), wav = std::move(wav)](
+                  const std::string &t, PostTask postTask) mutable {
+    if (auto self = alive.lock())
+    {
       std::ostringstream ss;
       saveWav(ss, wav, sampleRate);
-      httpClient.get().post(
-        "https://eastus.stt.speech.microsoft.com/speech/recognition/conversation/"
-        "cognitiveservices/v1?language=en-US",
+      self->httpClient.get().post(
+        "https://eastus.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/"
+        "v1?language=en-US",
         ss.str(),
-        [cb = std::move(cb), postTask = std::move(postTask), alive = std::weak_ptr<int>(alive), this](
-          CURLcode code, long httpStatus, std::string payload) {
-          if (!alive.lock())
+        [cb = std::move(cb), postTask = std::move(postTask), alive](
+          CURLcode code, long httpStatus, std::string payload) mutable {
+          if (auto self = alive.lock())
+          {
+            if (code != CURLE_OK)
+            {
+              cb("");
+              postTask(false);
+              return;
+            }
+            if (httpStatus == 401)
+            {
+              LOG(code, httpStatus);
+              self->token.get().clear();
+              cb("");
+              postTask(false);
+              return;
+            }
+            if (httpStatus >= 400 && httpStatus < 500)
+            {
+              LOG(code, httpStatus, payload);
+              self->lastError = payload;
+              cb("");
+              postTask(true);
+              return;
+            }
+            if (httpStatus != 200)
+            {
+              LOG(code, httpStatus, payload);
+              self->lastError = payload;
+              cb("");
+              self->timer.start([postTask = std::move(postTask)]() mutable { postTask(false); }, 10'000);
+              return;
+            }
+
+            self->lastError = "";
+            const auto j = json::Root{std::move(payload)};
+            // {"RecognitionStatus":"Success","Offset":600000,"Duration":30000000,"DisplayText":"What
+            // do you think about it?"}
+            cb(j("DisplayText").asStr());
+            postTask(true);
+          }
+          else
           {
             LOG("this was destroyed");
-            return;
           }
-          if (code != CURLE_OK)
-          {
-            cb("");
-            postTask(false);
-            return;
-          }
-          if (httpStatus == 401)
-          {
-            LOG(code, httpStatus);
-            token.get().clear();
-            cb("");
-            postTask(false);
-            return;
-          }
-          if (httpStatus >= 400 && httpStatus < 500)
-          {
-            LOG(code, httpStatus, payload);
-            lastError = payload;
-            cb("");
-            postTask(true);
-            return;
-          }
-          if (httpStatus != 200)
-          {
-            LOG(code, httpStatus, payload);
-            lastError = payload;
-            cb("");
-            timer.start([postTask = std::move(postTask)]() { postTask(false); }, 10'000);
-            return;
-          }
-
-          lastError = "";
-          const auto j = json::Root{std::move(payload)};
-          // {"RecognitionStatus":"Success","Offset":600000,"Duration":30000000,"DisplayText":"What
-          // do you think about it?"}
-          cb(j("DisplayText").asStr());
-          postTask(true);
         },
         {{"Accept", ""},
          {"User-Agent", "curl/7.68.0"},
          {"Authorization", "Bearer " + t},
          {"Content-Type", "audio/wav"}});
-    });
+    }
+    else
+
+    {
+      LOG("this was destroyed");
+    }
+  });
   process();
 }

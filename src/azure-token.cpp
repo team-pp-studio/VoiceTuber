@@ -3,49 +3,52 @@
 #include <log/log.hpp>
 
 AzureToken::AzureToken(std::string aKey, class HttpClient &aHttpClient)
-  : alive(std::make_shared<int>()), key(std::move(aKey)), httpClient(aHttpClient)
+  : key(std::move(aKey)), httpClient(aHttpClient)
 {
 }
 
-auto AzureToken::get(Cb cb) -> void
+auto AzureToken::get(Callback cb) -> void
 {
-  cbs.emplace_back(std::move(cb));
+  callbacks.emplace_back(std::move(cb));
   if (!token.empty())
   {
-    for (const auto &lCb : cbs)
+    for (auto &lCb : callbacks)
       lCb(token, "");
-    cbs.clear();
+    callbacks.clear();
     return;
   }
   httpClient.get().post(
     "https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
     "",
-    [alive = std::weak_ptr<int>(alive), this](CURLcode code, long httpStatus, std::string payload) {
-      if (!alive.lock())
+    [alive = this->weak_from_this()](CURLcode code, long httpStatus, std::string payload) {
+      if (auto self = alive.lock())
+      {
+        if (code != CURLE_OK)
+        {
+          LOG(code, httpStatus, payload);
+          for (auto &lCb : self->callbacks)
+            lCb("", std::string{"CURL Error: "} + curl_easy_strerror(code));
+          self->callbacks.clear();
+          return;
+        }
+        if (httpStatus != 200)
+        {
+          LOG(code, httpStatus, payload);
+          for (auto &lCb : self->callbacks)
+            lCb("", "HTTP Status: " + std::to_string(httpStatus) + " " + payload);
+          self->callbacks.clear();
+          return;
+        }
+        self->token = std::move(payload);
+        for (auto &lCb : self->callbacks)
+          lCb(self->token, "");
+        self->callbacks.clear();
+      }
+      else
+
       {
         LOG("this was destroyed");
-        return;
       }
-      if (code != CURLE_OK)
-      {
-        LOG(code, httpStatus, payload);
-        for (const auto &lCb : cbs)
-          lCb("", std::string{"CURL Error: "} + curl_easy_strerror(code));
-        cbs.clear();
-        return;
-      }
-      if (httpStatus != 200)
-      {
-        LOG(code, httpStatus, payload);
-        for (const auto &lCb : cbs)
-          lCb("", "HTTP Status: " + std::to_string(httpStatus) + " " + payload);
-        cbs.clear();
-        return;
-      }
-      token = std::move(payload);
-      for (const auto &lCb : cbs)
-        lCb(token, "");
-      cbs.clear();
     },
     {{"Ocp-Apim-Subscription-Key", key}, {"Expect", ""}});
 }

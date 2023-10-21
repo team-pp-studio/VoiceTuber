@@ -5,21 +5,20 @@
 #include <queue>
 #include <string>
 
-class AzureStt
+class AzureStt : public std::enable_shared_from_this<AzureStt>
 {
 public:
-  using Cb = std::function<auto(std::string)->void>;
+  using Callback = std::move_only_function<void(std::string)>;
   AzureStt(uv::Uv &, class AzureToken &, class HttpClient &);
-  auto perform(Wav, int sampleRate, Cb) -> void;
+  auto perform(Wav, int sampleRate, Callback) -> void;
 
   std::string lastError;
 
 private:
   enum class State { idle, waiting };
-  using PostTask = std::function<auto(bool)->void>;
-  using Task = std::function<auto(const std::string &t, PostTask)->void>;
+  using PostTask = std::move_only_function<void(bool)>;
+  using Task = std::move_only_function<void(const std::string &t, PostTask)>;
 
-  std::shared_ptr<int> alive;
   uv::Timer timer;
   std::reference_wrapper<AzureToken> token;
   std::reference_wrapper<HttpClient> httpClient;

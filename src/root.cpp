@@ -28,21 +28,25 @@ auto Root::renderUi() -> void
         "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
   {
     undo.get().record(
-      [alive = std::weak_ptr<int>(alive), this, newColor = clearColor]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this(), newColor = clearColor]() {
+        if (auto self = alive.lock())
+        {
+          static_cast<Root *>(self.get())->clearColor = std::move(newColor);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        clearColor = newColor;
       },
-      [alive = std::weak_ptr<int>(alive), this, oldColor]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this(), oldColor]() {
+        if (auto self = alive.lock())
+        {
+          static_cast<Root *>(self.get())->clearColor = std::move(oldColor);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        clearColor = oldColor;
       },
       "##BG color");
   }

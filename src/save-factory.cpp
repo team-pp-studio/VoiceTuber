@@ -1,7 +1,6 @@
 #include "save-factory.hpp"
 
-auto SaveFactory::ctor(const std::string &className, std::string name) const
-  -> std::unique_ptr<class Node>
+std::unique_ptr<Node> SaveFactory::ctor(const std::string &className, std::string const &name) const
 {
   auto it = classes.find(className);
   if (it == std::end(classes))

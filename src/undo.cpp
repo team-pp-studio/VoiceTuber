@@ -1,7 +1,7 @@
 #include "undo.hpp"
 #include <cmath>
 
-auto Undo::record(Op action, Op rollback, std::string tag) -> void
+auto Undo::record(Operation action, Operation rollback, std::string tag) -> void
 {
   action();
   undoStack.emplace_back(std::move(tag), SDL_GetTicks(), std::move(action), std::move(rollback));

@@ -10,8 +10,8 @@
 PreferencesDialog::PreferencesDialog(class Preferences &preferences,
                                      class AudioOut &aAudioOut,
                                      class AudioIn &aAudioIn,
-                                     Cb cb)
-  : Dialog("Preferences", std::move(cb)),
+                                     Callback callback)
+  : Dialog("Preferences", std::move(callback)),
     preferences(preferences),
     audioOut(aAudioOut),
     audioIn(aAudioIn),

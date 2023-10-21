@@ -9,22 +9,21 @@ namespace uv
   class Uv;
 }
 
-class AzureTts
+class AzureTts : std::enable_shared_from_this<AzureTts>
 {
 public:
-  using ListVoicesCb = std::function<auto(std::vector<std::string>)->void>;
+  using ListVoicesCallback = std::move_only_function<void(std::vector<std::string>)>;
   AzureTts(uv::Uv &, class AzureToken &, class HttpClient &, class AudioSink &);
   auto say(std::string voice, std::string msg, bool overlap = true) -> void;
-  auto listVoices(ListVoicesCb) -> void;
+  auto listVoices(ListVoicesCallback) -> void;
 
   std::string lastError;
 
 private:
   enum class State { idle, waiting };
-  using PostTask = std::function<auto(bool)->void>;
-  using Task = std::function<auto(const std::string &t, PostTask)->void>;
+  using PostTask = std::move_only_function<void(bool)>;
+  using Task = std::move_only_function<void(const std::string &t, PostTask)>;
 
-  std::shared_ptr<int> alive;
   uv::Timer timer;
   std::reference_wrapper<AzureToken> token;
   std::reference_wrapper<HttpClient> httpClient;

@@ -11,7 +11,7 @@ namespace uv
   class Uv;
 }
 
-class Twitch
+class Twitch : public std::enable_shared_from_this<Twitch>
 {
 public:
   Twitch(uv::Uv &, std::string user, std::string key, std::string channel);
@@ -22,7 +22,6 @@ public:
   auto updateUserKey(const std::string &user, const std::string &key) -> void;
 
 private:
-  std::shared_ptr<int> alive;
   std::reference_wrapper<uv::Uv> uv;
   std::string user;
   std::string key;

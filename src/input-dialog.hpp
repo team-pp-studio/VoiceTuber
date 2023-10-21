@@ -5,8 +5,8 @@
 class InputDialog final : public Dialog
 {
 public:
-  using Cb = std::function<auto(bool, const std::string &)->void>;
-  InputDialog(std::string title, std::string init, Cb cb);
+  using Callback = std::move_only_function<void(bool, const std::string &)>;
+  InputDialog(std::string title, std::string init, Callback cb);
 
 private:
   std::string input;

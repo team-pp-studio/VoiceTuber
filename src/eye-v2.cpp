@@ -106,48 +106,61 @@ auto EyeV2::renderUi() -> void
     {
       if (ImGui::Selectable("Custom", "Custom" == selectedDisplay))
         undo.get().record(
-          [alive = std::weak_ptr<int>(alive), this]() {
-            if (!alive.lock())
+          [alive = this->weak_from_this()]() {
+            if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+            {
+              self->selectedDisplay = "Custom";
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            selectedDisplay = "Custom";
           },
-          [alive = std::weak_ptr<int>(alive), this, oldDisplay = selectedDisplay]() {
-            if (!alive.lock())
+          [alive = this->weak_from_this(), oldDisplay = selectedDisplay]() {
+            if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+            {
+              self->selectedDisplay = std::move(oldDisplay);
+            }
+            else
             {
               LOG("this was destroyed");
-              return;
             }
-            selectedDisplay = oldDisplay;
           });
       const auto displayCnt = SDL_GetNumVideoDisplays();
       for (auto i = 0; i < displayCnt; ++i)
       {
-        auto displayName = SDL_GetDisplayName(i);
-        if (ImGui::Selectable(displayName, displayName == selectedDisplay))
+        auto displayName = std::string(SDL_GetDisplayName(i));
+        if (ImGui::Selectable(displayName.c_str(), displayName == selectedDisplay))
         {
           undo.get().record(
-            [alive = std::weak_ptr<int>(alive), this, newDisplay = std::string{displayName}, i]() {
-              if (!alive.lock())
+            [alive = this->weak_from_this(), newDisplay = displayName, i]() {
+              if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+              {
+                self->selectedDisplay = std::move(newDisplay);
+                SDL_Rect rect;
+                SDL_GetDisplayBounds(i, &rect);
+                self->screenTopLeft = glm::vec2{rect.x, rect.y};
+                self->screenBottomRight = glm::vec2{rect.x + rect.w, rect.y + rect.h};
+              }
+              else
               {
                 LOG("this was destroyed");
-                return;
               }
-              selectedDisplay = newDisplay;
-              SDL_Rect rect;
-              SDL_GetDisplayBounds(i, &rect);
-              screenTopLeft = glm::vec2{rect.x, rect.y};
-              screenBottomRight = glm::vec2{rect.x + rect.w, rect.y + rect.h};
             },
-            [this,
+            [alive = this->weak_from_this(),
              oldDisplay = selectedDisplay,
              oldScreenTopLeft = screenTopLeft,
              oldScreenBottomRight = screenBottomRight]() {
-              selectedDisplay = oldDisplay;
-              screenTopLeft = oldScreenTopLeft;
-              screenBottomRight = oldScreenBottomRight;
+              if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+              {
+                self->selectedDisplay = std::move(oldDisplay);
+                self->screenTopLeft = std::move(oldScreenTopLeft);
+                self->screenBottomRight = std::move(oldScreenBottomRight);
+              }
+              else
+              {
+                LOG("this was destroyed");
+              }
             });
         }
       }

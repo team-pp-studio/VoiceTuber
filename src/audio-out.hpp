@@ -5,7 +5,7 @@
 #include <sdlpp/sdlpp.hpp>
 #include <string>
 
-class AudioOut final : public AudioSink
+class AudioOut final : public AudioSink, public std::enable_shared_from_this<AudioOut>
 {
 public:
   AudioOut(const std::string &device, int sampleRate = 44100, int frameSize = 1024);
@@ -14,7 +14,6 @@ public:
   auto sampleRate() const -> int final;
 
 private:
-  std::shared_ptr<int> alive;
   SDL_AudioSpec want;
   std::unique_ptr<sdl::Audio> audio;
   std::deque<int16_t> buf;

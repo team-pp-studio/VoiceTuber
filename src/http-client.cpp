@@ -27,8 +27,7 @@ namespace uv
   class Uv;
 }
 
-HttpClient::HttpClient(uv::Uv &aUv)
-  : alive(std::make_shared<int>()), uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
+HttpClient::HttpClient(uv::Uv &aUv) : uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
 {
   CurlInitializer::init();
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
@@ -126,7 +125,7 @@ auto HttpClient::checkMultiInfo() -> void
       curl_easy_getinfo(easyHandle, CURLINFO_PRIVATE, &ctx);
       long codep;
       curl_easy_getinfo(easyHandle, CURLINFO_RESPONSE_CODE, &codep);
-      ctx->cb(message->data.result, codep, std::move(ctx->payloadOut));
+      ctx->callback(message->data.result, codep, std::move(ctx->payloadOut));
       curl_slist_free_all(ctx->headers);
       delete ctx;
       curl_multi_remove_handle(multiHandle, easyHandle);
@@ -168,25 +167,27 @@ auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
     timeout.stop();
   else
     timeout.start(
-      [alive = std::weak_ptr<int>(alive), this, multi]() {
-        if (!alive.lock())
+      [alive = this->weak_from_this(), multi]() {
+        if (auto self = alive.lock())
+        {
+          self->onTimeout(multi);
+        }
+        else
         {
           LOG("this was destroyed");
-          return;
         }
-        onTimeout(multi);
       },
       timeoutMs == 0 ? 1 : timeoutMs,
       0);
   return 0;
 }
 
-auto HttpClient::get(const std::string &url, Cb cb, const Headers &headers) -> void
+auto HttpClient::get(const std::string &url, Callback cb, const Headers &headers) -> void
 {
   auto handle = curl_easy_init();
   auto ctx = new CurlContext;
   ctx->self = this;
-  ctx->cb = std::move(cb);
+  ctx->callback = std::move(cb);
   curl_easy_setopt(handle, CURLOPT_PRIVATE, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, CurlContext::write_);
@@ -228,12 +229,13 @@ auto HttpClient::CurlContext::read_(char *out, unsigned size, unsigned nmemb, vo
   return static_cast<CurlContext *>(ctx)->read(out, size, nmemb);
 }
 
-auto HttpClient::post(const std::string &url, std::string post, Cb cb, const Headers &headers) -> void
+auto HttpClient::post(const std::string &url, std::string post, Callback cb, const Headers &headers)
+  -> void
 {
   auto handle = curl_easy_init();
   auto ctx = new CurlContext;
   ctx->self = this;
-  ctx->cb = std::move(cb);
+  ctx->callback = std::move(cb);
   ctx->payloadIn = std::move(post);
   curl_easy_setopt(handle, CURLOPT_PRIVATE, ctx);
   curl_easy_setopt(handle, CURLOPT_WRITEDATA, ctx);

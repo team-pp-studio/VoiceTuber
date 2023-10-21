@@ -8,7 +8,7 @@
 class PrjDialog final : public Dialog
 {
 public:
-  PrjDialog(Lib &, Cb);
+  PrjDialog(Lib &, Callback);
 
 private:
   auto internalDraw() -> DialogState final;

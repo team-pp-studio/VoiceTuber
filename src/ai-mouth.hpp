@@ -37,16 +37,16 @@ private:
   std::shared_ptr<AzureTts> tts;
   std::shared_ptr<Twitch> twitch;
   Viseme viseme;
-  decltype(std::chrono::high_resolution_clock::now()) freezeTime;
+  std::chrono::high_resolution_clock::time_point freezeTime;
   std::map<Viseme, int> viseme2Sprite;
   std::string voice;
   std::deque<int16_t> wavBuf;
-  decltype(std::chrono::high_resolution_clock::now()) silStart;
+  std::chrono::high_resolution_clock::time_point silStart;
   std::string hostMsg;
   std::string systemPrompt;
   std::string host = "Mika";
   std::string cohost = "Clara";
-  decltype(std::chrono::high_resolution_clock::now()) talkStart;
+  std::chrono::high_resolution_clock::time_point talkStart;
 
   auto h() const -> float final;
   auto ingest(Viseme) -> void final;
