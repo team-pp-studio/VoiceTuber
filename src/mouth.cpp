@@ -4,6 +4,7 @@
 #include "ui.hpp"
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
+#include <fmt/core.h>
 #include <imgui.h>
 #include <log/log.hpp>
 
@@ -126,7 +127,7 @@ auto Mouth<S, ClassName>::renderUi() -> void
     ImGui::SameLine();
 
     char btnTitle[16];
-    sprintf(btnTitle, "Test##%s", txt);
+    *fmt::format_to_n(btnTitle, std::size(btnTitle) - 1, "Test##{}", txt).out = 0;
 
     if (ImGui::Button(btnTitle))
     {

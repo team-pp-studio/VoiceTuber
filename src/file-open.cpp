@@ -1,4 +1,5 @@
 #include "file-open.hpp"
+#include "imgui-helpers.hpp"
 #include "ui.hpp"
 #include <functional>
 #include <log/log.hpp>
@@ -34,7 +35,7 @@ auto FileOpen::internalDraw() -> DialogState
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Go Up");
   ImGui::SameLine();
-  ImGui::Text("%s", cwd.string().c_str());
+  ImGui::TextF("{}", cwd);
 
   if (files.empty())
   {
@@ -124,7 +125,7 @@ auto FileOpen::internalDraw() -> DialogState
 
   // Show the selected file
   if (!selectedFile.empty())
-    ImGui::Text("%s", selectedFile.c_str());
+    ImGui::TextUnformatted(selectedFile);
   else
     ImGui::Text("No file selected");
 

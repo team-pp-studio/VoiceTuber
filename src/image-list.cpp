@@ -1,9 +1,14 @@
 #include "image-list.hpp"
 #include "file-open.hpp"
+#include "imgui-helpers.hpp"
 #include "ui.hpp"
 #include <log/log.hpp>
 
-ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &) : lib(aLib), undo(aUndo) {}
+ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &)
+  : lib(aLib),
+    undo(aUndo)
+{
+}
 
 auto ImageList::frame() const -> int
 {
@@ -89,13 +94,13 @@ auto ImageList::renderUi() -> void
   ImGui::TableNextColumn();
   auto n = 0;
   auto toDel = -1;
-  for (auto &t : textures)
+  for (auto &texture : textures)
   {
-    auto delStr = "X##" + std::to_string(n) + " " + t->path();
+    auto const delStr = fmt::format("X##{} {}", n, texture->path());
     if (ImGui::Button(delStr.c_str()))
       toDel = n;
     ImGui::SameLine();
-    ImGui::Text("%d %s", n++, t->path().c_str());
+    ImGui::TextF("{} {}", n++, texture->path());
   }
   if (toDel >= 0)
     undo.get().record(

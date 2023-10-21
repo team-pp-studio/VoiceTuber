@@ -25,6 +25,7 @@ class VoiceTuberConan(ConanFile):
 
         "pulseaudio/*:shared": True,
         "sdl/*:shared": True,
+        "sdl/*:pulse": False,
         "sdl_ttf/*:shared": True,
         "libcurl/*:shared": True,
     }
@@ -52,6 +53,7 @@ class VoiceTuberConan(ConanFile):
         self.requires("cpptoml/0.1.1")
         self.requires("imgui/cci.20230105+1.89.2.docking")
         self.requires("pocketsphinx/5.0.1")
+        self.requires("fmt/10.1.1")
 
     def build(self):
         cmake = CMake(self)

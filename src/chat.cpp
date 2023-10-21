@@ -1,5 +1,6 @@
 #include "chat.hpp"
 #include "audio-sink.hpp"
+#include "imgui-helpers.hpp"
 #include "lib.hpp"
 #include "no-voice.hpp"
 #include "ui.hpp"
@@ -384,7 +385,7 @@ auto Chat::renderUi() -> void
     ImGui::TableNextColumn();
     Ui::textRj("Error");
     ImGui::TableNextColumn();
-    ImGui::Text("%s", azureTts->lastError.c_str());
+    ImGui::TextF("{}", azureTts->lastError);
   }
 
   ImGui::TableNextColumn();
@@ -396,8 +397,8 @@ auto Chat::renderUi() -> void
     for (const auto &v : voicesMap)
       lines.emplace_back(v.first + " <-> " + v.second);
     std::sort(std::begin(lines), std::end(lines));
-    for (const auto &l : lines)
-      ImGui::Text("%s", l.c_str());
+    for (const auto &line : lines)
+      ImGui::TextUnformatted(line);
   }
   {
     ImGui::TableNextColumn();
@@ -440,7 +441,7 @@ auto Chat::renderUi() -> void
   if (auto chatListBox =
         Ui::ListBox{"##Chat", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())})
     for (const auto &msg : msgs)
-      ImGui::Text("%s: %s", msg.displayName.c_str(), msg.msg.c_str());
+      ImGui::TextF("{}: {}", msg.displayName, msg.msg);
   if (!twitch->isConnected())
     ImGui::PopStyleColor();
 }

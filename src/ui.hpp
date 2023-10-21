@@ -12,7 +12,10 @@
     {                                               \
       ImGui::Begin##X(std::forward<Args>(args)...); \
     }                                               \
-    X(X &&x) { x.isEmpty = true; }                  \
+    X(X &&x)                                        \
+    {                                               \
+      x.isEmpty = true;                             \
+    }                                               \
     X &operator=(X &&x)                             \
     {                                               \
       x.isEmpty = true;                             \
@@ -36,7 +39,10 @@
     X(Args &&...args) : res(ImGui::Begin##X(std::forward<Args>(args)...)) \
     {                                                                     \
     }                                                                     \
-    X(X &&x) : res(x.res) { x.isEmpty = true; }                           \
+    X(X &&x) : res(x.res)                                                 \
+    {                                                                     \
+      x.isEmpty = true;                                                   \
+    }                                                                     \
     X &operator=(X &&x)                                                   \
     {                                                                     \
       res = x.res;                                                        \
@@ -48,7 +54,10 @@
       if (!isEmpty && res)                                                \
         ImGui::End##X();                                                  \
     }                                                                     \
-    operator bool() const { return res; }                                 \
+    operator bool() const                                                 \
+    {                                                                     \
+      return res;                                                         \
+    }                                                                     \
                                                                           \
   private:                                                                \
     bool res;                                                             \
@@ -60,7 +69,7 @@ class Undo;
 
 namespace Ui
 {
-  auto textRj(const std::string &, float offset = 0.f) -> void;
+  auto textRj(std::string_view, float offset = 0.f) -> void;
   DECLARE_IMGUI_RAII(Disabled);
   DECLARE_IMGUI_RAII_BOOL(Combo);
   DECLARE_IMGUI_RAII_BOOL(DragDropSource);
@@ -74,7 +83,8 @@ namespace Ui
   {
   public:
     template <typename... Args>
-    Window(Args &&...args) : res(ImGui::Begin(std::forward<Args>(args)...))
+    Window(Args &&...args)
+      : res(ImGui::Begin(std::forward<Args>(args)...))
     {
     }
     Window(Window &&x) { x.isEmpty = true; }

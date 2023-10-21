@@ -1,16 +1,17 @@
 #include "ui.hpp"
+#include "imgui-helpers.hpp"
 #include "texture.hpp"
 #include "undo.hpp"
 #include <imgui.h>
 
 namespace Ui
 {
-  auto textRj(const std::string &v, float offset) -> void
+  auto textRj(std::string_view v, float offset) -> void
   {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() -
-                         ImGui::CalcTextSize(v.c_str()).x - ImGui::GetScrollX() -
+                         ImGui::CalcTextSize(v).x - ImGui::GetScrollX() -
                          2 * ImGui::GetStyle().ItemSpacing.x - offset);
-    ImGui::Text("%s", v.c_str());
+    ImGui::TextUnformatted(v);
   }
 
   auto btnImg(const std::string &id, const class Texture &t, float w, float h) -> bool
