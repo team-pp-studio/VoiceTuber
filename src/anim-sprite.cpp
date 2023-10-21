@@ -5,7 +5,7 @@
 #include <log/log.hpp>
 
 AnimSprite::AnimSprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
-  : Node(lib, aUndo, [&path]() { return path.filename().string(); }()),
+  : Node(lib, aUndo, path.filename().string()),
     sprite(lib, aUndo, path),
     startTime(std::chrono::high_resolution_clock::now()),
     arrowN(lib.queryTex("engine:arrow-n-circle.png", true)),
@@ -60,7 +60,7 @@ auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
   const auto orthogonalVec = glm::vec2{-pivotToEnd.y, pivotToEnd.x};
   const auto normalizedOrthogonalVec = glm::normalize(orthogonalVec);
   float projection = glm::dot(a, normalizedOrthogonalVec);
-  animRotV += (-force * projection - dRot * springness - animRotV * damping) * dt;
+  animRotV += (-force * projection - dRot * springiness - animRotV * damping) * dt;
   dRot += animRotV * dt;
 
   if (selected != this)
@@ -80,8 +80,7 @@ auto AnimSprite::renderUi() -> void
   ImGui::TableNextColumn();
   Ui::textRj("FPS");
   ImGui::TableNextColumn();
-  Ui::dragFloat(
-    undo, "##FPS", fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
+  Ui::dragFloat(undo, "##FPS", fps, 1, 1, std::numeric_limits<float>::max(), "%.1f", ImGuiSliderFlags_AlwaysClamp);
   ImGui::TableNextColumn();
   Ui::textRj("Physics");
   ImGui::TableNextColumn();
@@ -340,11 +339,11 @@ auto AnimSprite::renderUi() -> void
                   "%.1f",
                   ImGuiSliderFlags_AlwaysClamp);
     ImGui::TableNextColumn();
-    Ui::textRj("Springness");
+    Ui::textRj("Springiness");
     ImGui::TableNextColumn();
     Ui::dragFloat(undo,
-                  "##Springness",
-                  springness,
+                  "##Springiness",
+                  springiness,
                   .1f,
                   0,
                   std::numeric_limits<float>::max(),
