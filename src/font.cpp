@@ -24,12 +24,19 @@ namespace
   };
 } // namespace
 
+void Font::FontDeleter::operator()(TTF_Font *ptr) const noexcept
+{
+  TTF_CloseFont(ptr);
+}
+
 Font::Font(std::filesystem::path file, int ptsize)
-  : file_(std::move(file)), ptsize_(ptsize), font([this]() {
+  : file_(std::move(file)),
+    ptsize_(ptsize),
+    font([this]() {
       FontInitializer::init();
-      auto fp = open_file(file_, "rb");
+      auto fp = open_file(this->file(), "rb");
       auto *rw = SDL_RWFromFP(fp.get(), SDL_FALSE);
-      return TTF_OpenFontRW(rw, SDL_TRUE, ptsize_);
+      return TTF_OpenFontRW(rw, SDL_TRUE, this->ptsize());
     }())
 {
   if (!font)
@@ -38,8 +45,6 @@ Font::Font(std::filesystem::path file, int ptsize)
 
 Font::~Font()
 {
-  if (font)
-    TTF_CloseFont(font);
 }
 
 auto Font::render(glm::vec2 pos, const std::string &txt) -> void
@@ -75,7 +80,7 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
     }
   }
 
-  SDL_Surface *surface = TTF_RenderUTF8_Blended(font, txt.c_str(), {255, 255, 255, 255});
+  SDL_Surface *surface = TTF_RenderUTF8_Blended(font.get(), txt.c_str(), {255, 255, 255, 255});
   if (!surface)
   {
     LOG("TTF_RenderText_Blended", TTF_GetError());
@@ -104,7 +109,7 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
 auto Font::getSize(const std::string &txt) const -> glm::vec2
 {
   int w, h;
-  TTF_SizeUTF8(font, txt.c_str(), &w, &h);
+  TTF_SizeUTF8(font.get(), txt.c_str(), &w, &h);
   return glm::vec2{w, h};
 }
 
