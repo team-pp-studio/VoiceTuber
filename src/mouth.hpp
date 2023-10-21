@@ -23,7 +23,7 @@ private:
   S sprite;
   std::map<Viseme, int> viseme2Sprite;
   Viseme viseme = Viseme{};
-  decltype(std::chrono::high_resolution_clock::now()) freezeTime;
+  std::chrono::high_resolution_clock::time_point freezeTime;
   std::reference_wrapper<Wav2Visemes> wav2Visemes;
 
   auto h() const -> float final;
