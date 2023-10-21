@@ -1,4 +1,5 @@
 #include "prj-dialog.hpp"
+#include "imgui-helpers.hpp"
 #include "ui.hpp"
 #include "version.hpp"
 #include <algorithm>
@@ -208,7 +209,7 @@ auto PrjDialog::internalDraw() -> DialogState
     SDL_OpenURL("https://github.com/team-pp-studio/VoiceTuber");
 
   ImGui::SetCursorPos(ImVec2{226, 140 + 15});
-  ImGui::Text("v%s", appVersion());
+  ImGui::TextF("v{}", appVersion());
 
   return DialogState::active;
 }

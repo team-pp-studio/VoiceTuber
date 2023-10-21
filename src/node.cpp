@@ -1,4 +1,5 @@
 #include "node.hpp"
+#include "imgui-helpers.hpp"
 #include "save-factory.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
@@ -112,7 +113,7 @@ auto Node::renderUi() -> void
   ImGui::TableNextColumn();
   ImGui::Text("#");
   ImGui::TableNextColumn();
-  ImGui::Text("%s", name.c_str());
+  ImGui::TextUnformatted(name);
 
   ImGui::TableNextColumn();
   Ui::textRj("Visible");

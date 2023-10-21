@@ -5,6 +5,7 @@
 #include "ui.hpp"
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
+#include <fmt/core.h>
 #include <log/log.hpp>
 
 AiMouth::AiMouth(Lib &aLib,
@@ -197,31 +198,30 @@ auto AiMouth::renderUi() -> void
   }
   ImGui::TableNextColumn();
   {
-    ImGui::PushStyleColor(
-      ImGuiCol_Text,
-      ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]); // Set text color to disabled color
     Ui::textRj("Viseme");
     ImGui::TableNextColumn();
-    char str[16];
+    std::string_view str;
     switch (viseme)
     {
-    case Viseme::sil: strcpy(str, "sil"); break;
-    case Viseme::PP: strcpy(str, "PP"); break;
-    case Viseme::FF: strcpy(str, "FF"); break;
-    case Viseme::TH: strcpy(str, "TH"); break;
-    case Viseme::DD: strcpy(str, "DD"); break;
-    case Viseme::kk: strcpy(str, "kk"); break;
-    case Viseme::CH: strcpy(str, "CH"); break;
-    case Viseme::SS: strcpy(str, "SS"); break;
-    case Viseme::nn: strcpy(str, "nn"); break;
-    case Viseme::RR: strcpy(str, "RR"); break;
-    case Viseme::aa: strcpy(str, "aa"); break;
-    case Viseme::E: strcpy(str, "E"); break;
-    case Viseme::I: strcpy(str, "I"); break;
-    case Viseme::O: strcpy(str, "O"); break;
-    case Viseme::U: strcpy(str, "U"); break;
+      using namespace std::literals;
+    case Viseme::sil: str = "sil"sv; break;
+    case Viseme::PP: str = "PP"sv; break;
+    case Viseme::FF: str = "FF"sv; break;
+    case Viseme::TH: str = "TH"sv; break;
+    case Viseme::DD: str = "DD"sv; break;
+    case Viseme::kk: str = "kk"sv; break;
+    case Viseme::CH: str = "CH"sv; break;
+    case Viseme::SS: str = "SS"sv; break;
+    case Viseme::nn: str = "nn"sv; break;
+    case Viseme::RR: str = "RR"sv; break;
+    case Viseme::aa: str = "aa"sv; break;
+    case Viseme::E: str = "E"sv; break;
+    case Viseme::I: str = "I"sv; break;
+    case Viseme::O: str = "O"sv; break;
+    case Viseme::U: str = "U"sv; break;
     }
-    ImGui::InputText("##Viseme", str, ImGuiInputTextFlags_ReadOnly);
+    ImGui::InputText("##Viseme", const_cast<char *>(str.data()), str.size(), ImGuiInputTextFlags_ReadOnly);
     ImGui::PopStyleColor(); // Restore the original text color
   }
 
@@ -264,7 +264,7 @@ auto AiMouth::renderUi() -> void
     ImGui::SameLine();
 
     char btnTitle[16];
-    sprintf(btnTitle, "Test##%s", txt);
+    *fmt::format_to_n(btnTitle, std::size(btnTitle) - 1, "Test##{}", txt).out = 0;
 
     if (ImGui::Button(btnTitle))
     {

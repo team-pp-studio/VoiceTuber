@@ -10,6 +10,7 @@
 #include "eye-v2.hpp"
 #include "eye.hpp"
 #include "file-open.hpp"
+#include "imgui-helpers.hpp"
 #include "imgui-impl-opengl3.h"
 #include "imgui-impl-sdl.h"
 #include "input-dialog.hpp"
@@ -461,7 +462,7 @@ auto App::renderUi(float /*dt*/) -> void
         ImGui::SetTooltip("Parent with below");
     }
     renderTree(*root);
-    ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::TextF("{:3f} ms/frame ({:1f} FPS)", 1000.0f / io.Framerate, io.Framerate);
   }
   {
     auto detailsWindow = Ui::Window("Details");

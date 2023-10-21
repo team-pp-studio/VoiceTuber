@@ -1,7 +1,9 @@
 #include "add-as-dialog.hpp"
-#include <imgui.h>
+#include "imgui-helpers.hpp"
 
-AddAsDialog::AddAsDialog(std::string path, Callback callback)
+#include <fmt/std.h>
+
+AddAsDialog::AddAsDialog(std::filesystem::path path, Callback callback)
   : Dialog("Add As...",
            [callback = std::move(callback), this](bool r) mutable { callback(r, nodeType); }),
     path(std::move(path))
@@ -10,7 +12,7 @@ AddAsDialog::AddAsDialog(std::string path, Callback callback)
 
 auto AddAsDialog::internalDraw() -> DialogState
 {
-  ImGui::Text("Add \"%s\" as...", path.c_str());
+  ImGui::TextF("Add {:?} as...", path);
   char const *options[] = {
     "Sprite",
     "Mouth",
