@@ -33,7 +33,8 @@ namespace uv
                            }
                            self->buf.resize(suggestedSize);
                            aBuf->base = self->buf.data();
-                           aBuf->len = static_cast<decltype(aBuf->len)>(suggestedSize);
+                           // NOTE: uv_buf_t::len type is system dependant
+                           aBuf->len = static_cast<decltype(uv_buf_t::len)>(suggestedSize);
                          },
                          [](uv_stream_t *stream, ssize_t nread, const uv_buf_t *aBuf) {
                            auto self = static_cast<Tcp *>(stream->data);
@@ -311,7 +312,7 @@ namespace uv
     stop();
   }
 
-  auto Uv::loop() const -> decltype(uv_default_loop())
+  auto Uv::loop() const -> uv_loop_t *
   {
     return loop_;
   }

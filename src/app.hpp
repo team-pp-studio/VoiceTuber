@@ -31,7 +31,7 @@ private:
 
   std::reference_wrapper<sdl::Window> window;
   SDL_GLContext gl_context;
-  decltype(std::chrono::high_resolution_clock::now()) lastUpdate;
+  std::chrono::high_resolution_clock::time_point lastUpdate;
   bool isMinimized = false;
   uv::Uv uv;
   Preferences preferences;

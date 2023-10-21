@@ -15,9 +15,9 @@ private:
 
   std::vector<std::filesystem::path> dirs;
   std::string selectedDir;
-  decltype(std::filesystem::current_path()) cwd;
-  std::vector<decltype(std::filesystem::current_path())> undoStack;
-  std::vector<decltype(std::filesystem::current_path())> redoStack;
+  std::filesystem::path cwd;
+  std::vector<std::filesystem::path> undoStack;
+  std::vector<std::filesystem::path> redoStack;
   std::shared_ptr<const Texture> upDir;
   std::shared_ptr<const Texture> bckDir;
   std::shared_ptr<const Texture> fwdDir;

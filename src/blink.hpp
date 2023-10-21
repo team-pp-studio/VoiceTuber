@@ -32,7 +32,7 @@ private:
   float blinkEvery = 3.5f;
   float blinkDuration = .25f;
   State state = State::open;
-  decltype(std::chrono::high_resolution_clock::now()) nextEventTime;
+  std::chrono::high_resolution_clock::time_point nextEventTime;
 
   auto h() const -> float final;
   auto isTransparent(glm::vec2) const -> bool final;

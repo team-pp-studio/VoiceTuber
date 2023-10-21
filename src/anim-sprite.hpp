@@ -36,7 +36,7 @@ private:
   float force = 200.f;
   float damping = 1.f;
   float springness = 2.f;
-  decltype(std::chrono::high_resolution_clock::now()) startTime;
+  std::chrono::high_resolution_clock::time_point startTime;
   float animRotV = 0.f;
   glm::vec2 lastProjPivot = {0.f, 0.f};
   glm::vec2 lastProjPivotV = {0.f, 0.f};

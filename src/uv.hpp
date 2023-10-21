@@ -112,11 +112,11 @@ namespace uv
     auto createIdle() -> Idle;
     auto createPrepare() -> Prepare;
     auto createTimer() -> Timer;
-    auto loop() const -> decltype(uv_default_loop());
+    auto loop() const -> uv_loop_t *;
     auto tick() -> int;
 
   private:
-    decltype(uv_default_loop()) loop_;
+    uv_loop_t *loop_;
 
     auto onConnected(int status, Tcp, ConnectCb) -> void;
     auto onResolved(int status, struct addrinfo *res, ConnectCb) -> void;

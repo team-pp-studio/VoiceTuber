@@ -41,7 +41,7 @@ C++.)";
   std::vector<std::pair<Msg, Callback>> queuedMsgs;
   std::deque<Msg> msgs;
   State state = State::idle;
-  decltype(std::chrono::high_resolution_clock::now()) lastReply;
+  std::chrono::high_resolution_clock::time_point lastReply;
   std::string cohost_ = "Clara";
 
   auto countWords() const -> int;

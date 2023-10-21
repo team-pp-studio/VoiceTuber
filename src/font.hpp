@@ -22,7 +22,7 @@ public:
 private:
   std::filesystem::path file_;
   int ptsize_;
-  decltype(TTF_OpenFont("", 0)) font;
+  TTF_Font *font;
   mutable std::unordered_map<std::string, std::pair<Texture, std::list<std::string>::iterator>>
     texturesCache;
   mutable std::list<std::string> cacheAge;
