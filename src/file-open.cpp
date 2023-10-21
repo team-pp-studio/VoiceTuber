@@ -1,6 +1,7 @@
 #include "file-open.hpp"
 #include "imgui-helpers.hpp"
 #include "ui.hpp"
+#include <fmt/std.h>
 #include <functional>
 #include <log/log.hpp>
 

@@ -12,7 +12,7 @@ public:
   SER_PROP(end);      \
   SER_PROP(damping);  \
   SER_PROP(force);    \
-  SER_PROP(springness);
+  SER_PROP(springiness);
 
   SER_DEF_PROPS()
 #undef SER_PROP_LIST
@@ -35,7 +35,7 @@ private:
   glm::vec2 end = {0.f, 0.f};
   float force = 200.f;
   float damping = 1.f;
-  float springness = 2.f;
+  float springiness = 2.f;
   std::chrono::high_resolution_clock::time_point startTime;
   float animRotV = 0.f;
   glm::vec2 lastProjPivot = {0.f, 0.f};
