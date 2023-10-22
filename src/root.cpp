@@ -3,7 +3,7 @@
 #include "undo.hpp"
 #include <SDL_opengl.h>
 #include <limits>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 Root::Root(Lib &lib, Undo &aUndo) : Node(lib, aUndo, "root") {}
 
@@ -35,7 +35,7 @@ auto Root::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [alive = this->weak_from_this(), oldColor]() {
@@ -45,7 +45,7 @@ auto Root::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       "##BG color");

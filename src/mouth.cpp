@@ -6,7 +6,7 @@
 #include "wav-2-visemes.hpp"
 #include <fmt/core.h>
 #include <imgui.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 template <typename S, typename ClassName>
 Mouth<S, ClassName>::Mouth(Wav2Visemes &wav2Visemes,
@@ -105,7 +105,7 @@ auto Mouth<S, ClassName>::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
             return;
           }
         },
@@ -119,7 +119,7 @@ auto Mouth<S, ClassName>::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
             return;
           }
         });

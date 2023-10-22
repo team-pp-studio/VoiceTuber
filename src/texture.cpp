@@ -1,10 +1,12 @@
 #include "texture.hpp"
 #include "file.hpp"
 #include <cassert>
-#include <log/log.hpp>
+#include <fmt/std.h>
 #include <sdlpp/sdlpp.hpp>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdio.h>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
 #pragma GCC diagnostic ignored "-Wextra-semi-stmt"
@@ -32,7 +34,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
         }
         catch (std::runtime_error &e)
         {
-          LOG(e.what());
+          SPDLOG_ERROR("{:t}", e);
           auto engineImgPath = sdl::get_base_path() / "assets/corrupted.png";
           auto fp = open_file(engineImgPath, "rb");
           auto ret = stbi_load_from_file(fp.get(), &w_, &h_, &ch_, STBI_rgb_alpha);
@@ -102,7 +104,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
       }
       catch (std::runtime_error &e)
       {
-        LOG(e.what());
+        SPDLOG_ERROR("{:t}", e);
       }
     },
     path_,

@@ -54,6 +54,7 @@ class VoiceTuberConan(ConanFile):
         self.requires("imgui/cci.20230105+1.89.2.docking")
         self.requires("pocketsphinx/5.0.1")
         self.requires("fmt/10.1.1")
+        self.requires("spdlog/1.12.0")
 
     def build(self):
         cmake = CMake(self)

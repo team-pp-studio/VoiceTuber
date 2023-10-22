@@ -1,6 +1,6 @@
 #include "audio-out.hpp"
 #include "preferences.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AudioOut::AudioOut(const std::string &device, int sampleRate, int frameSize)
   : want([sampleRate, frameSize]() {
@@ -72,7 +72,7 @@ auto AudioOut::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Aud
                                             else
 
                                             {
-                                              LOG("this was destroyed");
+                                              SPDLOG_INFO("this was destroyed");
                                             }
                                           });
   if (have.format != want.format)

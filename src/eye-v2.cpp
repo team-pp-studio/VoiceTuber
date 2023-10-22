@@ -2,7 +2,7 @@
 #include "mouse-tracking.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <numbers>
 
 EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
@@ -113,7 +113,7 @@ auto EyeV2::renderUi() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           },
           [alive = this->weak_from_this(), oldDisplay = selectedDisplay]() {
@@ -123,7 +123,7 @@ auto EyeV2::renderUi() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           });
       const auto displayCnt = SDL_GetNumVideoDisplays();
@@ -144,7 +144,7 @@ auto EyeV2::renderUi() -> void
               }
               else
               {
-                LOG("this was destroyed");
+                SPDLOG_INFO("this was destroyed");
               }
             },
             [alive = this->weak_from_this(),
@@ -159,7 +159,7 @@ auto EyeV2::renderUi() -> void
               }
               else
               {
-                LOG("this was destroyed");
+                SPDLOG_INFO("this was destroyed");
               }
             });
         }

@@ -3,8 +3,9 @@
 #include "ui.hpp"
 #include "version.hpp"
 #include <algorithm>
+#include <fmt/std.h>
 #include <functional>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -96,7 +97,7 @@ auto PrjDialog::internalDraw() -> DialogState
       }
       catch (std::runtime_error &e)
       {
-        LOG(e.what());
+        SPDLOG_ERROR("{:t}", e);
       }
       std::sort(std::begin(dirs), std::end(dirs));
     }

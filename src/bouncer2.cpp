@@ -3,7 +3,7 @@
 #include "ui.hpp"
 #include <SDL_opengl.h>
 #include <limits>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioIn &audioIn, std::string aName)
   : Node(lib, aUndo, std::move(aName)), audioLevel(audioIn)

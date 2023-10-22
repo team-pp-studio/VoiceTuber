@@ -5,7 +5,7 @@
 #include "no-voice.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <sdlpp/sdlpp.hpp>
 #include <sstream>
 static const char *mute = "Mute";
@@ -108,7 +108,7 @@ auto Chat::onMsg(Msg val) -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       hideChatSec * 1000);
@@ -172,7 +172,7 @@ auto Chat::load(IStrm &strm) -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
     }
@@ -288,7 +288,7 @@ auto Chat::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldSize, alive = this->weak_from_this()]() {
@@ -300,7 +300,7 @@ auto Chat::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::TableNextColumn();
@@ -331,7 +331,7 @@ auto Chat::renderUi() -> void
                   }
                   else
                   {
-                    LOG("this was destroyed");
+                    SPDLOG_INFO("this was destroyed");
                   }
                 });
               }
@@ -344,7 +344,7 @@ auto Chat::renderUi() -> void
           else
 
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [alive = this->weak_from_this(), oldTts]() {
@@ -362,7 +362,7 @@ auto Chat::renderUi() -> void
                   }
                   else
                   {
-                    LOG("this was destroyed");
+                    SPDLOG_INFO("this was destroyed");
                   }
                 });
               }
@@ -375,7 +375,7 @@ auto Chat::renderUi() -> void
           else
 
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     }

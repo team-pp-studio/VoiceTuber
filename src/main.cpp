@@ -7,7 +7,7 @@
 #include <chrono>
 #include <filesystem>
 #include <imgui.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <sdlpp/sdlpp.hpp>
 #include <stdio.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)

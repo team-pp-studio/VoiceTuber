@@ -22,8 +22,9 @@
 #include "ui.hpp"
 #include "version.hpp"
 #include <SDL_opengl.h>
+#include <fmt/std.h>
 #include <fstream>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 static auto getProjMat() -> glm::mat4
 {
@@ -117,8 +118,8 @@ App::App(sdl::Window &aWindow, int argc, char *argv[])
   window.get().getPosition(&originalX, &originalY);
   window.get().getSize(&width, &height);
 
-  LOG("sample rate:", wav2Visemes.sampleRate());
-  LOG("frame size:", wav2Visemes.frameSize());
+  SPDLOG_INFO("sample rate: {}", wav2Visemes.sampleRate());
+  SPDLOG_INFO("frame rate: {}", wav2Visemes.frameSize());
   audioIn.reg(wav2Visemes);
   saveFactory.reg<Bouncer>(
     [this](std::string) { return std::make_unique<Bouncer>(lib, undo, audioIn); });
@@ -595,7 +596,7 @@ auto App::processIo() -> void
           std::string name;
           ::deser(is, className);
           ::deser(is, name);
-          LOG(className, name);
+          SPDLOG_INFO("{} {}", className, name);
           auto n = std::shared_ptr{saveFactory.ctor(className, name)};
           n->loadAll(saveFactory, is);
           undo.record(
@@ -684,12 +685,12 @@ auto App::renderTree(Node &v) -> void
     {
       if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !io.KeySuper)
       {
-        LOG(srcNode->getName(), "->", v.getName());
+        SPDLOG_INFO("{} -> {}", srcNode->getName(), v.getName());
         postponedActions.emplace_back([srcNode, &v]() { srcNode->placeBellow(v); });
       }
       if (ctrl)
       {
-        LOG("Parent", srcNode->getName(), "->", v.getName());
+        SPDLOG_INFO("Parent {} -> {}", srcNode->getName(), v.getName());
         postponedActions.emplace_back([srcNode, &v]() { srcNode->parentWith(v); });
       }
     }
@@ -742,7 +743,7 @@ auto App::loadPrj() -> void
   if (!st)
   {
     root = std::make_unique<Root>(lib, undo);
-    LOG("Create new project");
+    SPDLOG_INFO("Create new project");
     return;
   }
 
@@ -758,7 +759,7 @@ auto App::loadPrj() -> void
   if (v != saveVersion())
   {
     root = std::make_unique<Root>(lib, undo);
-    LOG("Version mismatch expected:", saveVersion(), ", received:", v);
+    SPDLOG_INFO("Version mismatch expected: {} received: {}", saveVersion(), v);
     return;
   }
 
@@ -766,7 +767,7 @@ auto App::loadPrj() -> void
   std::string name;
   ::deser(strm, className);
   ::deser(strm, name);
-  LOG(className, name);
+  SPDLOG_INFO("{} {}", className, name);
   root = saveFactory.ctor(className, name);
   root->loadAll(saveFactory, strm);
 }
@@ -800,9 +801,8 @@ auto App::addNode(const std::string &class_, const std::string &name) -> void
   }
   catch (const std::runtime_error &e)
   {
-    postponedActions.emplace_back(
-      [&]() { dialog = std::make_unique<MessageDialog>("Error", e.what()); });
-    LOG(e.what());
+    postponedActions.emplace_back([&]() { dialog = std::make_unique<MessageDialog>("Error", e.what()); });
+    SPDLOG_ERROR("{:t}", e);
   }
 };
 
@@ -889,7 +889,7 @@ auto App::sdlEventsAndRender() -> void
       break;
     case SDL_DROPFILE: {
       auto file = event.drop.file;
-      LOG("dropped file", file);
+      SPDLOG_INFO("dropped file {}", file);
       droppedFile(file);
       SDL_free(file);
       break;

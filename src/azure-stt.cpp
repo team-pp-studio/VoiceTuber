@@ -3,8 +3,9 @@
 #include "http-client.hpp"
 #include "save-wav.hpp"
 #include <cmath>
+#include <fmt/std.h>
 #include <json/json.hpp>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 AzureStt::AzureStt(uv::Uv &uv, AzureToken &aToken, HttpClient &aHttpClient)
@@ -37,7 +38,7 @@ auto AzureStt::process() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
         return;
@@ -56,20 +57,20 @@ auto AzureStt::process() -> void
             else
 
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           });
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
     }
     else
 
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
 }
@@ -78,13 +79,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
 {
   auto dur = 1.f * wav.size() / sampleRate;
   total += dur;
-  LOG("Azure",
-      dur,
-      "seconds Total:",
-      std::floor(total / 60),
-      "minuts",
-      static_cast<int>(total) % 60,
-      "seconds");
+  SPDLOG_INFO("Azure {} seconds, total: {} minutes {} seconds", dur, std::floor(total / 60.f), static_cast<int>(total) % 60);
   queue.emplace([cb = std::move(cb), sampleRate, alive = this->weak_from_this(), wav = std::move(wav)](
                   const std::string &t, PostTask postTask) mutable {
     if (auto self = alive.lock())
@@ -107,7 +102,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
             }
             if (httpStatus == 401)
             {
-              LOG(code, httpStatus);
+              SPDLOG_INFO("{} {}", curl_easy_strerror(code), httpStatus);
               self->token.get().clear();
               cb("");
               postTask(false);
@@ -115,7 +110,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
             }
             if (httpStatus >= 400 && httpStatus < 500)
             {
-              LOG(code, httpStatus, payload);
+              SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
               self->lastError = payload;
               cb("");
               postTask(true);
@@ -123,7 +118,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
             }
             if (httpStatus != 200)
             {
-              LOG(code, httpStatus, payload);
+              SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
               self->lastError = payload;
               cb("");
               self->timer.start([postTask = std::move(postTask)]() mutable { postTask(false); }, 10'000);
@@ -139,7 +134,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         {{"Accept", ""},
@@ -150,7 +145,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
     else
 
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   process();

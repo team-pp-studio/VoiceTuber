@@ -1,6 +1,6 @@
 #include "azure-token.hpp"
 #include "http-client.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AzureToken::AzureToken(std::string aKey, class HttpClient &aHttpClient)
   : key(std::move(aKey)), httpClient(aHttpClient)
@@ -25,7 +25,7 @@ auto AzureToken::get(Callback cb) -> void
       {
         if (code != CURLE_OK)
         {
-          LOG(code, httpStatus, payload);
+          SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
           for (auto &lCb : self->callbacks)
             lCb("", std::string{"CURL Error: "} + curl_easy_strerror(code));
           self->callbacks.clear();
@@ -33,7 +33,7 @@ auto AzureToken::get(Callback cb) -> void
         }
         if (httpStatus != 200)
         {
-          LOG(code, httpStatus, payload);
+          SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
           for (auto &lCb : self->callbacks)
             lCb("", "HTTP Status: " + std::to_string(httpStatus) + " " + payload);
           self->callbacks.clear();
@@ -47,7 +47,7 @@ auto AzureToken::get(Callback cb) -> void
       else
 
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     {{"Ocp-Apim-Subscription-Key", key}, {"Expect", ""}});

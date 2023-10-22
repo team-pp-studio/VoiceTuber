@@ -3,7 +3,7 @@
 #include "azure-token.hpp"
 #include "http-client.hpp"
 #include <json/json.hpp>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AzureTts::AzureTts(uv::Uv &uv,
                    AzureToken &azureToken,
@@ -57,21 +57,21 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
             }
             if (httpStatus == 401)
             {
-              LOG(code, httpStatus);
+              SPDLOG_INFO("{} {}", curl_easy_strerror(code), httpStatus);
               self->token.get().clear();
               postTask(false);
               return;
             }
             if (httpStatus >= 400 && httpStatus < 500)
             {
-              LOG(code, httpStatus, payload);
+              SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
               self->lastError = payload;
               postTask(true);
               return;
             }
             if (httpStatus != 200)
             {
-              LOG(code, httpStatus, payload);
+              SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
               self->lastError = payload;
               self->timer.start([postTask = std::move(postTask)]() mutable { postTask(false); }, 10'000);
               return;
@@ -92,7 +92,7 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
           else
 
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         {{"Accept", ""},
@@ -104,7 +104,7 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
     else
 
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   process();
@@ -135,7 +135,7 @@ auto AzureTts::process() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
         return;
@@ -153,20 +153,20 @@ auto AzureTts::process() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           });
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
           return;
         }
       });
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
 }
@@ -191,7 +191,7 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
             }
             if (httpStatus == 401)
             {
-              LOG(code, httpStatus);
+              SPDLOG_INFO("{} {}", curl_easy_strerror(code), httpStatus);
               self->token.get().clear();
               cb({});
               postTask(false);
@@ -199,7 +199,7 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
             }
             if (httpStatus != 200)
             {
-              LOG(code, httpStatus, payload);
+              SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
               self->lastError = payload;
               cb({});
               postTask(false);
@@ -264,14 +264,14 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         {{"Accept", ""}, {"User-Agent", "curl/7.68.0"}, {"Authorization", "Bearer " + t}});
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   process();

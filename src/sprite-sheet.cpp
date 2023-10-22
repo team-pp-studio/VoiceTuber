@@ -3,8 +3,9 @@
 #include <cassert>
 #include <cstdint>
 #include <filesystem>
+#include <fmt/std.h>
 #include <imgui.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 SpriteSheet::SpriteSheet(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
   : undo(aUndo), texture(lib.queryTex([&]() {
@@ -16,7 +17,7 @@ SpriteSheet::SpriteSheet(Lib &lib, Undo &aUndo, const std::filesystem::path &pat
       }
       catch (std::runtime_error &e)
       {
-        LOG(e.what());
+        SPDLOG_ERROR("{:t}", e);
         return std::string{"engine:missing.png"};
       }
     }()))

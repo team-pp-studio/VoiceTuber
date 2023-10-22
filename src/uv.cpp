@@ -1,23 +1,24 @@
 #include "uv.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
 
 namespace uv
 {
-  Tcp::Tcp(uv_loop_t *loop) : socket(std::make_unique<uv_tcp_t>())
+  Tcp::Tcp(uv_loop_t *loop)
+    : socket(std::make_unique<uv_tcp_t>())
   {
-    LOG(this, "Tcp ctor");
+    SPDLOG_DEBUG("{}", this);
     uv_tcp_init(loop, socket.get());
     socket->data = this;
   }
 
   auto Tcp::readStart(ReadCallback cb) -> int
   {
-    LOG(this, "readStart socket:", socket);
+    SPDLOG_DEBUG("{}: {}", this, socket);
     if (!socket)
     {
-      LOG(this, "Uninitialized TCP connection");
+      SPDLOG_DEBUG("{}: uninitialized TCP connection", this);
       cb(static_cast<int>(-1), std::string{});
       return -1;
     }
@@ -28,7 +29,7 @@ namespace uv
                            auto self = static_cast<Tcp *>(handle->data);
                            if (!self)
                            {
-                             LOG("self is nullptr");
+                             SPDLOG_DEBUG("self is nullptr");
                              return;
                            }
                            self->buf.resize(suggestedSize);
@@ -40,7 +41,7 @@ namespace uv
                            auto self = static_cast<Tcp *>(stream->data);
                            if (!self)
                            {
-                             LOG("self is nullptr");
+                             SPDLOG_DEBUG("self is nullptr");
                              return;
                            }
                            self->onRead(nread, aBuf);
@@ -62,7 +63,7 @@ namespace uv
   {
     if (!socket)
     {
-      LOG(this, "Uninitialized TCP connection");
+      SPDLOG_DEBUG("{}: uninitialized TCP connection", this);
       cb(-1);
       return -1;
     }
@@ -90,19 +91,20 @@ namespace uv
   {
     if (nread < 0)
     {
-      LOG(__func__, "error:", uv_err_name(static_cast<int>(nread)));
+      SPDLOG_ERROR("{}", uv_err_name(static_cast<int>(nread)));
       readCb(static_cast<int>(nread), std::string_view{});
       return;
     }
     if (!readCb)
     {
-      LOG("The TCP read callback is not set up");
+      SPDLOG_DEBUG("{}: The TCP read callback is not set up", this);
       return;
     }
     readCb(0, std::string_view{aBuf->base, aBuf->base + nread});
   }
 
-  Uv::Uv() : loop_(uv_default_loop())
+  Uv::Uv()
+    : loop_(uv_default_loop())
   {
     loop_->data = this;
   }
@@ -129,7 +131,7 @@ namespace uv
 
   auto Uv::connect(const std::string &domain, const std::string &port, ConnectCb cb) -> int
   {
-    LOG("connect ", domain, ":", port);
+    SPDLOG_INFO("connect {}:{}", domain, port);
     // TODO-Mika Can we combine two memory allocations into one?
     struct Request : uv_getaddrinfo_t
     {
@@ -140,7 +142,7 @@ namespace uv
 
     req->ctx.uv = this;
     req->ctx.cb = std::move(cb);
-    LOG("Resolve:", domain, port);
+    SPDLOG_INFO("Resolve: {}:{}", domain, port);
     struct addrinfo hints;
     hints.ai_family = PF_INET;
     hints.ai_socktype = SOCK_STREAM;
@@ -163,7 +165,7 @@ namespace uv
 
     if (status < 0)
     {
-      LOG(__func__, "error:", uv_err_name(status));
+      SPDLOG_ERROR("{}", uv_err_name(status));
       cb(status, Tcp{});
       return;
     }
@@ -171,7 +173,7 @@ namespace uv
 
     char addr[17] = {'\0'};
     uv_ip4_name(reinterpret_cast<struct sockaddr_in *>(result->ai_addr), addr, 16);
-    LOG("Resolved:", addr);
+    SPDLOG_INFO("Resolved: {}", addr);
 
     // TODO-Mika Can we combine two memory allocations into one?
     struct Request : uv_connect_t
@@ -189,14 +191,14 @@ namespace uv
                             (const struct sockaddr *)result->ai_addr,
                             [](uv_connect_t *aReq, int aStatus) {
                               auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
-                              LOG("Connected");
+                              SPDLOG_INFO("Connected");
 
                               req->ctx.uv->onConnected(
                                 aStatus, std::move(req->ctx.tcp), std::move(req->ctx.cb));
                             });
     if (s < 0)
     {
-      LOG(__func__, "error:", uv_err_name(s));
+      SPDLOG_ERROR("{}", uv_err_name(s));
       cb(s, Tcp{});
 
       return;
@@ -235,7 +237,7 @@ namespace uv
   {
     if (socket)
     {
-      LOG(this, "Graceful disconnect");
+      SPDLOG_DEBUG("{}: graceful disconnect", this);
       socket->data = nullptr;
       auto rawSocket = socket.release();
       uv_read_stop((uv_stream_t *)rawSocket);
@@ -247,9 +249,9 @@ namespace uv
       auto req = std::make_unique<uv_shutdown_t>(rawSocket);
       uv_shutdown(req.release(), (uv_stream_t *)rawSocket, [](uv_shutdown_t *aReq, int status) {
         auto req = std::unique_ptr<Request>(static_cast<Request *>(aReq));
-        LOG("Disconnected");
+        SPDLOG_DEBUG("Disconnected");
         if (status < 0)
-          LOG(__func__, "error:", uv_err_name(status));
+          SPDLOG_ERROR("{}", uv_err_name(status));
       });
     }
   }
@@ -272,7 +274,8 @@ namespace uv
     deinit();
   }
 
-  Timer::Timer(uv_loop_t *loop) : timer(std::make_unique<uv_timer_t>())
+  Timer::Timer(uv_loop_t *loop)
+    : timer(std::make_unique<uv_timer_t>())
   {
     uv_timer_init(loop, timer.get());
     timer->data = this;
@@ -288,7 +291,7 @@ namespace uv
         auto self = static_cast<Timer *>(handle->data);
         if (!self->callback)
         {
-          LOG("The Timer callback is not set up");
+          SPDLOG_DEBUG("The Timer callback is not set up");
           return;
         }
         self->callback();
@@ -301,7 +304,7 @@ namespace uv
   {
     if (!timer)
     {
-      LOG("timer is nullptr");
+      SPDLOG_DEBUG("timer is nullptr");
       return -1;
     }
     return uv_timer_stop(timer.get());
@@ -317,7 +320,8 @@ namespace uv
     return loop_;
   }
 
-  Idle::Idle(uv_loop_t *loop) : idle(std::make_unique<uv_idle_t>())
+  Idle::Idle(uv_loop_t *loop)
+    : idle(std::make_unique<uv_idle_t>())
   {
     uv_idle_init(loop, idle.get());
     idle->data = this;
@@ -336,7 +340,7 @@ namespace uv
       auto self = static_cast<Idle *>(handle->data);
       if (!self->cb)
       {
-        LOG("The Idle callback is not set up");
+        SPDLOG_DEBUG("The Idle callback is not set up");
         return;
       }
       self->cb();
@@ -347,13 +351,14 @@ namespace uv
   {
     if (!idle)
     {
-      LOG("idle is nullptr");
+      SPDLOG_DEBUG("idle is nullptr");
       return -1;
     }
     return uv_idle_stop(idle.get());
   }
 
-  Prepare::Prepare(uv_loop_t *loop) : prepare(std::make_unique<uv_prepare_t>())
+  Prepare::Prepare(uv_loop_t *loop)
+    : prepare(std::make_unique<uv_prepare_t>())
   {
     uv_prepare_init(loop, prepare.get());
     prepare->data = this;
@@ -372,7 +377,7 @@ namespace uv
       auto self = static_cast<Prepare *>(handle->data);
       if (!self->cb)
       {
-        LOG("The Prepare callback is not set up");
+        SPDLOG_DEBUG("The Prepare callback is not set up");
         return;
       }
       self->cb();
@@ -383,13 +388,14 @@ namespace uv
   {
     if (!prepare)
     {
-      LOG("prepare is nullptr");
+      SPDLOG_DEBUG("prepare is nullptr");
       return -1;
     }
     return uv_prepare_stop(prepare.get());
   }
 
-  FsEvent::FsEvent(uv_loop_t *loop) : event(std::make_unique<uv_fs_event_t>())
+  FsEvent::FsEvent(uv_loop_t *loop)
+    : event(std::make_unique<uv_fs_event_t>())
   {
     uv_fs_event_init(loop, event.get());
     event->data = this;
@@ -410,7 +416,7 @@ namespace uv
         auto self = static_cast<FsEvent *>(handle->data);
         if (!self->cb)
         {
-          LOG("The FsEvent callback is not set up");
+          SPDLOG_DEBUG("The FsEvent callback is not set up");
           return;
         }
         self->cb(filename, events, status);
@@ -423,7 +429,7 @@ namespace uv
   {
     if (!event)
     {
-      LOG("event is nullptr");
+      SPDLOG_DEBUG("event is nullptr");
       return -1;
     }
     return uv_fs_event_stop(event.get());

@@ -1,6 +1,6 @@
 #include "audio-in.hpp"
 #include "preferences.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int frameSize)
   : prepare(uv.createPrepare()),
@@ -22,7 +22,7 @@ AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int fram
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
 }
@@ -80,7 +80,7 @@ auto AudioIn::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audi
                                             }
                                             else
                                             {
-                                              LOG("this was destroyed");
+                                              SPDLOG_INFO("this was destroyed");
                                             }
                                           });
   if (have.format != want.format)

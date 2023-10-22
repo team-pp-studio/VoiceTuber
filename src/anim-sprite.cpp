@@ -2,7 +2,7 @@
 #include "ui.hpp"
 #include "undo.hpp"
 #include <imgui.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AnimSprite::AnimSprite(Lib &lib, Undo &aUndo, const std::filesystem::path &path)
   : Node(lib, aUndo, path.filename().string()),
@@ -121,7 +121,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -131,7 +131,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -144,7 +144,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -154,7 +154,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -167,7 +167,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -177,7 +177,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     if (Ui::btnImg("w2", *arrowW, sz, sz))
@@ -189,7 +189,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -199,7 +199,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -212,7 +212,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -222,7 +222,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -235,7 +235,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -245,7 +245,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     if (Ui::btnImg("sw2", *arrowSW, sz, sz))
@@ -257,7 +257,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -267,7 +267,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -280,7 +280,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -290,7 +290,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::SameLine();
@@ -303,7 +303,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [oldEnd = end, alive = this->weak_from_this()]() {
@@ -313,7 +313,7 @@ auto AnimSprite::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     ImGui::TableNextColumn();

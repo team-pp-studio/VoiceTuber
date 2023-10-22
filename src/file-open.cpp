@@ -3,7 +3,7 @@
 #include "ui.hpp"
 #include <fmt/std.h>
 #include <functional>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -49,7 +49,7 @@ auto FileOpen::internalDraw() -> DialogState
       }
       catch (std::runtime_error &e)
       {
-        LOG(e.what());
+        SPDLOG_ERROR("{:t}", e);
       }
       std::sort(files.begin(), files.end());
     }
@@ -117,7 +117,7 @@ auto FileOpen::internalDraw() -> DialogState
       }
       catch (std::runtime_error &e)
       {
-        LOG(e.what());
+        SPDLOG_ERROR("{:t}", e);
       }
     }
     if (postponedAction)
