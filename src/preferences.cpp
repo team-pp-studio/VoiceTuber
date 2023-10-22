@@ -1,8 +1,9 @@
 #include "preferences.hpp"
 #include <SDL.h>
 #include <filesystem>
-#include <log/log.hpp>
+#include <fmt/std.h>
 #include <sdlpp/sdlpp.hpp>
+#include <spdlog/spdlog.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcovered-switch-default"
@@ -39,7 +40,7 @@ Preferences::Preferences()
     configFile.open(configFilePath, std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
     if (!configFile)
     {
-      LOG("failed to create preferences file");
+      SPDLOG_ERROR("failed to create preferences file");
       return;
     }
   }
@@ -49,7 +50,7 @@ Preferences::Preferences()
     configFile.open(configFilePath, std::ios_base::in);
     if (!configFile)
     {
-      LOG("failed to open preferences file");
+      SPDLOG_ERROR("failed to open preferences file");
       return;
     }
   }
@@ -69,7 +70,7 @@ Preferences::Preferences()
   }
   catch (const cpptoml::parse_exception &e)
   {
-    LOG("Error parsing config file:", e.what());
+    SPDLOG_ERROR("Error parsing config file: {:t}", e);
   }
 }
 
@@ -115,7 +116,7 @@ auto Preferences::save() -> void
     auto configFile = std::ofstream{configFilePath};
     if (!configFile.is_open())
     {
-      LOG("Error opening config file for writing");
+      SPDLOG_ERROR("Error opening config file for writing");
       return;
     }
 
@@ -125,6 +126,6 @@ auto Preferences::save() -> void
   }
   catch (const std::ofstream::failure &e)
   {
-    LOG("Error saving config file:", e.what());
+    SPDLOG_ERROR("Error saving config file: {:t}", e);
   }
 }

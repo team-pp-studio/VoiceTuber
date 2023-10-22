@@ -2,7 +2,8 @@
 #include "file-open.hpp"
 #include "imgui-helpers.hpp"
 #include "ui.hpp"
-#include <log/log.hpp>
+#include <fmt/std.h>
+#include <spdlog/spdlog.h>
 
 ImageList::ImageList(Lib &aLib, Undo &aUndo, const std::filesystem::path &)
   : lib(aLib),
@@ -111,7 +112,7 @@ auto ImageList::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [alive = this->weak_from_this(), oldTextures = textures]() {
@@ -121,7 +122,7 @@ auto ImageList::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   if (ImGui::Button("Add##Image"))
@@ -141,14 +142,14 @@ auto ImageList::renderUi() -> void
                 }
                 catch (std::runtime_error &e)
                 {
-                  LOG(e.what());
+                  SPDLOG_ERROR("{:t}", e);
                   return std::string{"engine:missing.png"};
                 }
               }()));
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           },
           [alive = this->weak_from_this()]() {
@@ -158,7 +159,7 @@ auto ImageList::renderUi() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           });
     });

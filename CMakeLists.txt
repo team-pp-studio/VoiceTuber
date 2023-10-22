@@ -15,6 +15,7 @@ find_package(libuv REQUIRED CONFIG)
 find_package(CURL REQUIRED CONFIG)
 find_package(OpenGL REQUIRED MODULE)
 find_package(fmt REQUIRED CONFIG)
+find_package(spdlog REQUIRED CONFIG)
 
 
 add_library(warnings INTERFACE)
@@ -54,7 +55,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON CXX_ST
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "src/**")
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/3rd-party)
-target_link_libraries(${PROJECT_NAME} PRIVATE warnings sanitizers ser json imgui_bindings OpenGL::GL SDL2::SDL2 imgui::imgui SDL2_ttf::SDL2_ttf glm::glm stb::stb pocketsphinx::pocketsphinx cpptoml uv CURL::libcurl fmt::fmt)
+target_link_libraries(${PROJECT_NAME} PRIVATE warnings sanitizers ser json imgui_bindings OpenGL::GL SDL2::SDL2 imgui::imgui SDL2_ttf::SDL2_ttf glm::glm stb::stb pocketsphinx::pocketsphinx cpptoml uv CURL::libcurl fmt::fmt spdlog::spdlog)
 
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main)    

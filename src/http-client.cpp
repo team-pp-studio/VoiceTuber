@@ -4,7 +4,7 @@
 
 #include "http-client.hpp"
 #include <algorithm>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 namespace
 {
@@ -174,7 +174,7 @@ auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       timeoutMs == 0 ? 1 : timeoutMs,

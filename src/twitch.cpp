@@ -4,8 +4,8 @@
 
 #include "twitch.hpp"
 #include <algorithm>
-#include <log/log.hpp>
 #include <optional>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -153,7 +153,7 @@ Twitch::Twitch(uv::Uv &uv, std::string aUser, std::string aKey, std::string aCha
 
 auto Twitch::init() -> void
 {
-  LOG("Init:", server, ":", port, "user", user, "channel", channel);
+  SPDLOG_INFO("Init: {}:{} user {} channel {}", server, port, user, channel);
   state = State::connecting;
   retryTimer.stop();
   pingTimer.stop();
@@ -163,7 +163,7 @@ auto Twitch::init() -> void
     {
       if (status < 0)
       {
-        LOG(__func__, "error:", uv_err_name(status));
+        SPDLOG_ERROR("{}", uv_err_name(status));
         self->initiateRetry();
         return;
       }
@@ -173,12 +173,12 @@ auto Twitch::init() -> void
     else
 
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   if (s < 0)
   {
-    LOG(__func__, "error:", uv_err_name(s));
+    SPDLOG_ERROR("{}", uv_err_name(s));
     initiateRetry();
     return;
   }
@@ -195,7 +195,7 @@ auto Twitch::sendPassNickUser() -> void
     {
       if (status < 0)
       {
-        LOG(__func__, "error:", uv_err_name(status));
+        SPDLOG_ERROR("{}", uv_err_name(status));
         self->initiateRetry();
         return;
       }
@@ -203,12 +203,12 @@ auto Twitch::sendPassNickUser() -> void
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   if (s < 0)
   {
-    LOG(__func__, "error:", uv_err_name(s));
+    SPDLOG_ERROR("{}", uv_err_name(s));
     initiateRetry();
     return;
   }
@@ -221,7 +221,7 @@ auto Twitch::readStart() -> void
     {
       if (status < 0)
       {
-        LOG(__func__, "error:", uv_err_name(status));
+        SPDLOG_ERROR("{}", uv_err_name(status));
         self->initiateRetry();
       }
       self->buf.insert(std::end(self->buf), std::begin(msg), std::end(msg));
@@ -229,12 +229,12 @@ auto Twitch::readStart() -> void
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   if (s < 0)
   {
-    LOG(__func__, "error:", uv_err_name(s));
+    SPDLOG_ERROR("{}", uv_err_name(s));
     initiateRetry();
     return;
   }
@@ -292,7 +292,7 @@ auto Twitch::parseMsg() -> void
     {
       if (parameters.size() < 2)
       {
-        LOG("Expected 2 parameters on PRIVMSG");
+        SPDLOG_ERROR("Expected 2 parameters on PRIVMSG");
         return;
       }
       auto privMsg = parameters[1];
@@ -341,7 +341,7 @@ auto Twitch::parseMsg() -> void
           continue;
         }
       }
-      LOG(displayName, ":", privMsg);
+      SPDLOG_INFO("{}:{}", displayName, privMsg);
       for (auto sink : sinks)
         sink.get().onMsg({displayName, privMsg, color, isFirst, isMod, subscriber});
       return;
@@ -353,7 +353,7 @@ auto Twitch::parseMsg() -> void
     {
       if (parameters.empty())
       {
-        LOG("Parameters on PING message are empty");
+        SPDLOG_ERROR("Parameters on PING message are empty");
         return;
       }
       onPing(parameters[0]);
@@ -374,19 +374,19 @@ auto Twitch::onPing(const std::string &val) -> void
     {
       if (status < 0)
       {
-        LOG(__func__, "error:", uv_err_name(status));
+        SPDLOG_ERROR("{}", uv_err_name(status));
         self->initiateRetry();
         return;
       }
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   if (s < 0)
   {
-    LOG(__func__, "error:", uv_err_name(s));
+    SPDLOG_ERROR("{}", uv_err_name(s));
     initiateRetry();
     return;
   }
@@ -409,23 +409,23 @@ auto Twitch::onWelcome() -> void
     {
       if (status < 0)
       {
-        LOG(__func__, "error:", uv_err_name(status));
+        SPDLOG_ERROR("{}", uv_err_name(status));
         self->initiateRetry();
         return;
       }
     }
     else
     {
-      LOG("this was destroyed");
+      SPDLOG_INFO("this was destroyed");
     }
   });
   if (s < 0)
   {
-    LOG(__func__, "error:", uv_err_name(s));
+    SPDLOG_ERROR("{}", uv_err_name(s));
     initiateRetry();
     return;
   }
-  LOG("Connected to twitch");
+  SPDLOG_INFO("Connected to twitch");
   state = State::connected;
   initRetry = 1000;
   schedulePing();
@@ -442,33 +442,33 @@ auto Twitch::schedulePing() -> void
           {
             if (status < 0)
             {
-              LOG(__func__, "error:", uv_err_name(status));
+              SPDLOG_ERROR("{}", uv_err_name(status));
               self->initiateRetry();
               return;
             }
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
         self->pingTimer.start(
           [alive]() {
             if (auto self = alive.lock())
             {
-              LOG(__func__, "error: PING timeout");
+              SPDLOG_ERROR("PING timeout");
               self->initiateRetry();
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           },
           2'000);
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     120'000);
@@ -493,16 +493,16 @@ auto Twitch::initiateRetry() -> void
     [alive = this->weak_from_this()]() {
       if (auto self = alive.lock())
       {
-        LOG("Retrying...");
+        SPDLOG_INFO("Retrying...");
         self->init();
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     initRetry);
-  LOG("Retry in", initRetry);
+  SPDLOG_INFO("Retry in", initRetry);
   initRetry = std::min(32000, initRetry * 2);
 }
 

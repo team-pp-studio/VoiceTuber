@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <limits>
-#include <log/log.hpp>
 #include <numbers>
+#include <spdlog/spdlog.h>
 
 namespace Internal
 {
@@ -174,7 +174,7 @@ auto Node::renderUi() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           },
           [oldScale = scale, alive = this->weak_from_this()]() {
@@ -184,7 +184,7 @@ auto Node::renderUi() -> void
             }
             else
             {
-              LOG("this was destroyed");
+              SPDLOG_INFO("this was destroyed");
             }
           },
           "Scale");
@@ -257,7 +257,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -267,7 +267,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -280,7 +280,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -290,7 +290,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -303,7 +303,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -313,7 +313,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   if (Ui::btnImg("w", *arrowW, sz, sz))
@@ -325,7 +325,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -335,7 +335,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -348,7 +348,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -358,7 +358,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -371,7 +371,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -381,7 +381,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
@@ -393,7 +393,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -403,7 +403,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -416,7 +416,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -426,7 +426,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::SameLine();
@@ -439,7 +439,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldPivot = pivot_, alive = this->weak_from_this()]() {
@@ -449,7 +449,7 @@ auto Node::renderUi() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
   ImGui::TableNextColumn();
@@ -593,7 +593,7 @@ auto Node::moveUp() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [alive = this->weak_from_this()]() {
@@ -606,7 +606,7 @@ auto Node::moveUp() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }
@@ -631,7 +631,7 @@ auto Node::moveDown() -> void
       else
 
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [alive = this->weak_from_this()]() {
@@ -645,7 +645,7 @@ auto Node::moveDown() -> void
       else
 
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }
@@ -674,7 +674,7 @@ auto Node::unparent() -> void
         self->parent_ = newParent;
       }
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
@@ -689,7 +689,7 @@ auto Node::unparent() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }
@@ -724,7 +724,7 @@ auto Node::parentWithBellow() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
@@ -739,7 +739,7 @@ auto Node::parentWithBellow() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }
@@ -870,7 +870,7 @@ auto Node::loadAll(const class SaveFactory &saveFactory, IStrm &strm) -> void
     auto node = saveFactory.ctor(className, n);
     if (!node)
     {
-      LOG("class name", className, "name", n);
+      SPDLOG_INFO("class name {} name {}", className, n);
       assert(node);
     }
     node->loadAll(saveFactory, strm);
@@ -948,7 +948,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldLoc = initLoc, alive = this->weak_from_this()]() {
@@ -958,7 +958,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
     break;
@@ -971,7 +971,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldRot = initRot, alive = this->weak_from_this()]() {
@@ -981,7 +981,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
     break;
@@ -994,7 +994,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       },
       [oldScale = initScale, alive = this->weak_from_this()]() {
@@ -1004,7 +1004,7 @@ auto Node::commit() -> void
         }
         else
         {
-          LOG("this was destroyed");
+          SPDLOG_INFO("this was destroyed");
         }
       });
     break;
@@ -1050,7 +1050,7 @@ auto Node::parentWith(Node &newParent) -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [it, &newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
@@ -1065,7 +1065,7 @@ auto Node::parentWith(Node &newParent) -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }
@@ -1092,7 +1092,7 @@ auto Node::placeBellow(Node &newSibling) -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     [alive = this->weak_from_this(), nodes = parent()->nodes, oldParent = parent()]() {
@@ -1108,7 +1108,7 @@ auto Node::placeBellow(Node &newSibling) -> void
       else
 
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }

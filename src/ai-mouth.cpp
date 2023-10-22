@@ -6,7 +6,7 @@
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
 #include <fmt/core.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 AiMouth::AiMouth(Lib &aLib,
                  Undo &aUndo,
@@ -72,7 +72,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                          if (!self->hostMsg.empty())
                            self->hostMsg += '\n';
                          self->hostMsg += txt;
-                         LOG(self->host, ":", txt);
+                         SPDLOG_INFO("{}: {}", self->host, txt);
                          if (self->hostMsg.size() < 75)
                            return;
 
@@ -80,20 +80,20 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                            "Host", std::move(self->hostMsg), [alive](std::string rsp) {
                              if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
                              {
-                               LOG(self->cohost, ":", rsp);
+                               SPDLOG_INFO("{}: {}", self->cohost, rsp);
                                self->tts->say("en-US-AmberNeural", std::move(rsp), false);
                                self->talkStart = std::chrono::high_resolution_clock::now();
                              }
                              else
                              {
-                               LOG("this was destroyed");
+                               SPDLOG_INFO("this was destroyed");
                              };
                            });
                          self->hostMsg.clear();
                        }
                        else
                        {
-                         LOG("this was destroyed");
+                         SPDLOG_INFO("this was destroyed");
                        }
                      });
     }
@@ -107,13 +107,13 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
       {
         if (rsp.empty())
           return;
-        LOG(self->cohost, ":", rsp);
+        SPDLOG_INFO("{}: {}", self->cohost, rsp);
         self->tts->say("en-US-AmberNeural", std::move(rsp), false);
         self->talkStart = std::chrono::high_resolution_clock::now();
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
     hostMsg.clear();
@@ -244,7 +244,7 @@ auto AiMouth::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         },
         [&f, oldF, alive = this->weak_from_this(), vis]() {
@@ -257,7 +257,7 @@ auto AiMouth::renderUi() -> void
           }
           else
           {
-            LOG("this was destroyed");
+            SPDLOG_INFO("this was destroyed");
           }
         });
     }
@@ -307,13 +307,14 @@ auto AiMouth::onMsg(Msg val) -> void
       {
         if (rsp.empty())
           return;
-        LOG(self->cohost, ":", rsp);
+
+        SPDLOG_INFO("{}: {}", self->cohost, rsp);
         self->tts->say("en-US-AmberNeural", std::move(rsp), false);
         self->talkStart = std::chrono::high_resolution_clock::now();
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     });
 }

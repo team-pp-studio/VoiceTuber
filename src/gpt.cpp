@@ -6,8 +6,8 @@
 #include <cstring>
 #include <functional>
 #include <json/json.hpp>
-#include <log/log.hpp>
 #include <numeric>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 Gpt::Gpt(uv::Uv &uv, std::string aToken, HttpClient &aHttpClient)
@@ -113,8 +113,8 @@ auto Gpt::process() -> void
         }
         if (httpStatus >= 400 && httpStatus < 500)
         {
-          LOG(code, httpStatus, payload);
-          LOG(jsonPrompt);
+          SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
+          SPDLOG_INFO("{}", jsonPrompt);
           self->lastError = payload;
           for (auto &msg : qMsgs)
             msg.second("");
@@ -123,8 +123,8 @@ auto Gpt::process() -> void
         }
         if (httpStatus != 200)
         {
-          LOG(code, httpStatus, payload);
-          LOG(jsonPrompt);
+          SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
+          SPDLOG_INFO("{}", jsonPrompt);
           self->lastError = payload;
           for (auto &msg : qMsgs)
             msg.second("");
@@ -137,7 +137,7 @@ auto Gpt::process() -> void
               }
               else
               {
-                LOG("this was destroyed");
+                SPDLOG_INFO("this was destroyed");
               }
             },
             10'000);
@@ -167,7 +167,7 @@ auto Gpt::process() -> void
         auto choices = j("choices");
         if (choices.empty())
         {
-          LOG(code, httpStatus, payload);
+          SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
           self->lastError = "0 Choices";
           for (auto &msg : qMsgs)
             msg.second("");
@@ -214,7 +214,7 @@ auto Gpt::process() -> void
       }
       else
       {
-        LOG("this was destroyed");
+        SPDLOG_INFO("this was destroyed");
       }
     },
     {{"Content-Type", "application/json"}, {"Authorization", "Bearer " + token}});

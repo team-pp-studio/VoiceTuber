@@ -1,6 +1,6 @@
 #include "font.hpp"
 #include "file.hpp"
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 namespace
@@ -13,10 +13,9 @@ namespace
       const auto r = TTF_Init();
       if (r < 0)
       {
-        std::ostringstream ss;
-        ss << "TTF_Init: " << TTF_GetError();
-        LOG(ss.str());
-        throw std::runtime_error(ss.str());
+        auto str = fmt::format("TTF_Init: {}", TTF_GetError());
+        SPDLOG_ERROR("{}", str);
+        throw std::runtime_error(str);
       }
     }
     ~FontInitializer() { TTF_Quit(); }
@@ -40,7 +39,7 @@ Font::Font(std::filesystem::path file, int ptsize)
     }())
 {
   if (!font)
-    LOG("TTF_OpenFont", TTF_GetError());
+    SPDLOG_ERROR("TTF_OpenFont: {}", TTF_GetError());
 }
 
 Font::~Font()
@@ -83,7 +82,7 @@ auto Font::getTextureFromCache(const std::string &txt) const -> Texture &
   SDL_Surface *surface = TTF_RenderUTF8_Blended(font.get(), txt.c_str(), {255, 255, 255, 255});
   if (!surface)
   {
-    LOG("TTF_RenderText_Blended", TTF_GetError());
+    SPDLOG_ERROR("TTF_RenderText_Blended: {}", TTF_GetError());
     surface = SDL_CreateRGBSurfaceWithFormat(0,  // The flags are obsolete and should be set to 0.
                                              16, //  The width in pixels of the surface to create.
                                              16, //  The height in pixels of the surface to create.

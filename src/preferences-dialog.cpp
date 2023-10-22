@@ -5,7 +5,7 @@
 #include "ui.hpp"
 #include <SDL.h>
 #include <imgui.h>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 PreferencesDialog::PreferencesDialog(class Preferences &preferences,
                                      class AudioOut &aAudioOut,

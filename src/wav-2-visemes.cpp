@@ -1,6 +1,6 @@
 #include "wav-2-visemes.hpp"
-#include <log/log.hpp>
 #include <pocketsphinx.h>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
@@ -71,17 +71,49 @@ auto Wav2Visemes::ingest(Wav wav, bool /*overlap*/) -> void
         if (tmp[0] != '+')
           phoneme = tmp;
       }
-      static auto phonToViseme = std::unordered_map<std::string, Viseme>{
-        {"AA", Viseme::aa}, {"AE", Viseme::aa}, {"AH", Viseme::aa},   {"AO", Viseme::O},
-        {"AW", Viseme::O},  {"AY", Viseme::aa}, {"B", Viseme::PP},    {"CH", Viseme::CH},
-        {"D", Viseme::DD},  {"DH", Viseme::TH}, {"EH", Viseme::E},    {"ER", Viseme::E},
-        {"EY", Viseme::E},  {"F", Viseme::FF},  {"G", Viseme::kk},    {"HH", Viseme::CH},
-        {"IH", Viseme::I},  {"IY", Viseme::I},  {"JH", Viseme::CH},   {"K", Viseme::kk},
-        {"L", Viseme::nn},  {"M", Viseme::nn},  {"N", Viseme::nn},    {"NG", Viseme::nn},
-        {"OW", Viseme::O},  {"OY", Viseme::O},  {"P", Viseme::PP},    {"R", Viseme::RR},
-        {"S", Viseme::SS},  {"SH", Viseme::SS}, {"SIL", Viseme::sil}, {"T", Viseme::DD},
-        {"TH", Viseme::TH}, {"UH", Viseme::U},  {"UW", Viseme::U},    {"V", Viseme::FF},
-        {"W", Viseme::RR},  {"Y", Viseme::nn},  {"Z", Viseme::SS},    {"ZH", Viseme::SS}};
+      using namespace std::literals;
+      static auto const phonToViseme = std::unordered_map<std::string_view, Viseme>{
+        {"AA"sv, Viseme::aa},
+        {"AE"sv, Viseme::aa},
+        {"AH"sv, Viseme::aa},
+        {"AO"sv, Viseme::O},
+        {"AW"sv, Viseme::O},
+        {"AY"sv, Viseme::aa},
+        {"B"sv, Viseme::PP},
+        {"CH"sv, Viseme::CH},
+        {"D"sv, Viseme::DD},
+        {"DH"sv, Viseme::TH},
+        {"EH"sv, Viseme::E},
+        {"ER"sv, Viseme::E},
+        {"EY"sv, Viseme::E},
+        {"F"sv, Viseme::FF},
+        {"G"sv, Viseme::kk},
+        {"HH"sv, Viseme::CH},
+        {"IH"sv, Viseme::I},
+        {"IY"sv, Viseme::I},
+        {"JH"sv, Viseme::CH},
+        {"K"sv, Viseme::kk},
+        {"L"sv, Viseme::nn},
+        {"M"sv, Viseme::nn},
+        {"N"sv, Viseme::nn},
+        {"NG"sv, Viseme::nn},
+        {"OW"sv, Viseme::O},
+        {"OY"sv, Viseme::O},
+        {"P"sv, Viseme::PP},
+        {"R"sv, Viseme::RR},
+        {"S"sv, Viseme::SS},
+        {"SH"sv, Viseme::SS},
+        {"SIL"sv, Viseme::sil},
+        {"T"sv, Viseme::DD},
+        {"TH"sv, Viseme::TH},
+        {"UH"sv, Viseme::U},
+        {"UW"sv, Viseme::U},
+        {"V"sv, Viseme::FF},
+        {"W"sv, Viseme::RR},
+        {"Y"sv, Viseme::nn},
+        {"Z"sv, Viseme::SS},
+        {"ZH"sv, Viseme::SS},
+      };
 
       auto it = phonToViseme.find(phoneme);
       if (it != std::end(phonToViseme))
@@ -90,7 +122,7 @@ auto Wav2Visemes::ingest(Wav wav, bool /*overlap*/) -> void
           v.get().ingest(it->second);
       }
       else
-        LOG("Did not find phone mapping for:", phoneme);
+        SPDLOG_ERROR("Did not find phone mapping for: {}", phoneme);
     }
     if (!ps_endpointer_in_speech(ep))
     {

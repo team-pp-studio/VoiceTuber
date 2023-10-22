@@ -1,7 +1,7 @@
 #include "lib.hpp"
 #include "preferences.hpp"
 #include <cassert>
-#include <log/log.hpp>
+#include <spdlog/spdlog.h>
 
 Lib::Lib(class Preferences &aPreferences, uv::Uv &aUv, HttpClient &aHttpClient)
   : preferences(aPreferences),

@@ -1,6 +1,3 @@
-[submodule "3rd-party/log"]
-	path = 3rd-party/log
-	url = https://github.com/mika314/log.git
 [submodule "3rd-party/sdlpp"]
 	path = 3rd-party/sdlpp
 	url = https://github.com/mika314/sdlpp.git
@@ -10,6 +7,3 @@
 [submodule "3rd-party/json"]
 	path = 3rd-party/json
 	url = https://github.com/mika314/json.git
-[submodule "3rd-party/pocketsphinx"]
-	path = 3rd-party/pocketsphinx
-	url = https://github.com/cmusphinx/pocketsphinx.git
