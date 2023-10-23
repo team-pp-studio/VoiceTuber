@@ -4,7 +4,7 @@
 #include "save-wav.hpp"
 #include <cmath>
 #include <fmt/std.h>
-#include <json/json.hpp>
+#include <rapidjson/document.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 
@@ -126,10 +126,11 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
             }
 
             self->lastError = "";
-            const auto j = json::Root{std::move(payload)};
-            // {"RecognitionStatus":"Success","Offset":600000,"Duration":30000000,"DisplayText":"What
-            // do you think about it?"}
-            cb(j("DisplayText").asStr());
+            rapidjson::Document document;
+            document.Parse(payload.data(), payload.size());
+            // {"RecognitionStatus":"Success","Offset":600000,"Duration":30000000,"DisplayText":"What do you think about it?"}
+            auto const &display_text = document["DisplayText"];
+            cb(std::string_view{display_text.GetString(), display_text.GetStringLength()});
             postTask(true);
           }
           else

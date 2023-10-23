@@ -8,14 +8,15 @@
 class AzureStt : public std::enable_shared_from_this<AzureStt>
 {
 public:
-  using Callback = std::move_only_function<void(std::string)>;
+  using Callback = std::move_only_function<void(std::string_view)>;
   AzureStt(uv::Uv &, class AzureToken &, class HttpClient &);
   auto perform(Wav, int sampleRate, Callback) -> void;
 
   std::string lastError;
 
 private:
-  enum class State { idle, waiting };
+  enum class State { idle,
+                     waiting };
   using PostTask = std::move_only_function<void(bool)>;
   using Task = std::move_only_function<void(const std::string &t, PostTask)>;
 

@@ -1100,7 +1100,7 @@ auto Node::placeBellow(Node &newSibling) -> void
       {
         auto selfIt =
           std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
-        assert(selfIt != std::end(parent()->nodes));
+        assert(selfIt != std::end(self->parent()->nodes));
         self->parent()->nodes.erase(selfIt);
         oldParent->nodes = nodes;
         self->parent_ = oldParent;
