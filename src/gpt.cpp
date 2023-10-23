@@ -5,8 +5,8 @@
 #include <cctype>
 #include <cstring>
 #include <functional>
-#include <json/json.hpp>
 #include <numeric>
+#include <rapidjson/document.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 
@@ -38,25 +38,30 @@ static auto esc(const std::string &str) -> std::string
   return result;
 }
 
-static auto stripWhiteSpaces(std::string v) -> std::string
+static std::string_view stripWhiteSpaces(std::string_view v)
 {
-  v.erase(v.begin(), std::find_if(v.begin(), v.end(), [](auto c) { return !std::isspace(c); }));
-  v.erase(std::find_if(v.rbegin(), v.rend(), [](auto c) { return !std::isspace(c); }).base(), v.end());
+  if (v.empty())
+    goto done;
+  while (std::isspace(v.front()))
+    v.remove_prefix(1);
+  while (std::isspace(v.back()))
+    v.remove_suffix(1);
+done:
   return v;
 }
 
-static auto stripHangingSentences(std::string v) -> std::string
+static std::string_view stripHangingSentences(std::string_view v)
 {
   const auto posDot = v.rfind('.');
   const auto posExclamation = v.rfind('!');
   const auto posQuestion = v.rfind('?');
 
-  auto pos = std::string::npos;
+  auto pos = std::string_view::npos;
   for (std::size_t p : {posDot, posExclamation, posQuestion})
-    if (p != std::string::npos && (pos == std::string::npos || p > pos))
+    if (p != std::string_view::npos && (pos == std::string_view::npos || p > pos))
       pos = p;
 
-  return (pos != std::string::npos) ? v.substr(0, pos + 1) : v;
+  return (pos != std::string_view::npos) ? v.substr(0, pos + 1) : v;
 }
 
 auto Gpt::prompt(std::string name, std::string p, Callback cb) -> void
@@ -143,8 +148,9 @@ auto Gpt::process() -> void
             10'000);
           return;
         }
-        self->lastError = "";
-        const auto j = json::Root{std::move(payload)};
+        self->lastError.clear();
+        rapidjson::Document document;
+        document.Parse(payload.data(), payload.size());
         // {
         //   "id": "cmpl-7PJIyTy1pXJD3OvzekQOQnqOdcUF5",
         //   "object": "text_completion",
@@ -164,8 +170,8 @@ auto Gpt::process() -> void
         //     "total_tokens": 64
         //   }
         // }
-        auto choices = j("choices");
-        if (choices.empty())
+        auto const &choices = document["choices"].GetArray();
+        if (choices.Empty())
         {
           SPDLOG_INFO("{} {} {}", curl_easy_strerror(code), httpStatus, payload);
           self->lastError = "0 Choices";
@@ -174,7 +180,7 @@ auto Gpt::process() -> void
           self->state = State::idle;
           self->process();
         }
-        auto cohostMsg = stripHangingSentences(stripWhiteSpaces(choices[0]("text").asStr()));
+        auto cohostMsg = stripHangingSentences(stripWhiteSpaces(std::string_view{choices[0]["text"].GetString(), choices[0]["text"].GetStringLength()}));
         if (!embedName)
         {
           if (cohostMsg.find(self->cohost_ + std::string{":"}) != 0)

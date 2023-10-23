@@ -66,7 +66,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
       if (*max > 0x2000 || static_cast<int>(wavBuf.size()) > 10 * sampleRate)
         stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
                      sampleRate,
-                     [alive = this->weak_from_this()](std::string txt) {
+                     [alive = this->weak_from_this()](std::string_view txt) {
                        if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
                        {
                          if (!self->hostMsg.empty())
@@ -77,11 +77,11 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
                            return;
 
                          self->lib.get().gpt().prompt(
-                           "Host", std::move(self->hostMsg), [alive](std::string rsp) {
+                           "Host", std::move(self->hostMsg), [alive](std::string_view rsp) {
                              if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
                              {
                                SPDLOG_INFO("{}: {}", self->cohost, rsp);
-                               self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+                               self->tts->say("en-US-AmberNeural", std::string(rsp), false);
                                self->talkStart = std::chrono::high_resolution_clock::now();
                              }
                              else
@@ -102,13 +102,13 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   }
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = this->weak_from_this()](std::string rsp) {
+    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = this->weak_from_this()](std::string_view rsp) {
       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
       {
         if (rsp.empty())
           return;
         SPDLOG_INFO("{}: {}", self->cohost, rsp);
-        self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+        self->tts->say("en-US-AmberNeural", std::string(rsp), false);
         self->talkStart = std::chrono::high_resolution_clock::now();
       }
       else
@@ -302,14 +302,14 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(
-    val.displayName + " from chat", val.msg, [alive = this->weak_from_this()](std::string rsp) {
+    val.displayName + " from chat", val.msg, [alive = this->weak_from_this()](std::string_view rsp) {
       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
       {
         if (rsp.empty())
           return;
 
         SPDLOG_INFO("{}: {}", self->cohost, rsp);
-        self->tts->say("en-US-AmberNeural", std::move(rsp), false);
+        self->tts->say("en-US-AmberNeural", std::string(rsp), false);
         self->talkStart = std::chrono::high_resolution_clock::now();
       }
       else

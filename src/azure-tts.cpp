@@ -2,7 +2,7 @@
 #include "audio-sink.hpp"
 #include "azure-token.hpp"
 #include "http-client.hpp"
-#include <json/json.hpp>
+#include <rapidjson/document.h>
 #include <spdlog/spdlog.h>
 
 AzureTts::AzureTts(uv::Uv &uv,
@@ -38,7 +38,7 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
   queue.emplace([msg = std::move(msg),
                  alive = this->weak_from_this(),
                  voice = std::move(voice),
-                 overlap](const std::string &t, PostTask postTask) {
+                 overlap](std::string_view t, PostTask postTask) {
     if (auto self = alive.lock())
     {
       auto xml = R"(<speak version="1.0" xml:lang="en-us"><voice xml:lang="en-US" name=")" + voice +
@@ -97,7 +97,7 @@ auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
         },
         {{"Accept", ""},
          {"User-Agent", "curl/7.68.0"},
-         {"Authorization", "Bearer " + t},
+         {"Authorization", fmt::format("Bearer {}", t)},
          {"Content-Type", "application/ssml+xml"},
          {"X-Microsoft-OutputFormat", "raw-24khz-16bit-mono-pcm"}});
     }
@@ -173,8 +173,7 @@ auto AzureTts::process() -> void
 
 auto AzureTts::listVoices(ListVoicesCallback cb) -> void
 {
-  queue.emplace([cb = std::move(cb), alive = this->weak_from_this()](const std::string &t,
-                                                                     PostTask postTask) mutable {
+  queue.emplace([cb = std::move(cb), alive = this->weak_from_this()](std::string_view t, PostTask postTask) mutable {
     if (auto self = alive.lock())
     {
       self->httpClient.get().get(
@@ -206,9 +205,10 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
               return;
             }
 
-            const auto list = json::Root{std::move(payload)};
-            std::vector<std::string> voices;
-            for (auto i = 0U; i < list.size(); ++i)
+            rapidjson::Document document;
+            document.Parse(payload.data(), payload.size());
+            std::vector<std::string_view> voices;
+            for (auto const &element : document.GetArray())
             {
               //[
               //  {
@@ -251,15 +251,14 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
               //    "WordsPerMinute": "112"
               //  }, ...
 
-              const auto obj = list[i];
-              const auto locale = obj("Locale").asStr();
-              if (locale.find("en-") != 0)
+              const auto locale = std::string_view{element["Locale"].GetString(), element["Locale"].GetStringLength()};
+              if (locale.starts_with("en-") != 0)
                 continue;
-              voices.emplace_back(obj("ShortName").asStr());
+              voices.emplace_back(std::string_view{element["ShortName"].GetString(), element["ShortName"].GetStringLength()});
             }
-            self->lastError = "";
+            self->lastError.clear();
 
-            cb(std::move(voices));
+            cb(voices);
             postTask(true);
           }
           else
@@ -267,7 +266,11 @@ auto AzureTts::listVoices(ListVoicesCallback cb) -> void
             SPDLOG_INFO("this was destroyed");
           }
         },
-        {{"Accept", ""}, {"User-Agent", "curl/7.68.0"}, {"Authorization", "Bearer " + t}});
+        {
+          {"Accept", ""},
+          {"User-Agent", "curl/7.68.0"},
+          {"Authorization", fmt::format("Bearer {}", t)},
+        });
     }
     else
     {

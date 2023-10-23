@@ -5,8 +5,8 @@
 #include "no-voice.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
-#include <spdlog/spdlog.h>
 #include <sdlpp/sdlpp.hpp>
+#include <spdlog/spdlog.h>
 #include <sstream>
 static const char *mute = "Mute";
 
@@ -165,10 +165,10 @@ auto Chat::load(IStrm &strm) -> void
     if (!azureTts)
     {
       azureTts = lib.get().queryAzureTts(audioSink);
-      azureTts->listVoices([alive = this->weak_from_this()](std::vector<std::string> aVoices) {
+      azureTts->listVoices([alive = this->weak_from_this()](std::span<std::string_view> aVoices) {
         if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
         {
-          self->voices = std::move(aVoices);
+          self->voices.insert(self->voices.begin(), aVoices.begin(), aVoices.end());
         }
         else
         {
@@ -324,10 +324,11 @@ auto Chat::renderUi() -> void
               if (!self->azureTts)
               {
                 self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
-                self->azureTts->listVoices([alive](std::vector<std::string> aVoices) {
+                self->azureTts->listVoices([alive](std::span<std::string_view> aVoices) {
                   if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
                   {
-                    self->voices = std::move(aVoices);
+                    self->voices.clear();
+                    self->voices.insert(self->voices.end(), aVoices.begin(), aVoices.end());
                   }
                   else
                   {
@@ -355,10 +356,10 @@ auto Chat::renderUi() -> void
               if (!self->azureTts)
               {
                 self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
-                self->azureTts->listVoices([alive](std::vector<std::string> voices) {
+                self->azureTts->listVoices([alive](std::span<std::string_view> voices) {
                   if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
                   {
-                    self->voices = std::move(voices);
+                    self->voices.insert(self->voices.end(), voices.begin(), voices.end());
                   }
                   else
                   {

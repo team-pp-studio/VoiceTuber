@@ -10,7 +10,7 @@
 class Gpt : public std::enable_shared_from_this<Gpt>
 {
 public:
-  using Callback = std::move_only_function<void(const std::string &)>;
+  using Callback = std::move_only_function<void(std::string_view)>;
   Gpt(uv::Uv &, std::string token, class HttpClient &);
   auto cohost() const -> std::string;
   auto cohost(std::string) -> void;
@@ -27,7 +27,10 @@ private:
     std::string name;
     std::string msg;
   };
-  enum class State { idle, waiting };
+  enum class State {
+    idle,
+    waiting,
+  };
 
   uv::Timer timer;
   std::string token;

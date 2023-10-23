@@ -4,6 +4,3 @@
 [submodule "3rd-party/ser"]
 	path = 3rd-party/ser
 	url = https://github.com/mika314/ser.git
-[submodule "3rd-party/json"]
-	path = 3rd-party/json
-	url = https://github.com/mika314/json.git
