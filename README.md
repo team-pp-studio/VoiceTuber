@@ -104,8 +104,11 @@ Links:
 
 * Ensure you have Conan, CMake and GCC installed.
     * Conan might not be available in your distribution repositories, but it's also available through pip.
+* Clone the repository: `git clone https://github.com/team-pp-studio/VoiceTuber.git;` `cd VoiceTuber`
+* Initialize Git submodules: `git submodule update --init --recursive`
 * Export PocketSphinx to your conan cache by running `conan export ./recipes/pocketsphinx --version 5.0.1`.
-* Install required dependencies: `conan install ./ --build missing -s build_type=Release`
+* Install and build required dependencies: `conan install ./ --build missing -s build_type=Release`
+* Configure CMake: `cmake --preset conan-release`
 * Build the binary: `cmake --build --preset conan-release`
 * And install locally: `cmake --install build/Release --prefix ./local_install/`
 
