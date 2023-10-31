@@ -30,9 +30,9 @@ elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
 endif()
 
 add_library(sanitizers INTERFACE)
-if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang*"))
-target_link_libraries(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
-target_compile_options(sanitizers INTERFACE -fsanitize=address -fsanitize=undefined)
+if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "*Clang"))
+    target_link_libraries(sanitizers INTERFACE -fsanitize=address,undefined -static-libasan -static-libubsan)
+    target_compile_options(sanitizers INTERFACE -fsanitize=address,undefined -static-libasan -static-libubsan)
 endif()
 
 add_library(ser)
@@ -56,6 +56,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE warnings sanitizers ser imgui_bind
 
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main)    
+endif()
+
+if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "*Clang"))
+    target_link_libraries(sanitizers INTERFACE -static-libgcc -static-libstdc++)
+    target_compile_options(sanitizers INTERFACE -static-libgcc -static-libstdc++)
 endif()
 
 set_target_properties(VoiceTuber PROPERTIES INSTALL_RPATH "\${ORIGIN}/lib")
