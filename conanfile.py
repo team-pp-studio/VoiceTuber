@@ -23,9 +23,7 @@ class VoiceTuberConan(ConanFile):
     default_options = {
         "fPIC": True,
 
-        "pulseaudio/*:shared": True,
         "sdl/*:shared": True,
-        "sdl/*:pulse": False,
         "sdl_ttf/*:shared": True,
         "libcurl/*:shared": True,
     }

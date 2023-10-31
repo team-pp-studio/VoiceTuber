@@ -54,7 +54,7 @@ static auto eq(const std::vector<std::string_view> &words, size_t i, size_t j, s
 static auto dedup(std::string_view var)
 {
   std::vector<std::string_view> words;
-  auto const result = scn::scan_list(var, words);
+  [[maybe_unused]] auto const result = scn::scan_list(var, words);
   assert(!result.error());
   for (bool didUpdate = true; didUpdate;)
   {

@@ -110,9 +110,7 @@ Links:
 * Install and build required dependencies: `conan install ./ --build missing -s build_type=Release`
 * Configure CMake: `cmake --preset conan-release`
 * Build the binary: `cmake --build --preset conan-release`
-* And install locally: `cmake --install build/Release --prefix ./local_install/`
-
-You can also add the location of the shared libraries to the `LD_LIBRARY_PATH` environment variable.
+* And install locally: `cmake --install build/Release --prefix ./install/`
 
 ***Building with coddle***
 

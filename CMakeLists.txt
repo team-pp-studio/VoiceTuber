@@ -58,7 +58,9 @@ if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main)    
 endif()
 
+set_target_properties(VoiceTuber PROPERTIES INSTALL_RPATH "\${ORIGIN}/lib")
 
 # destinations are relative to the install prefix
-install(TARGETS ${PROJECT_NAME} DESTINATION ".")
+install(TARGETS ${PROJECT_NAME} DESTINATION "." RUNTIME_DEPENDENCY_SET RuntimeDependencies)
+install(RUNTIME_DEPENDENCY_SET RuntimeDependencies DESTINATION "lib" PRE_EXCLUDE_REGEXES "^/lib.*" "^/usr.*" POST_EXCLUDE_REGEXES "^/lib.*" "^/usr.*")
 install(DIRECTORY assets DESTINATION ".")
