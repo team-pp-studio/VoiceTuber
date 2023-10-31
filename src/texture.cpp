@@ -4,7 +4,6 @@
 #include <fmt/std.h>
 #include <sdlpp/sdlpp.hpp>
 #include <spdlog/spdlog.h>
-#include <sstream>
 #include <stdio.h>
 
 #pragma GCC diagnostic push
@@ -25,11 +24,8 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
         {
           auto ret = stbi_load(path_.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
           if (!ret)
-          {
-            std::ostringstream ss;
-            ss << "Error loading image: " << path_;
-            throw std::runtime_error(ss.str());
-          }
+            throw std::runtime_error(fmt::format("Error loading image from {:?}: {}", path_, stbi_failure_reason()));
+
           return ret;
         }
         catch (std::runtime_error &e)
@@ -39,11 +35,8 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
           auto fp = open_file(engineImgPath, "rb");
           auto ret = stbi_load_from_file(fp.get(), &w_, &h_, &ch_, STBI_rgb_alpha);
           if (!ret)
-          {
-            std::ostringstream ss;
-            ss << "Error loading image: " << engineImgPath;
-            throw std::runtime_error(ss.str());
-          }
+            throw std::runtime_error(fmt::format("Error loading image from {:?}: {}", engineImgPath, stbi_failure_reason()));
+
           return ret;
         }
       }
@@ -53,11 +46,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
         auto fp = open_file(engineImgPath, "rb");
         auto ret = stbi_load_from_file(fp.get(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
-        {
-          std::ostringstream ss;
-          ss << "Error loading image: " << engineImgPath;
-          throw std::runtime_error(ss.str());
-        }
+          throw std::runtime_error(fmt::format("Error loading image from {:?}: {}", engineImgPath, stbi_failure_reason()));
         return ret;
       }
     }()),
@@ -90,11 +79,7 @@ Texture::Texture(uv::Uv &uv, std::string aPath, bool isUi)
       {
         auto ret = stbi_load(path_.c_str(), &w_, &h_, &ch_, STBI_rgb_alpha);
         if (!ret)
-        {
-          std::ostringstream ss;
-          ss << "Error loading image: " << path_;
-          throw std::runtime_error(ss.str());
-        }
+          throw std::runtime_error(fmt::format("Error loading image from {:?}: {}", path_, stbi_failure_reason()));
         imageData_ = ret;
         glBindTexture(GL_TEXTURE_2D, texture_);
         if (ch_ == 4)

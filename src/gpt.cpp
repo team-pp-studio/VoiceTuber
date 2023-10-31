@@ -7,6 +7,7 @@
 #include <functional>
 #include <numeric>
 #include <rapidjson/document.h>
+#include <scn/scn.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 
@@ -237,14 +238,18 @@ auto Gpt::countWords() const -> int
   return std::accumulate(
     std::begin(msgs), std::end(msgs), 0, [this](int a, const auto &msg) { return a + countWords(msg); });
 }
+
 auto Gpt::countWords(const Msg &msg) const -> int
 {
-  std::istringstream ss(msg.msg);
-  std::string word;
-  auto cnt = 0;
-  while (std::getline(ss, word, ' '))
-    ++cnt;
-  return cnt;
+  std::string_view str = msg.msg;
+
+  std::size_t count = 0;
+  while (auto result = scn::scan_value<std::string_view>(str))
+  {
+    str = result.range_as_string_view();
+    ++count;
+  }
+  return count;
 }
 
 auto Gpt::systemPrompt(std::string v) -> void

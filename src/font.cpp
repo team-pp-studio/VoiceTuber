@@ -1,7 +1,6 @@
 #include "font.hpp"
 #include "file.hpp"
 #include <spdlog/spdlog.h>
-#include <sstream>
 
 namespace
 {

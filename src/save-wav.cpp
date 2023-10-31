@@ -1,6 +1,5 @@
 #include "save-wav.hpp"
-#include <fstream>
-#include <iostream>
+#include <ostream>
 
 namespace little_endian_io
 {
@@ -23,8 +22,8 @@ auto saveWav(std::ostream &f, const Wav &pcm, int sampleRate) -> void
   writeWord(f, 1, 2);                         // one channel (mono file)
   writeWord(f, sampleRate, 4);                // samples per second (Hz)
   writeWord(f, (sampleRate * 16 * 1) / 8, 4); // (Sample Rate * BitsPerSample * Channels) / 8
-  writeWord(f, 2, 2);  // data block size (size of two integer samples, one for each channel, in bytes)
-  writeWord(f, 16, 2); // number of bits per sample (use a multiple of 8)
+  writeWord(f, 2, 2);                         // data block size (size of two integer samples, one for each channel, in bytes)
+  writeWord(f, 16, 2);                        // number of bits per sample (use a multiple of 8)
 
   // Write the data chunk header
   const auto dataChunkPos = static_cast<long>(f.tellp());

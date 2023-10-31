@@ -1,7 +1,7 @@
 #include "wav-2-visemes.hpp"
 #include <pocketsphinx.h>
+#include <scn/scn.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -63,11 +63,12 @@ auto Wav2Visemes::ingest(Wav wav, bool /*overlap*/) -> void
     const auto hyp = ps_get_hyp(decoder, nullptr);
     if (hyp)
     {
-      std::istringstream st(hyp);
-      std::string tmp;
-      std::string phoneme = "SIL";
-      while (std::getline(st, tmp, ' '))
+      std::string_view str = hyp;
+      std::string_view phoneme = "SIL";
+      while (auto result = scn::scan_value<std::string_view>(str))
       {
+        str = result.range_as_string_view();
+        auto const tmp = result.value();
         if (tmp[0] != '+')
           phoneme = tmp;
       }

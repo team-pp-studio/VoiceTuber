@@ -52,6 +52,6 @@ private:
   auto render(float dt, Node *hovered, Node *selected) -> void final;
   auto renderUi() -> void final;
   auto w() const -> float final;
-  auto wrapText(const std::string &text, float initOffset) const -> std::vector<std::string>;
+  auto wrapText(std::string_view text, float initOffset) const -> std::vector<std::string>;
   auto getVoice(const std::string &name) const -> std::string;
 };

@@ -5,8 +5,8 @@
 #include "twitch.hpp"
 #include <algorithm>
 #include <optional>
+#include <scn/scn.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -186,11 +186,12 @@ auto Twitch::init() -> void
 
 auto Twitch::sendPassNickUser() -> void
 {
-  std::ostringstream msg;
-  msg << "PASS " << key << "\r\n";
-  msg << "NICK " << user << "\r\n";
-  msg << "USER nobody unknown unknown :noname\r\n";
-  auto s = tcp.write(msg.str(), [alive = this->weak_from_this()](int status) {
+  std::string buff;
+  fmt::format_to(std::back_inserter(buf), "PASS {}\r\n", key);
+  fmt::format_to(std::back_inserter(buf), "NICK {}\r\n", user);
+  fmt::format_to(std::back_inserter(buf), "USER nobody unknown unknown :noname\r\n");
+
+  auto s = tcp.write(std::move(buff), [alive = this->weak_from_this()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -265,13 +266,13 @@ auto Twitch::parseMsg() -> void
         continue;
       if (token.front() == '@' && tags.empty() && !source && command.empty())
       {
-        auto tagsSs = std::istringstream{token.substr(1)};
-        auto tag = std::string{};
-        while (tagsSs)
+        std::string_view str(token.begin() + 1, token.end());
+        std::string_view tag;
+        while (auto result = scn::getline(str, tag, ';'))
         {
-          std::getline(tagsSs, tag, ';');
+          str = result.range_as_string_view();
           const auto pos = tag.find('=');
-          tags.push_back({tag.substr(0, pos), tag.substr(pos + 1)});
+          tags.emplace_back(tag.substr(0, pos), tag.substr(pos + 1));
         }
       }
       else if (token.front() == ':' && !source && command.empty())
@@ -317,9 +318,8 @@ auto Twitch::parseMsg() -> void
             }
 
             int r, g, b;
-            std::istringstream(hexString.substr(1, 2)) >> std::hex >> r;
-            std::istringstream(hexString.substr(3, 2)) >> std::hex >> g;
-            std::istringstream(hexString.substr(5, 2)) >> std::hex >> b;
+            [[maybe_unused]] auto const result = scn::scan(hexString, "#{:2x}{:2x}{:2x}", r, g, b);
+            assert(!result.error());
 
             return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f);
           }(tag.second);
@@ -367,9 +367,9 @@ auto Twitch::parseMsg() -> void
 
 auto Twitch::onPing(const std::string &val) -> void
 {
-  std::ostringstream sendMsg;
-  sendMsg << "PONG " << val << "\r\n";
-  auto s = tcp.write(sendMsg.str(), [alive = this->weak_from_this()](int status) {
+  std::string buf;
+  std::format_to(std::back_inserter(buf), "PONG {}\r\n", val);
+  auto s = tcp.write(std::move(buf), [alive = this->weak_from_this()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -400,11 +400,11 @@ auto Twitch::onPong() -> void
 
 auto Twitch::onWelcome() -> void
 {
-  std::ostringstream msg;
-  msg << "CAP REQ :twitch.tv/tags\r\n"
-      << "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n"
-      << "JOIN #" << channel << "\r\n";
-  auto s = tcp.write(msg.str(), [alive = this->weak_from_this()](int status) {
+  std::string buf;
+  std::format_to(std::back_inserter(buf), "CAP REQ :twitch.tv/tags\r\n");
+  std::format_to(std::back_inserter(buf), "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n");
+  std::format_to(std::back_inserter(buf), "JOIN #{}\r\n", channel);
+  auto s = tcp.write(std::move(buf), [alive = this->weak_from_this()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)

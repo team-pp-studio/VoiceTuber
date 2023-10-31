@@ -5,9 +5,10 @@
 #include "no-voice.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
+#include <scn/scn.h>
 #include <sdlpp/sdlpp.hpp>
 #include <spdlog/spdlog.h>
-#include <sstream>
+
 static const char *mute = "Mute";
 
 Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std::string n)
@@ -38,7 +39,7 @@ static auto escName(std::string value) -> std::string
   return value;
 }
 
-static auto eq(const std::vector<std::string> &words, size_t i, size_t j, size_t w)
+static auto eq(const std::vector<std::string_view> &words, size_t i, size_t j, size_t w)
 {
   if (i + w > words.size())
     return false;
@@ -50,19 +51,20 @@ static auto eq(const std::vector<std::string> &words, size_t i, size_t j, size_t
   return true;
 }
 
-static auto dedup(const std::string &var)
+static auto dedup(std::string_view var)
 {
-  std::vector<std::string> words;
-  std::string word;
-  std::istringstream st(var);
-  while (std::getline(st, word, ' '))
-    words.push_back(word);
+  std::vector<std::string_view> words;
+  auto const result = scn::scan_list(var, words);
+  assert(!result.error());
   for (bool didUpdate = true; didUpdate;)
   {
     didUpdate = false;
     for (auto w = 1U; w < words.size() / 2 && !didUpdate; ++w)
+    {
       for (auto i = 0U; i < words.size() - w && !didUpdate; ++i)
+      {
         for (auto r = 1U; !didUpdate; ++r)
+        {
           if (!eq(words, i, i + r * w, w))
           {
             if (r >= 3)
@@ -73,15 +75,12 @@ static auto dedup(const std::string &var)
             else
               break;
           }
+        }
+      }
+    }
   }
-  std::string ret;
-  for (const auto &w : words)
-  {
-    if (!ret.empty())
-      ret += " ";
-    ret += w;
-  }
-  return ret;
+
+  return fmt::format("{}", fmt::join(words, " "));
 }
 
 static auto getDialogLine(const std::string &text, bool isMe)
@@ -200,11 +199,10 @@ auto Chat::render(float dt, Node *hovered, Node *selected) -> void
   for (auto it = msgs.rbegin(); it != msgs.rend(); ++it)
   {
     const auto displayNameDim = font->getSize(it->displayName);
-    auto msg = std::ostringstream{};
-    msg << ": " << it->msg;
+    auto const msg = fmt::format(": {}", it->msg);
 
     glColor3f(1.f, 1.f, 1.f);
-    const auto wrappedLines = wrapText(msg.str(), displayNameDim.x);
+    const auto wrappedLines = wrapText(msg, displayNameDim.x);
     for (auto ln = wrappedLines.rbegin(); ln != wrappedLines.rend(); ++ln)
     {
       if (y > h())
@@ -226,25 +224,27 @@ auto Chat::render(float dt, Node *hovered, Node *selected) -> void
   Node::render(dt, hovered, selected);
 }
 
-auto Chat::wrapText(const std::string &text, float initOffset) const -> std::vector<std::string>
+auto Chat::wrapText(std::string_view text, float initial_offset) const -> std::vector<std::string>
 {
   std::vector<std::string> lines;
-  auto iss = std::istringstream{text};
-  std::string word;
-  iss >> word;
-  auto line = std::move(word);
-  while (iss >> word)
+  std::string line;
+  while (auto result = scn::scan_value<std::string_view>(text))
   {
-    auto tempLine = line + " " + word;
-    const auto tempDim = font->getSize(tempLine);
-    if (tempDim.x > w() - initOffset)
+    text = result.range_as_string_view();
+    auto const word = result.value();
+
+    if (line.empty())
+      line += word;
+    else
+      (line += " ") += word;
+    const auto text_dimensions = font->getSize(line);
+    if (text_dimensions.x > w() - initial_offset)
     {
-      initOffset = 0;
+      initial_offset = 0;
+      line.resize(line.size() == word.size() ? 0 : line.size() - word.size() - 1);
       lines.emplace_back(std::move(line));
       line = word;
-      continue;
     }
-    line = std::move(tempLine);
   }
   if (!line.empty())
     lines.emplace_back(std::move(line));

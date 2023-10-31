@@ -697,11 +697,10 @@ auto App::renderTree(Node &v) -> void
   };
   const auto &nodes = v.getNodes();
   const auto sz = ImGui::GetFontSize();
-  std::ostringstream ss;
-  ss << "##" << &v;
+  auto const label = fmt::format("##{}", static_cast<void *>(&v));
   if (!nodes.empty())
   {
-    if (Ui::btnImg(ss.str().c_str(), v.visible ? *hideIco : *showIco, sz, sz))
+    if (Ui::btnImg(label, v.visible ? *hideIco : *showIco, sz, sz))
       undo.record([&v, newVisibility = !v.visible]() { v.visible = newVisibility; },
                   [&v, oldVisibility = v.visible]() { v.visible = oldVisibility; });
 
@@ -721,7 +720,7 @@ auto App::renderTree(Node &v) -> void
   }
   else
   {
-    if (Ui::btnImg(ss.str().c_str(), v.visible ? *hideIco : *showIco, sz, sz))
+    if (Ui::btnImg(label, v.visible ? *hideIco : *showIco, sz, sz))
       undo.record([&v, newVisibility = !v.visible]() { v.visible = newVisibility; },
                   [&v, oldVisibility = v.visible]() { v.visible = oldVisibility; });
     ImGui::SameLine();
