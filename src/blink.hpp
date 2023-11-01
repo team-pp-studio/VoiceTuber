@@ -24,7 +24,10 @@ public:
   constexpr static const char *className = ClassName::v;
 
 private:
-  enum class State { open, closed };
+  enum class State {
+    open,
+    closed,
+  };
 
   S sprite;
   int openEyes = 0;
@@ -41,6 +44,7 @@ private:
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
   auto w() const -> float final;
+  auto do_clone() const -> std::shared_ptr<Node> final;
 };
 
 struct SpriteSheetBlinkClassName

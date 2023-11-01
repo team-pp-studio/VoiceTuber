@@ -4,8 +4,7 @@
 class AudioLevel final : public AudioSink
 {
 public:
-  AudioLevel(class AudioIn &);
-  AudioLevel(const AudioLevel &) = delete;
+  explicit AudioLevel(class AudioIn &);
   ~AudioLevel() final;
   auto getLevel() const -> float;
   auto sampleRate() const -> int final;

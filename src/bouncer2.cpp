@@ -10,6 +10,11 @@ Bouncer2::Bouncer2(Lib &lib, Undo &aUndo, class AudioIn &audioIn, std::string aN
 {
 }
 
+auto Bouncer2::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Bouncer2>(*this);
+}
+
 auto Bouncer2::render(float dt, Node *hovered, Node *selected) -> void
 {
   dLoc.y += std::min(1000.f * dt / easing, 1.f) * (strength * audioLevel.getLevel() - dLoc.y);

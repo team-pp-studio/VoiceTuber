@@ -10,6 +10,12 @@ Blink<S, ClassName>::Blink(Lib &lib, Undo &aUndo, const std::filesystem::path &p
 }
 
 template <typename S, typename ClassName>
+auto Blink<S, ClassName>::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Blink>(*this);
+}
+
+template <typename S, typename ClassName>
 auto Blink<S, ClassName>::h() const -> float
 {
   return sprite.h();

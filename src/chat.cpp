@@ -17,7 +17,7 @@ Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std
     audioSink(aAudioSink),
     twitch(aLib.queryTwitch(n)),
     font(aLib.queryFont(sdl::get_base_path() / "assets/notepad_font/NotepadFont.ttf", ptsize)),
-    timer(aUv.createTimer())
+    timer(std::make_shared<uv::Timer>(aUv.createTimer()))
 {
   twitch->reg(*this);
 }
@@ -25,6 +25,11 @@ Chat::Chat(class Lib &aLib, Undo &aUndo, uv::Uv &aUv, AudioSink &aAudioSink, std
 Chat::~Chat()
 {
   twitch->unreg(*this);
+}
+
+auto Chat::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Chat>(*this);
 }
 
 static auto escName(std::string value) -> std::string
@@ -97,9 +102,9 @@ static auto getDialogLine(const std::string &text, bool isMe)
 auto Chat::onMsg(Msg val) -> void
 {
   showChat = true;
-  timer.stop();
+  timer->stop();
   if (hideChatSec > 0)
-    timer.start(
+    timer->start(
       [alive = this->weak_from_this()]() {
         if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
         {

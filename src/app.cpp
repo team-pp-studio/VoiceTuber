@@ -588,17 +588,7 @@ auto App::processIo() -> void
       {
         if (selected)
         {
-          OStrm os;
-          selected->saveAll(os);
-          const auto s = os.str();
-          IStrm is(s.data(), s.data() + s.size());
-          std::string className;
-          std::string name;
-          ::deser(is, className);
-          ::deser(is, name);
-          SPDLOG_INFO("{} {}", className, name);
-          auto n = std::shared_ptr{saveFactory.ctor(className, name)};
-          n->loadAll(saveFactory, is);
+          auto n = selected->clone();
           undo.record(
             [n, parent = selected->parent(), this]() {
               selected = n.get();

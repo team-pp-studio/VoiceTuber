@@ -22,3 +22,8 @@ auto ChatV2::save(OStrm &strm) const -> void
   ::ser(strm, *this);
   Chat::save(strm);
 }
+
+auto ChatV2::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<ChatV2>(*this);
+}

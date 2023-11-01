@@ -10,6 +10,11 @@ Bouncer::Bouncer(Lib &lib, Undo &aUndo, class AudioIn &audioIn)
 {
 }
 
+auto Bouncer::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Bouncer>(*this);
+}
+
 auto Bouncer::render(float dt, Node *hovered, Node *selected) -> void
 {
   zOrder = INT_MIN;

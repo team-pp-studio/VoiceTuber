@@ -2,8 +2,8 @@
 #include "mouse-tracking.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
-#include <spdlog/spdlog.h>
 #include <numbers>
+#include <spdlog/spdlog.h>
 
 EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::filesystem::path &path)
   : AnimSprite(lib, aUndo, path), mouseTracking(mouseTracking)
@@ -21,6 +21,11 @@ EyeV2::EyeV2(MouseTracking &mouseTracking, Lib &lib, Undo &aUndo, const std::fil
 EyeV2::~EyeV2()
 {
   mouseTracking.get().unreg(*this);
+}
+
+auto EyeV2::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<EyeV2>(*this);
 }
 
 auto EyeV2::render(float dt, Node *hovered, Node *selected) -> void

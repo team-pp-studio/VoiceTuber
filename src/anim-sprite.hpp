@@ -53,4 +53,5 @@ private:
   auto h() const -> float final;
   auto isTransparent(glm::vec2) const -> bool final;
   auto w() const -> float final;
+  auto do_clone() const -> std::shared_ptr<Node>;
 };

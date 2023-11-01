@@ -31,7 +31,7 @@ private:
   std::shared_ptr<Twitch> twitch;
   std::shared_ptr<Font> font;
   std::vector<Msg> msgs;
-  uv::Timer timer;
+  std::shared_ptr<uv::Timer> timer;
   bool showChat = false;
   bool tts = false;
   std::shared_ptr<AzureTts> azureTts;
@@ -54,4 +54,5 @@ private:
   auto w() const -> float final;
   auto wrapText(std::string_view text, float initOffset) const -> std::vector<std::string>;
   auto getVoice(const std::string &name) const -> std::string;
+  auto do_clone() const -> std::shared_ptr<Node>;
 };

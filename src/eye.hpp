@@ -26,4 +26,5 @@ private:
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
   auto ingest(const glm::mat4 &projMat, glm::vec2 v) -> void final;
+  auto do_clone() const -> std::shared_ptr<Node> final;
 };

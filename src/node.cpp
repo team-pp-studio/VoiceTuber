@@ -903,6 +903,18 @@ auto Node::w() const -> float
   return 1.f;
 }
 
+auto Node::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Node>(*this);
+}
+
+auto Node::clone() const -> std::shared_ptr<Node>
+{
+  auto n = this->do_clone();
+  assert(typeid(*this) == typeid(*n));
+  return n;
+}
+
 auto Node::parent() -> Node *
 {
   return parent_;

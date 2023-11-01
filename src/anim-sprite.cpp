@@ -27,6 +27,11 @@ static auto getProjectionMatrix() -> glm::mat4
   return glm::make_mat4(projectionMatrixData);
 }
 
+auto AnimSprite::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<AnimSprite>(*this);
+}
+
 auto AnimSprite::render(float dt, Node *hovered, Node *selected) -> void
 {
   if (sprite.numFrames() > 0)

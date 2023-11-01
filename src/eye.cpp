@@ -14,6 +14,11 @@ Eye::~Eye()
   mouseTracking.get().unreg(*this);
 }
 
+auto Eye::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Eye>(*this);
+}
+
 auto Eye::render(float dt, Node *hovered, Node *selected) -> void
 {
   auto clampMouse = [&]() {

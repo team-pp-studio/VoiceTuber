@@ -20,4 +20,5 @@ private:
   auto renderUi() -> void final;
   auto save(OStrm &) const -> void final;
   auto load(IStrm &) -> void final;
+  auto do_clone() const -> std::shared_ptr<Node> final;
 };

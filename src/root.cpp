@@ -5,9 +5,15 @@
 #include <limits>
 #include <spdlog/spdlog.h>
 
-Root::Root(Lib &lib, Undo &aUndo) : Node(lib, aUndo, "root") {}
+Root::Root(Lib &lib, Undo &aUndo)
+  : Node(lib, aUndo, "root") {}
 
 Root::~Root() {}
+
+auto Root::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Root>(*this);
+}
 
 auto Root::render(float dt, Node *hovered, Node *selected) -> void
 {

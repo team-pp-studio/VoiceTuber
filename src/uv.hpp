@@ -39,6 +39,7 @@ namespace uv
 
   public:
     using Callback = std::move_only_function<void()>;
+    Timer(Timer &&) = default;
 
     ~Timer();
     auto start(Callback, uint64_t timeout = 0, uint64_t repeat = 0) -> int;

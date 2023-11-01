@@ -42,6 +42,12 @@ Mouth<S, ClassName>::~Mouth()
 }
 
 template <typename S, typename ClassName>
+auto Mouth<S, ClassName>::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<Mouth>(*this);
+}
+
+template <typename S, typename ClassName>
 auto Mouth<S, ClassName>::render(float dt, Node *hovered, Node *selected) -> void
 {
   if (sprite.numFrames() > 0)

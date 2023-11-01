@@ -51,6 +51,11 @@ AiMouth::~AiMouth()
   twitch->unreg(*this);
 }
 
+auto AiMouth::do_clone() const -> std::shared_ptr<Node>
+{
+  return std::make_shared<AiMouth>(*this);
+}
+
 auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
 {
   if (!visible)

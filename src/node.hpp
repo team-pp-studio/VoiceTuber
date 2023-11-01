@@ -36,7 +36,12 @@ public:
 
   using PNodes = std::vector<std::shared_ptr<Node>>;
   using Nodes = std::vector<std::reference_wrapper<Node>>;
-  enum class EditMode { select, translate, scale, rotate };
+  enum class EditMode {
+    select,
+    translate,
+    scale,
+    rotate,
+  };
 
   Node(Lib &, class Undo &, std::string name);
   auto addChild(std::shared_ptr<Node>) -> void;
@@ -62,6 +67,7 @@ public:
   auto translateStart(glm::vec2 mouse) -> void;
   auto unparent() -> void;
   auto update(const glm::mat4 &projMat, glm::vec2 mouse) -> void;
+  auto clone() const -> std::shared_ptr<Node>;
   static auto del(Node **) -> void;
   static auto delNoUndo(Node &) -> void;
   virtual auto h() const -> float;
@@ -81,6 +87,7 @@ protected:
   std::string name;
 
 private:
+  virtual auto do_clone() const -> std::shared_ptr<Node>;
   auto collectUnderNodes(const glm::mat4 &projMat, glm::vec2 v, Nodes &) -> void;
   auto getAllNodesCalcModelView(Nodes &) -> void;
   auto rotCancel() -> void;

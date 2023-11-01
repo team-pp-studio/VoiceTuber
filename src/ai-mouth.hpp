@@ -59,4 +59,5 @@ private:
   auto sampleRate() const -> int final;
   auto save(OStrm &) const -> void final;
   auto w() const -> float final;
+  auto do_clone() const -> std::shared_ptr<Node> final;
 };

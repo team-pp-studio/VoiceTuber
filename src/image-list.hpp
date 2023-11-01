@@ -30,5 +30,5 @@ private:
   int frame_ = 0;
   mutable std::vector<std::string> texturesForSaveLoad;
   std::vector<std::shared_ptr<const Texture>> textures;
-  std::unique_ptr<Dialog> dialog = nullptr;
+  std::shared_ptr<Dialog> dialog = nullptr;
 };
