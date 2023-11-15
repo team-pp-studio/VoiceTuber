@@ -83,6 +83,46 @@ static auto dedup(const std::string &var)
   return ret;
 }
 
+static std::string escape(std::string data)
+{
+  // escape name
+  size_t p0 = 0;
+  while ((p0 = data.find('@', p0)) != std::string::npos)
+  {
+    ++p0;
+    auto p1 = data.find(' ', p0);
+    data.replace(p0, p1 - p0, escName(data.substr(p0, p1 - p0)));
+  }
+
+  // escape HTML links
+  for (;;)
+  {
+    {
+      auto p10 = data.find("http://");
+      if (p10 != std::string::npos)
+      {
+        auto p11 = data.find(' ', p10);
+        data.replace(p10, p11 - p10, "http link");
+
+        continue;
+      }
+    }
+    {
+      auto p20 = data.find("https://");
+      if (p20 != std::string::npos)
+      {
+        auto p21 = data.find(' ', p20);
+        data.replace(p20, p21 - p20, "https link");
+
+        continue;
+      }
+    }
+    break;
+  }
+
+  return dedup(data);
+}
+
 static auto getDialogLine(const std::string &text, bool isMe)
 {
   if (isMe)
@@ -120,7 +160,7 @@ auto Chat::onMsg(Msg val) -> void
       azureTts->say(
         voice,
         (!supressName ? (escName(displayName) + " " + getDialogLine(text, isMe) + " ") : "") +
-          dedup(text));
+          escape(text));
     else
       audioSink.get().ingest(noVoice());
     lastName = displayName;
