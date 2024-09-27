@@ -37,7 +37,7 @@ auto PrjDialog::internalDraw() -> DialogState
   const auto sz = ImGui::GetFontSize();
   {
     auto disable = Ui::Disabled{undoStack.empty()};
-    if (ImGui::ImageButton((void *)(intptr_t)bckDir->texture(), ImVec2(sz, sz)))
+    if (ImGui::ImageButton("Back",(void *)(intptr_t)bckDir->texture(), ImVec2(sz, sz)))
     {
       auto d = undoStack.back();
       undoStack.pop_back();
@@ -50,7 +50,7 @@ auto PrjDialog::internalDraw() -> DialogState
   ImGui::SameLine();
   {
     auto disable = Ui::Disabled{redoStack.empty()};
-    if (ImGui::ImageButton((void *)(intptr_t)fwdDir->texture(), ImVec2(sz, sz)))
+    if (ImGui::ImageButton("Forward",(void *)(intptr_t)fwdDir->texture(), ImVec2(sz, sz)))
     {
       auto d = redoStack.back();
       redoStack.pop_back();
@@ -61,7 +61,7 @@ auto PrjDialog::internalDraw() -> DialogState
     }
   }
   ImGui::SameLine();
-  if (ImGui::ImageButton((void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
+  if (ImGui::ImageButton("Up",(void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
   {
     dirs.clear();
     selectedDir = "";
@@ -201,11 +201,11 @@ auto PrjDialog::internalDraw() -> DialogState
   }
 
   ImGui::SetCursorPos(ImVec2{1110 - 160 + 20, 412 - 142 + 30});
-  if (ImGui::ImageButton((void *)(intptr_t)donate->texture(),
+  if (ImGui::ImageButton("Donate",(void *)(intptr_t)donate->texture(),
                          ImVec2{static_cast<float>(donate->w()), static_cast<float>(donate->h())}))
     SDL_OpenURL("https://github.com/sponsors/WichitPritchett");
   ImGui::SetCursorPosX(1110 - 160 + 20);
-  if (ImGui::ImageButton((void *)(intptr_t)github->texture(),
+  if (ImGui::ImageButton("GitHub", (void *)(intptr_t)github->texture(),
                          ImVec2{static_cast<float>(github->w()), static_cast<float>(github->h())}))
     SDL_OpenURL("https://github.com/team-pp-studio/VoiceTuber");
 

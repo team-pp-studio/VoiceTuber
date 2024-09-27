@@ -35,16 +35,16 @@ if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHE
     target_compile_options(sanitizers INTERFACE -fsanitize=address,undefined -static-libasan -static-libubsan)
 endif()
 
-add_library(ser)
+add_library(ser OBJECT)
 file(GLOB_RECURSE SER_SOURCE_FILES CONFIGURE_DEPENDS "3rd-party/ser/*.cpp")
 target_sources(ser PRIVATE ${SER_SOURCE_FILES})
 set_target_properties(ser PROPERTIES CXX_STANDARD_REQUIRED ON CXX_STANDARD 17)
 
-add_library(imgui_bindings)
+add_library(imgui_bindings OBJECT)
 target_include_directories(imgui_bindings PUBLIC ${imgui_RES_DIR}/bindings)
 target_sources(imgui_bindings PRIVATE
     ${imgui_RES_DIR}/bindings/imgui_impl_opengl3.cpp
-    ${imgui_RES_DIR}/bindings/imgui_impl_sdl.cpp)
+    ${imgui_RES_DIR}/bindings/imgui_impl_sdl2.cpp)
 target_link_libraries(imgui_bindings PUBLIC imgui::imgui SDL2::SDL2)
 
 add_executable(${PROJECT_NAME})

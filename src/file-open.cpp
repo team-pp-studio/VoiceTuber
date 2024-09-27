@@ -20,7 +20,7 @@ FileOpen::FileOpen(Lib &lib, std::string dialogName, Callback aCb)
 auto FileOpen::internalDraw() -> DialogState
 {
   const auto sz = ImGui::GetFontSize();
-  if (ImGui::ImageButton((void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
+  if (ImGui::ImageButton("Up",(void *)(intptr_t)upDir->texture(), ImVec2(sz, sz)))
   {
     files.clear();
     selectedFile = "";
