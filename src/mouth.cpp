@@ -101,7 +101,7 @@ auto Mouth<S, ClassName>::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, alive = this->weak_from_this(), vis]() {
+        [&f, newF = f, alive = weak_from_this(), vis]() {
           if (auto self = std::static_pointer_cast<Mouth>(alive.lock()))
           {
             using namespace std::chrono_literals;
@@ -115,7 +115,7 @@ auto Mouth<S, ClassName>::renderUi() -> void
             return;
           }
         },
-        [&f, oldF, alive = this->weak_from_this(), vis]() {
+        [&f, oldF, alive = weak_from_this(), vis]() {
           if (auto self = std::static_pointer_cast<Mouth>(alive.lock()))
           {
             using namespace std::chrono_literals;

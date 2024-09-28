@@ -71,7 +71,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
       if (*max > 0x2000 || static_cast<int>(wavBuf.size()) > 10 * sampleRate)
         stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
                      sampleRate,
-                     [alive = this->weak_from_this()](std::string_view txt) {
+                     [alive = weak_from_this()](std::string_view txt) {
                        if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
                        {
                          if (!self->hostMsg.empty())
@@ -107,7 +107,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   }
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = this->weak_from_this()](std::string_view rsp) {
+    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = weak_from_this()](std::string_view rsp) {
       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
       {
         if (rsp.empty())
@@ -239,7 +239,7 @@ auto AiMouth::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, alive = this->weak_from_this(), vis]() {
+        [&f, newF = f, alive = weak_from_this(), vis]() {
           if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
           {
             using namespace std::chrono_literals;
@@ -252,7 +252,7 @@ auto AiMouth::renderUi() -> void
             SPDLOG_INFO("this was destroyed");
           }
         },
-        [&f, oldF, alive = this->weak_from_this(), vis]() {
+        [&f, oldF, alive = weak_from_this(), vis]() {
           if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
           {
             using namespace std::chrono_literals;
@@ -307,7 +307,7 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(
-    val.displayName + " from chat", val.msg, [alive = this->weak_from_this()](std::string_view rsp) {
+    val.displayName + " from chat", val.msg, [alive = weak_from_this()](std::string_view rsp) {
       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
       {
         if (rsp.empty())

@@ -1,11 +1,15 @@
+#define NOMINMAX
+
 #include "gpt.hpp"
 #include "http-client.hpp"
 #include "uv.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <functional>
 #include <numeric>
+
 #include <rapidjson/document.h>
 #include <scn/scn.h>
 #include <spdlog/spdlog.h>
@@ -100,8 +104,7 @@ auto Gpt::process() -> void
     ss << R"(\n| )" << cohost_ << R"(:)";
   else
     ss << R"(\n|)";
-  ss
-    << R"(", "temperature": 1, "max_tokens": 24, "top_p": 1.0, "frequency_penalty": 0.5, "presence_penalty": 0.6, "stop": ["\n| "]})";
+  ss << R"(", "temperature": 1, "max_tokens": 24, "top_p": 1.0, "frequency_penalty": 0.5, "presence_penalty": 0.6, "stop": ["\n| "]})";
 
   httpClient.get().post(
     "https://api.openai.com/v1/completions",

@@ -105,7 +105,7 @@ auto ImageList::renderUi() -> void
   }
   if (toDel >= 0)
     undo.get().record(
-      [alive = this->weak_from_this(), toDel]() {
+      [alive = weak_from_this(), toDel]() {
         if (auto self = alive.lock())
         {
           self->textures.erase(std::begin(self->textures) + toDel);
@@ -115,7 +115,7 @@ auto ImageList::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [alive = this->weak_from_this(), oldTextures = textures]() {
+      [alive = weak_from_this(), oldTextures = textures]() {
         if (auto self = alive.lock())
         {
           self->textures = std::move(oldTextures);
@@ -130,7 +130,7 @@ auto ImageList::renderUi() -> void
     dialog = std::make_unique<FileOpen>(lib, "Add Image Dialog", [this](bool r, const auto &path) {
       if (r)
         undo.get().record(
-          [alive = this->weak_from_this(), path]() {
+          [alive = weak_from_this(), path]() {
             if (auto self = alive.lock())
             {
               self->textures.emplace_back(self->lib.get().queryTex([&]() {
@@ -152,7 +152,7 @@ auto ImageList::renderUi() -> void
               SPDLOG_INFO("this was destroyed");
             }
           },
-          [alive = this->weak_from_this()]() {
+          [alive = weak_from_this()]() {
             if (auto self = alive.lock())
             {
               self->textures.pop_back();
