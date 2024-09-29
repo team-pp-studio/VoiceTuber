@@ -1,12 +1,15 @@
 #include "azure-stt.hpp"
-#include "azure-token.hpp"
-#include "http-client.hpp"
-#include "save-wav.hpp"
+
 #include <cmath>
+#include <sstream>
+
 #include <fmt/std.h>
 #include <rapidjson/document.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
+
+#include "azure-token.hpp"
+#include "http-client.hpp"
+#include "save-wav.hpp"
 
 AzureStt::AzureStt(uv::Uv &uv, AzureToken &aToken, HttpClient &aHttpClient)
   : timer(uv.createTimer()), token(aToken), httpClient(aHttpClient)
@@ -24,7 +27,7 @@ auto AzureStt::process() -> void
     return;
   }
   state = State::waiting;
-  token.get().get([alive = this->weak_from_this()](const std::string &t, const std::string &err) {
+  token.get().get([alive = weak_self()](const std::string &t, const std::string &err) {
     if (auto self = alive.lock())
     {
       if (t.empty())
@@ -80,7 +83,7 @@ auto AzureStt::perform(Wav wav, int sampleRate, Callback cb) -> void
   auto dur = 1.f * wav.size() / sampleRate;
   total += dur;
   SPDLOG_INFO("Azure {} seconds, total: {} minutes {} seconds", dur, std::floor(total / 60.f), static_cast<int>(total) % 60);
-  queue.emplace([cb = std::move(cb), sampleRate, alive = this->weak_from_this(), wav = std::move(wav)](
+  queue.emplace([cb = std::move(cb), sampleRate, alive = weak_self(), wav = std::move(wav)](
                   const std::string &t, PostTask postTask) mutable {
     if (auto self = alive.lock())
     {

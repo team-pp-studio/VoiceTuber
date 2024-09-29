@@ -1,17 +1,20 @@
 #pragma once
-#include "uv.hpp"
-#include <curl/curl.h>
 #include <functional>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <curl/curl.h>
+
+#include "shared_from_this.hpp"
+#include "uv.hpp"
 
 namespace uv
 {
   class Uv;
 }
 
-class HttpClient : public std::enable_shared_from_this<HttpClient>
+class HttpClient : public virtual enable_shared_from_this
 {
 public:
   using Headers = std::vector<std::pair<std::string, std::string>>;

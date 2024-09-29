@@ -1,11 +1,13 @@
 #pragma once
-#include "uv.hpp"
-#include "wav.hpp"
 #include <functional>
 #include <queue>
 #include <string>
 
-class AzureStt : public std::enable_shared_from_this<AzureStt>
+#include "shared_from_this.hpp"
+#include "uv.hpp"
+#include "wav.hpp"
+
+class AzureStt : public virtual enable_shared_from_this
 {
 public:
   using Callback = std::move_only_function<void(std::string_view)>;
@@ -15,8 +17,10 @@ public:
   std::string lastError;
 
 private:
-  enum class State { idle,
-                     waiting };
+  enum class State {
+    idle,
+    waiting
+  };
   using PostTask = std::move_only_function<void(bool)>;
   using Task = std::move_only_function<void(const std::string &t, PostTask)>;
 

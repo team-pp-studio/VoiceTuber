@@ -6,9 +6,12 @@ Debug/
 Release/
 
 full_deploy/
+direct_deploy/
 build/
 install/
 .vscode/
 CMakeUserPresets.json
 /src/.coddle/
+/src/.cache/
+/src/compile_commands.json
 /src/VoiceTuber

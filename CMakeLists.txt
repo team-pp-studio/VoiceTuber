@@ -32,7 +32,7 @@ endif()
 add_library(sanitizers INTERFACE)
 if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") OR (${CMAKE_CXX_COMPILER_ID} MATCHES ".*Clang"))
     target_link_libraries(sanitizers INTERFACE -fsanitize=address,undefined -static-libasan -static-libubsan)
-    target_compile_options(sanitizers INTERFACE -fsanitize=address,undefined -static-libasan -static-libubsan)
+    target_compile_options(sanitizers INTERFACE -fsanitize=address,undefined)
 endif()
 
 add_library(ser OBJECT)

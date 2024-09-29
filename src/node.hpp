@@ -21,7 +21,7 @@ namespace Internal
 } // namespace Internal
 #include <ser/ser.hpp>
 
-class Node : public std::enable_shared_from_this<Node>
+class Node : public virtual enable_shared_from_this
 {
 public:
 #define SER_PROP_LIST       \

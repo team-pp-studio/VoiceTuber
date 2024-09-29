@@ -5,7 +5,7 @@
 #include "undo.hpp"
 #include <filesystem>
 
-class ImageList : public std::enable_shared_from_this<ImageList>
+class ImageList : public virtual enable_shared_from_this
 {
 public:
 #define SER_PROP_LIST SER_PROP(texturesForSaveLoad);

@@ -105,8 +105,8 @@ auto Chat::onMsg(Msg val) -> void
   timer->stop();
   if (hideChatSec > 0)
     timer->start(
-      [alive = this->weak_from_this()]() {
-        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+      [alive = weak_self()]() {
+        if (auto self = alive.lock())
         {
           self->showChat = false;
         }
@@ -169,8 +169,8 @@ auto Chat::load(IStrm &strm) -> void
     if (!azureTts)
     {
       azureTts = lib.get().queryAzureTts(audioSink);
-      azureTts->listVoices([alive = this->weak_from_this()](std::span<std::string_view> aVoices) {
-        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+      azureTts->listVoices([alive = weak_self()](std::span<std::string_view> aVoices) {
+        if (auto self = alive.lock())
         {
           self->voices.insert(self->voices.begin(), aVoices.begin(), aVoices.end());
         }
@@ -284,8 +284,8 @@ auto Chat::renderUi() -> void
   const auto oldSize = ptsize;
   if (ImGui::InputInt("##Font Size", &ptsize))
     undo.get().record(
-      [newSize = ptsize, alive = this->weak_from_this()]() {
-        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+      [newSize = ptsize, alive = weak_self()]() {
+        if (auto self = alive.lock())
         {
           self->ptsize = newSize;
           self->font = self->lib.get().queryFont(
@@ -296,8 +296,8 @@ auto Chat::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldSize, alive = this->weak_from_this()]() {
-        if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+      [oldSize, alive = weak_self()]() {
+        if (auto self = alive.lock())
         {
           self->ptsize = oldSize;
           self->font = self->lib.get().queryFont(
@@ -321,8 +321,8 @@ auto Chat::renderUi() -> void
     if (ImGui::Checkbox("##AzureTTS", &tts))
     {
       undo.get().record(
-        [alive = this->weak_from_this(), newTts = tts]() {
-          if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        [alive = weak_self(), newTts = tts]() {
+          if (auto self = alive.lock())
           {
             if (newTts)
             {
@@ -330,7 +330,7 @@ auto Chat::renderUi() -> void
               {
                 self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
                 self->azureTts->listVoices([alive](std::span<std::string_view> aVoices) {
-                  if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+                  if (auto self = alive.lock())
                   {
                     self->voices.clear();
                     self->voices.insert(self->voices.end(), aVoices.begin(), aVoices.end());
@@ -353,8 +353,8 @@ auto Chat::renderUi() -> void
             SPDLOG_INFO("this was destroyed");
           }
         },
-        [alive = this->weak_from_this(), oldTts]() {
-          if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+        [alive = weak_self(), oldTts]() {
+          if (auto self = alive.lock())
           {
             if (oldTts)
             {
@@ -362,7 +362,7 @@ auto Chat::renderUi() -> void
               {
                 self->azureTts = self->lib.get().queryAzureTts(self->audioSink);
                 self->azureTts->listVoices([alive](std::span<std::string_view> voices) {
-                  if (auto self = std::static_pointer_cast<Chat>(alive.lock()))
+                  if (auto self = alive.lock())
                   {
                     self->voices.insert(self->voices.end(), voices.begin(), voices.end());
                   }

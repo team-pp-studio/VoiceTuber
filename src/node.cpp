@@ -167,7 +167,7 @@ auto Node::renderUi() -> void
                            "%.2f"))
       {
         undo.get().record(
-          [avgScale, alive = this->weak_from_this()]() {
+          [avgScale, alive = weak_self()]() {
             if (auto self = alive.lock())
             {
               self->scale.x = self->scale.y = avgScale;
@@ -177,7 +177,7 @@ auto Node::renderUi() -> void
               SPDLOG_INFO("this was destroyed");
             }
           },
-          [oldScale = scale, alive = this->weak_from_this()]() {
+          [oldScale = scale, alive = weak_self()]() {
             if (auto self = alive.lock())
             {
               self->scale = oldScale;
@@ -250,7 +250,7 @@ auto Node::renderUi() -> void
   const auto sz = 2 * ImGui::GetFontSize();
   if (Ui::btnImg("nw", *arrowNW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, h()}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{0, h()}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -260,7 +260,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -273,7 +273,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("n", *arrowN, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, h()}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w() / 2, h()}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -283,7 +283,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -296,7 +296,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("ne", *arrowNE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w(), h()}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w(), h()}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -306,7 +306,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -318,7 +318,7 @@ auto Node::renderUi() -> void
       });
   if (Ui::btnImg("w", *arrowW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, h() / 2}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{0, h() / 2}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -328,7 +328,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -341,7 +341,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("c", *center, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, h() / 2}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w() / 2, h() / 2}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -351,7 +351,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -364,7 +364,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("e", *arrowE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w(), h() / 2}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w(), h() / 2}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -374,7 +374,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -386,7 +386,7 @@ auto Node::renderUi() -> void
       });
   if (Ui::btnImg("sw", *arrowSW, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{0, 0}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{0, 0}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -396,7 +396,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -409,7 +409,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("s", *arrowS, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, 0}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w() / 2, 0}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -419,7 +419,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -432,7 +432,7 @@ auto Node::renderUi() -> void
   ImGui::SameLine();
   if (Ui::btnImg("se", *arrowSE, sz, sz))
     undo.get().record(
-      [newPivot = glm::vec2{w() / 2, 0}, alive = this->weak_from_this()]() {
+      [newPivot = glm::vec2{w() / 2, 0}, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = newPivot;
@@ -442,7 +442,7 @@ auto Node::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldPivot = pivot_, alive = this->weak_from_this()]() {
+      [oldPivot = pivot_, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->pivot_ = oldPivot;
@@ -583,7 +583,7 @@ auto Node::moveUp() -> void
   if (parent()->nodes.front().get() == this)
     return;
   undo.get().record(
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
@@ -596,7 +596,7 @@ auto Node::moveUp() -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
@@ -620,7 +620,7 @@ auto Node::moveDown() -> void
   if (parent()->nodes.back().get() == this)
     return;
   undo.get().record(
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
@@ -634,7 +634,7 @@ auto Node::moveDown() -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         auto it = std::find(std::begin(self->parent()->nodes), std::end(self->parent()->nodes), self);
@@ -665,7 +665,7 @@ auto Node::unparent() -> void
   assert(it != std::end(oldParent->nodes));
   auto other = std::move(*it);
   undo.get().record(
-    [it, newParent, oldParent, alive = this->weak_from_this(), other]() {
+    [it, newParent, oldParent, alive = weak_self(), other]() {
       if (auto self = alive.lock())
       {
         self->loc += oldParent->loc;
@@ -677,7 +677,7 @@ auto Node::unparent() -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+    [it, newParent, oldLoc = loc, oldParent, alive = weak_self(), other]() {
       if (auto self = alive.lock())
       {
         self->loc = oldLoc;
@@ -711,7 +711,7 @@ auto Node::parentWithBellow() -> void
   auto other = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [newParent, alive = this->weak_from_this(), it, other]() {
+    [newParent, alive = weak_self(), it, other]() {
       if (auto self = alive.lock())
       {
         glm::mat4 newParentTransform = newParent->modelViewMat;
@@ -727,7 +727,7 @@ auto Node::parentWithBellow() -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [it, newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+    [it, newParent, oldLoc = loc, oldParent, alive = weak_self(), other]() {
       if (auto self = alive.lock())
       {
         self->loc = oldLoc;
@@ -953,7 +953,7 @@ auto Node::commit() -> void
   {
   case EditMode::translate:
     undo.get().record(
-      [newLoc = loc, alive = this->weak_from_this()]() {
+      [newLoc = loc, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->loc = newLoc;
@@ -963,7 +963,7 @@ auto Node::commit() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldLoc = initLoc, alive = this->weak_from_this()]() {
+      [oldLoc = initLoc, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->loc = oldLoc;
@@ -976,7 +976,7 @@ auto Node::commit() -> void
     break;
   case EditMode::rotate:
     undo.get().record(
-      [newRot = rot, alive = this->weak_from_this()]() {
+      [newRot = rot, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->rot = newRot;
@@ -986,7 +986,7 @@ auto Node::commit() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldRot = initRot, alive = this->weak_from_this()]() {
+      [oldRot = initRot, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->rot = oldRot;
@@ -999,7 +999,7 @@ auto Node::commit() -> void
     break;
   case EditMode::scale:
     undo.get().record(
-      [newScale = scale, alive = this->weak_from_this()]() {
+      [newScale = scale, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->scale = newScale;
@@ -1009,7 +1009,7 @@ auto Node::commit() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [oldScale = initScale, alive = this->weak_from_this()]() {
+      [oldScale = initScale, alive = weak_self()]() {
         if (auto self = alive.lock())
         {
           self->scale = oldScale;
@@ -1049,7 +1049,7 @@ auto Node::parentWith(Node &newParent) -> void
   auto other = std::move(*it);
   auto oldParent = parent();
   undo.get().record(
-    [&newParent, alive = this->weak_from_this(), it, other]() {
+    [&newParent, alive = weak_self(), it, other]() {
       if (auto self = alive.lock())
       {
         glm::mat4 newParentTransform = newParent.modelViewMat;
@@ -1065,7 +1065,7 @@ auto Node::parentWith(Node &newParent) -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [it, &newParent, oldLoc = loc, oldParent, alive = this->weak_from_this(), other]() {
+    [it, &newParent, oldLoc = loc, oldParent, alive = weak_self(), other]() {
       if (auto self = alive.lock())
       {
         self->loc = oldLoc;
@@ -1086,7 +1086,7 @@ auto Node::placeBellow(Node &newSibling) -> void
 {
   assert(newSibling.parent());
   undo.get().record(
-    [alive = this->weak_from_this(), &newSibling]() {
+    [alive = weak_self(), &newSibling]() {
       if (auto self = alive.lock())
       {
         auto selfIt =
@@ -1107,7 +1107,7 @@ auto Node::placeBellow(Node &newSibling) -> void
         SPDLOG_INFO("this was destroyed");
       }
     },
-    [alive = this->weak_from_this(), nodes = parent()->nodes, oldParent = parent()]() {
+    [alive = weak_self(), nodes = parent()->nodes, oldParent = parent()]() {
       if (auto self = alive.lock())
       {
         auto selfIt =

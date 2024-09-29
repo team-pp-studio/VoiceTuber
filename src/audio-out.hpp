@@ -1,14 +1,23 @@
 #pragma once
-#include "audio-sink.hpp"
 #include <deque>
 #include <memory>
-#include <sdlpp/sdlpp.hpp>
 #include <string>
 
-class AudioOut final : public AudioSink, public std::enable_shared_from_this<AudioOut>
+#include <sdlpp/sdlpp.hpp>
+
+#include "audio-sink.hpp"
+#include "shared_from_this.hpp"
+
+class AudioOut final : public AudioSink, public virtual enable_shared_from_this
 {
 public:
   AudioOut(const std::string &device, int sampleRate = 44100, int frameSize = 1024);
+  AudioOut(AudioOut const &) = delete;
+  AudioOut(AudioOut &&) = delete;
+
+  AudioOut operator=(AudioOut const &) = delete;
+  AudioOut operator=(AudioOut &&) = delete;
+
   auto updateDevice(const std::string &) -> void;
   auto ingest(Wav, bool overlap) -> void final;
   auto sampleRate() const -> int final;
@@ -18,5 +27,6 @@ private:
   std::unique_ptr<sdl::Audio> audio;
   std::deque<int16_t> buf;
 
-  auto makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audio>;
+  void callback(unsigned char *, int);
+  std::unique_ptr<sdl::Audio> makeDevice(const std::string &device);
 };

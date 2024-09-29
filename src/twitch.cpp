@@ -158,7 +158,7 @@ auto Twitch::init() -> void
   retryTimer.stop();
   pingTimer.stop();
 
-  auto s = uv.get().connect(server, port, [alive = this->weak_from_this()](int status, uv::Tcp aTcp) {
+  auto s = uv.get().connect(server, port, [alive = weak_self()](int status, uv::Tcp aTcp) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -191,7 +191,7 @@ auto Twitch::sendPassNickUser() -> void
   fmt::format_to(std::back_inserter(buf), "NICK {}\r\n", user);
   fmt::format_to(std::back_inserter(buf), "USER nobody unknown unknown :noname\r\n");
 
-  auto s = tcp.write(std::move(buff), [alive = this->weak_from_this()](int status) {
+  auto s = tcp.write(std::move(buff), [alive = weak_self()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -217,7 +217,7 @@ auto Twitch::sendPassNickUser() -> void
 
 auto Twitch::readStart() -> void
 {
-  auto s = tcp.readStart([alive = this->weak_from_this()](int status, std::string_view msg) {
+  auto s = tcp.readStart([alive = weak_self()](int status, std::string_view msg) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -369,7 +369,7 @@ auto Twitch::onPing(const std::string &val) -> void
 {
   std::string buf;
   std::format_to(std::back_inserter(buf), "PONG {}\r\n", val);
-  auto s = tcp.write(std::move(buf), [alive = this->weak_from_this()](int status) {
+  auto s = tcp.write(std::move(buf), [alive = weak_self()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -404,7 +404,7 @@ auto Twitch::onWelcome() -> void
   std::format_to(std::back_inserter(buf), "CAP REQ :twitch.tv/tags\r\n");
   std::format_to(std::back_inserter(buf), "CAP REQ :twitch.tv/tags twitch.tv/commands\r\n");
   std::format_to(std::back_inserter(buf), "JOIN #{}\r\n", channel);
-  auto s = tcp.write(std::move(buf), [alive = this->weak_from_this()](int status) {
+  auto s = tcp.write(std::move(buf), [alive = weak_self()](int status) {
     if (auto self = alive.lock())
     {
       if (status < 0)
@@ -434,7 +434,7 @@ auto Twitch::onWelcome() -> void
 auto Twitch::schedulePing() -> void
 {
   pingTimer.start(
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         self->tcp.write("PING :tmi.twitch.tv\r\n", [alive](int status) {
@@ -490,7 +490,7 @@ auto Twitch::initiateRetry() -> void
 {
   state = State::connecting;
   retryTimer.start(
-    [alive = this->weak_from_this()]() {
+    [alive = weak_self()]() {
       if (auto self = alive.lock())
       {
         SPDLOG_INFO("Retrying...");

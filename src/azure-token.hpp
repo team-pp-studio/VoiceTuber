@@ -1,10 +1,11 @@
 #pragma once
 #include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
-class AzureToken : public std::enable_shared_from_this<AzureToken>
+#include "shared_from_this.hpp"
+
+class AzureToken : public virtual enable_shared_from_this
 {
 public:
   using Callback = std::move_only_function<auto(const std::string &token, const std::string &err)->void>;

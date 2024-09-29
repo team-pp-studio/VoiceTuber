@@ -1,6 +1,8 @@
 #include "audio-in.hpp"
-#include "preferences.hpp"
+
 #include <spdlog/spdlog.h>
+
+#include "preferences.hpp"
 
 AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int frameSize)
   : prepare(uv.createPrepare()),
@@ -15,16 +17,8 @@ AudioIn::AudioIn(uv::Uv &uv, const std::string &device, int sampleRate, int fram
     }()),
     audio(makeDevice(device))
 {
-  prepare.start([alive = this->weak_from_this()]() {
-    if (auto self = alive.lock())
-    {
-      self->tick();
-    }
-    else
-    {
-      SPDLOG_INFO("this was destroyed");
-    }
-  });
+
+  prepare.start(std::bind_front(&AudioIn::tick, this));
 }
 
 auto AudioIn::tick() -> void
@@ -62,27 +56,25 @@ auto AudioIn::updateDevice(const std::string &device) -> void
   audio = makeDevice(device);
 }
 
-auto AudioIn::makeDevice(const std::string &device) -> std::unique_ptr<sdl::Audio>
+void AudioIn::callback(unsigned char const *stream, int len)
+{
+  std::size_t const stream_len = len / sizeof(int16_t);
+  auto const stream_begin = reinterpret_cast<int16_t const *>(stream);
+  auto const stream_end = stream_begin + stream_len;
+
+  buf.insert(std::end(buf), stream_begin, stream_end);
+}
+
+std::unique_ptr<sdl::Audio> AudioIn::makeDevice(const std::string &device)
 {
   SDL_AudioSpec have;
-  auto ret = std::make_unique<sdl::Audio>(device != Preferences::DefaultAudio ? device.c_str() : nullptr,
-                                          1,
-                                          &want,
-                                          &have,
-                                          0,
-                                          [alive = this->weak_from_this()](Uint8 *stream, int len) {
-                                            if (auto self = alive.lock())
-                                            {
-                                              self->buf.insert(std::end(self->buf),
-                                                               reinterpret_cast<int16_t *>(stream),
-                                                               reinterpret_cast<int16_t *>(stream) +
-                                                                 len / sizeof(int16_t));
-                                            }
-                                            else
-                                            {
-                                              SPDLOG_INFO("this was destroyed");
-                                            }
-                                          });
+  auto ret = std::make_unique<sdl::Audio>(
+    device != Preferences::DefaultAudio ? device.c_str() : nullptr,
+    1,
+    &want,
+    &have,
+    0,
+    std::bind_front(&AudioIn::callback, this));
   if (have.format != want.format)
     throw std::runtime_error("Failed to get the desired AudioSpec");
   ret->pause(0);

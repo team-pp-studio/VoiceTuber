@@ -34,7 +34,7 @@ auto Root::renderUi() -> void
         "##BG color", (float *)&clearColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
   {
     undo.get().record(
-      [alive = this->weak_from_this(), newColor = clearColor]() {
+      [alive = weak_self(), newColor = clearColor]() {
         if (auto self = alive.lock())
         {
           static_cast<Root *>(self.get())->clearColor = std::move(newColor);
@@ -44,7 +44,7 @@ auto Root::renderUi() -> void
           SPDLOG_INFO("this was destroyed");
         }
       },
-      [alive = this->weak_from_this(), oldColor]() {
+      [alive = weak_self(), oldColor]() {
         if (auto self = alive.lock())
         {
           static_cast<Root *>(self.get())->clearColor = std::move(oldColor);

@@ -1,6 +1,8 @@
 #include "azure-token.hpp"
-#include "http-client.hpp"
+
 #include <spdlog/spdlog.h>
+
+#include "http-client.hpp"
 
 AzureToken::AzureToken(std::string aKey, class HttpClient &aHttpClient)
   : key(std::move(aKey)), httpClient(aHttpClient)
@@ -20,7 +22,7 @@ auto AzureToken::get(Callback cb) -> void
   httpClient.get().post(
     "https://eastus.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
     "",
-    [alive = this->weak_from_this()](CURLcode code, long httpStatus, std::string payload) {
+    [alive = weak_self()](CURLcode code, long httpStatus, std::string payload) {
       if (auto self = alive.lock())
       {
         if (code != CURLE_OK)

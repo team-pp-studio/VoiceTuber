@@ -1,17 +1,19 @@
 #pragma once
-#include "uv.hpp"
 #include <functional>
 #include <queue>
 #include <span>
 #include <string>
 #include <string_view>
 
+#include "shared_from_this.hpp"
+#include "uv.hpp"
+
 namespace uv
 {
   class Uv;
 }
 
-class AzureTts : std::enable_shared_from_this<AzureTts>
+class AzureTts : public virtual enable_shared_from_this
 {
 public:
   using ListVoicesCallback = std::move_only_function<void(std::span<std::string_view>)>;

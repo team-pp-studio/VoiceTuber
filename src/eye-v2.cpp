@@ -111,8 +111,8 @@ auto EyeV2::renderUi() -> void
     {
       if (ImGui::Selectable("Custom", "Custom" == selectedDisplay))
         undo.get().record(
-          [alive = this->weak_from_this()]() {
-            if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+          [alive = weak_self()]() {
+            if (auto self = alive.lock())
             {
               self->selectedDisplay = "Custom";
             }
@@ -121,8 +121,8 @@ auto EyeV2::renderUi() -> void
               SPDLOG_INFO("this was destroyed");
             }
           },
-          [alive = this->weak_from_this(), oldDisplay = selectedDisplay]() {
-            if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+          [alive = weak_self(), oldDisplay = selectedDisplay]() {
+            if (auto self = alive.lock())
             {
               self->selectedDisplay = std::move(oldDisplay);
             }
@@ -138,8 +138,8 @@ auto EyeV2::renderUi() -> void
         if (ImGui::Selectable(displayName.c_str(), displayName == selectedDisplay))
         {
           undo.get().record(
-            [alive = this->weak_from_this(), newDisplay = displayName, i]() {
-              if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+            [alive = weak_self(), newDisplay = displayName, i]() {
+              if (auto self = alive.lock())
               {
                 self->selectedDisplay = std::move(newDisplay);
                 SDL_Rect rect;
@@ -152,11 +152,11 @@ auto EyeV2::renderUi() -> void
                 SPDLOG_INFO("this was destroyed");
               }
             },
-            [alive = this->weak_from_this(),
+            [alive = weak_self(),
              oldDisplay = selectedDisplay,
              oldScreenTopLeft = screenTopLeft,
              oldScreenBottomRight = screenBottomRight]() {
-              if (auto self = std::static_pointer_cast<EyeV2>(alive.lock()))
+              if (auto self = alive.lock())
               {
                 self->selectedDisplay = std::move(oldDisplay);
                 self->screenTopLeft = std::move(oldScreenTopLeft);

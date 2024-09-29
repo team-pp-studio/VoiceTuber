@@ -1,13 +1,13 @@
 #pragma once
-#include "uv.hpp"
 #include <chrono>
 #include <deque>
 #include <functional>
-#include <optional>
-#include <queue>
 #include <string>
 
-class Gpt : public std::enable_shared_from_this<Gpt>
+#include "shared_from_this.hpp"
+#include "uv.hpp"
+
+class Gpt : public virtual enable_shared_from_this
 {
 public:
   using Callback = std::move_only_function<void(std::string_view)>;

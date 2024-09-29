@@ -1,17 +1,19 @@
 #pragma once
-#include "twitch-sink.hpp"
-#include "uv.hpp"
 #include <deque>
 #include <functional>
 #include <string>
 #include <vector>
+
+#include "shared_from_this.hpp"
+#include "twitch-sink.hpp"
+#include "uv.hpp"
 
 namespace uv
 {
   class Uv;
 }
 
-class Twitch : public std::enable_shared_from_this<Twitch>
+class Twitch : public virtual enable_shared_from_this
 {
 public:
   Twitch(uv::Uv &, std::string user, std::string key, std::string channel);
@@ -27,7 +29,10 @@ private:
   std::string key;
   std::string channel;
   uv::Tcp tcp;
-  enum class State { connecting, connected };
+  enum class State {
+    connecting,
+    connected
+  };
   State state = State::connecting;
   std::deque<char> buf;
   std::vector<std::reference_wrapper<TwitchSink>> sinks;

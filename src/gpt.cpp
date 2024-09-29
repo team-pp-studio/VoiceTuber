@@ -4,7 +4,6 @@
 #include "http-client.hpp"
 #include "uv.hpp"
 
-#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <functional>
@@ -109,7 +108,7 @@ auto Gpt::process() -> void
   httpClient.get().post(
     "https://api.openai.com/v1/completions",
     ss.str(),
-    [embedName, qMsgs = std::move(queuedMsgs), jsonPrompt = ss.str(), alive = this->weak_from_this()](
+    [embedName, qMsgs = std::move(queuedMsgs), jsonPrompt = ss.str(), alive = weak_self()](
       CURLcode code, long httpStatus, std::string payload) mutable {
       if (auto self = alive.lock())
       {

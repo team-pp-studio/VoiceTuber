@@ -36,7 +36,7 @@ static std::string escape(std::string data)
 auto AzureTts::say(std::string voice, std::string msg, bool overlap) -> void
 {
   queue.emplace([msg = std::move(msg),
-                 alive = this->weak_from_this(),
+                 alive = weak_self(),
                  voice = std::move(voice),
                  overlap](std::string_view t, PostTask postTask) {
     if (auto self = alive.lock())
@@ -120,7 +120,7 @@ auto AzureTts::process() -> void
     return;
   }
   state = State::waiting;
-  token.get().get([alive = this->weak_from_this()](const std::string &t, const std::string &err) {
+  token.get().get([alive = weak_self()](const std::string &t, const std::string &err) {
     if (auto self = alive.lock())
     {
 
@@ -173,7 +173,7 @@ auto AzureTts::process() -> void
 
 auto AzureTts::listVoices(ListVoicesCallback cb) -> void
 {
-  queue.emplace([cb = std::move(cb), alive = this->weak_from_this()](std::string_view t, PostTask postTask) mutable {
+  queue.emplace([cb = std::move(cb), alive = weak_self()](std::string_view t, PostTask postTask) mutable {
     if (auto self = alive.lock())
     {
       self->httpClient.get().get(

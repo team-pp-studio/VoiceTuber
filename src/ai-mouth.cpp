@@ -1,12 +1,14 @@
 #include "ai-mouth.hpp"
+
+#include <fmt/core.h>
+#include <spdlog/spdlog.h>
+
 #include "audio-in.hpp"
 #include "audio-out.hpp"
 #include "azure-stt.hpp"
 #include "ui.hpp"
 #include "undo.hpp"
 #include "wav-2-visemes.hpp"
-#include <fmt/core.h>
-#include <spdlog/spdlog.h>
 
 AiMouth::AiMouth(Lib &aLib,
                  Undo &aUndo,
@@ -71,8 +73,8 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
       if (*max > 0x2000 || static_cast<int>(wavBuf.size()) > 10 * sampleRate)
         stt->perform(Wav{std::begin(wavBuf), std::end(wavBuf)},
                      sampleRate,
-                     [alive = weak_from_this()](std::string_view txt) {
-                       if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+                     [alive = weak_self()](std::string_view txt) {
+                       if (auto self = alive.lock())
                        {
                          if (!self->hostMsg.empty())
                            self->hostMsg += '\n';
@@ -83,7 +85,7 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
 
                          self->lib.get().gpt().prompt(
                            "Host", std::move(self->hostMsg), [alive](std::string_view rsp) {
-                             if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+                             if (auto self = alive.lock())
                              {
                                SPDLOG_INFO("{}: {}", self->cohost, rsp);
                                self->tts->say("en-US-AmberNeural", std::string(rsp), false);
@@ -107,8 +109,8 @@ auto AiMouth::ingest(Wav wav, bool /*overlap*/) -> void
   }
   if (std::chrono::high_resolution_clock::now() > silStart + 5000ms && hostMsg.size() > 5)
   {
-    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = weak_from_this()](std::string_view rsp) {
-      if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+    lib.get().gpt().prompt(host, std::move(hostMsg), [alive = weak_self()](std::string_view rsp) {
+      if (auto self = alive.lock())
       {
         if (rsp.empty())
           return;
@@ -239,8 +241,8 @@ auto AiMouth::renderUi() -> void
     if (ImGui::InputInt(txt2, &f))
     {
       undo.get().record(
-        [&f, newF = f, alive = weak_from_this(), vis]() {
-          if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+        [&f, newF = f, alive = weak_self(), vis]() {
+          if (auto self = alive.lock())
           {
             using namespace std::chrono_literals;
             f = std::move(newF);
@@ -252,8 +254,8 @@ auto AiMouth::renderUi() -> void
             SPDLOG_INFO("this was destroyed");
           }
         },
-        [&f, oldF, alive = weak_from_this(), vis]() {
-          if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+        [&f, oldF, alive = weak_self(), vis]() {
+          if (auto self = alive.lock())
           {
             using namespace std::chrono_literals;
             f = std::move(oldF);
@@ -307,8 +309,8 @@ auto AiMouth::save(OStrm &strm) const -> void
 auto AiMouth::onMsg(Msg val) -> void
 {
   lib.get().gpt().prompt(
-    val.displayName + " from chat", val.msg, [alive = weak_from_this()](std::string_view rsp) {
-      if (auto self = std::static_pointer_cast<AiMouth>(alive.lock()))
+    val.displayName + " from chat", val.msg, [alive = weak_self()](std::string_view rsp) {
+      if (auto self = alive.lock())
       {
         if (rsp.empty())
           return;

@@ -27,7 +27,8 @@ namespace uv
   class Uv;
 }
 
-HttpClient::HttpClient(uv::Uv &aUv) : uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
+HttpClient::HttpClient(uv::Uv &aUv)
+  : uv(aUv), timeout(aUv.createTimer()), multiHandle(curl_multi_init())
 {
   CurlInitializer::init();
 #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
@@ -167,7 +168,7 @@ auto HttpClient::startTimeout(long timeoutMs, CURLM *multi) -> int
     timeout.stop();
   else
     timeout.start(
-      [alive = this->weak_from_this(), multi]() {
+      [alive = weak_self(), multi]() {
         if (auto self = alive.lock())
         {
           self->onTimeout(multi);
